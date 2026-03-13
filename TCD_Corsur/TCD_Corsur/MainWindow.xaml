@@ -1,0 +1,71 @@
+<Window x:Class="TCD_Corsur.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TCD_Corsur"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="12">
+            <Button Content="Load Stage" Width="110" Margin="0,0,8,0" Command="{Binding LoadStageCommand}" />
+            <Button Content="Start" Width="90" Margin="0,0,8,0" Command="{Binding StartCommand}" />
+            <Button Content="Stop" Width="90" Margin="0,0,8,0" Command="{Binding StopCommand}" />
+            <Button Content="Clear" Width="90" Command="{Binding ClearCommand}" />
+            <TextBlock Margin="16,0,0,0" VerticalAlignment="Center" Text="Status:"/>
+            <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" FontWeight="Bold" Text="{Binding Status}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="12,0,12,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="Materials" Margin="0,0,8,0">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,10,6" Text="Stage1:"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,0,0,6" Text="{Binding Stage1}"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,10,6" Text="Stage2:"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding Stage2}"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,10,6" Text="Upper:"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding UpperChamber}"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,10,0" Text="Lower:"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,0" Text="{Binding LowerChamber}"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Devices" Grid.Column="1" Margin="0,0,8,0">
+                <StackPanel Margin="10">
+                    <TextBlock Text="{Binding Robot}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding Axes}" TextWrapping="Wrap"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Alarms" Grid.Column="2">
+                <ListBox Margin="10" ItemsSource="{Binding Alarms}" />
+            </GroupBox>
+        </Grid>
+    </Grid>
+</Window>

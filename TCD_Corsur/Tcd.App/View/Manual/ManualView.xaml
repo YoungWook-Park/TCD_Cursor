@@ -1,0 +1,28 @@
+<UserControl x:Class="Tcd.App.ManualView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             xmlns:man="clr-namespace:Tcd.App.Manual"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1600"
+             d:DataContext="{d:DesignInstance Type=local:ManualViewModel}">
+      <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
+          <Grid.RowDefinitions>
+              <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+
+            <!-- Robot / Motor 매뉴얼 탭 -->
+        <TabControl>
+            <TabItem Header="Robot" Height="30" Width="100">
+                <man:Manual_RobotView  DataContext="{Binding Robot}"/>
+            </TabItem>
+
+            <TabItem Header="Motor" Height="30" Width="100" >
+                <man:Manual_MotorView DataContext="{Binding Motor}"/>
+            </TabItem>
+        </TabControl>
+      </Grid>
+</UserControl>
+

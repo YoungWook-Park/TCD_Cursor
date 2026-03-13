@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- 기본 TextBlock 스타일 -->
+  <Style TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+
+  <!-- 강조 TextBlock 스타일 -->
+  <Style x:Key="HighlightTextBlockStyle"
+         TargetType="TextBlock"
+         BasedOn="{StaticResource {x:Type TextBlock}}">
+    <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+    <Setter Property="FontWeight" Value="Bold"/>
+  </Style>
+</ResourceDictionary>
+
