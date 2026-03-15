@@ -6,6 +6,7 @@ using Tcd.App.Core;
 using Tcd.App.Manual;
 using Tcd.App.Mvvm;
 using Tcd.Core;
+using Tcd.Devices;
 using Tcd.Materials;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -171,6 +172,25 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     private string _axes = "";
     public string Axes { get => _axes; private set => Set(ref _axes, value); }
 
+    // 설비 도형 바인딩용
+    private bool _stage1HasMaterial;
+    public bool Stage1HasMaterial { get => _stage1HasMaterial; private set => Set(ref _stage1HasMaterial, value); }
+
+    private bool _stage2HasMaterial;
+    public bool Stage2HasMaterial { get => _stage2HasMaterial; private set => Set(ref _stage2HasMaterial, value); }
+
+    private bool _upperChamberHasMaterial;
+    public bool UpperChamberHasMaterial { get => _upperChamberHasMaterial; private set => Set(ref _upperChamberHasMaterial, value); }
+
+    private bool _lowerChamberHasMaterial;
+    public bool LowerChamberHasMaterial { get => _lowerChamberHasMaterial; private set => Set(ref _lowerChamberHasMaterial, value); }
+
+    private double _zPosition;
+    public double ZPosition { get => _zPosition; private set => Set(ref _zPosition, value); }
+
+    private RobotPosition _currentRobotPosition;
+    public RobotPosition CurrentRobotPosition { get => _currentRobotPosition; private set => Set(ref _currentRobotPosition, value); }
+
     private void Cmd_LoadStage(object? commandParameter)
     {
         try
@@ -270,6 +290,14 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         Stage2 = s2?.Kind.ToString() ?? "(empty)";
         UpperChamber = up?.Kind.ToString() ?? "(empty)";
         LowerChamber = low?.Kind.ToString() ?? "(empty)";
+
+        Stage1HasMaterial = s1 != null;
+        Stage2HasMaterial = s2 != null;
+        UpperChamberHasMaterial = up != null;
+        LowerChamberHasMaterial = low != null;
+
+        ZPosition = _sim.LowerMotion.Z.Position;
+        CurrentRobotPosition = _sim.Robot.CurrentPosition;
 
         Robot = $"{_sim.Robot.CurrentPosition} | Vacuum={_sim.Robot.HasVacuum}";
         Axes = $"U={_sim.LowerMotion.U.Position:0.0}, V={_sim.LowerMotion.V.Position:0.0}, W={_sim.LowerMotion.W.Position:0.0}, Z={_sim.LowerMotion.Z.Position:0.0}";

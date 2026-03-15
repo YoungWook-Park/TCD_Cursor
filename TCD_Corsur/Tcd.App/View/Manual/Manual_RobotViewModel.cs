@@ -24,14 +24,14 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     }
 
     // Robot moves (discrete)
-    private BiRelayCommand? cmd_RobotMoveStage;
-    public ICommand Cmd_RobotMoveStage => cmd_RobotMoveStage ??= new BiRelayCommand(_ => RobotMove(RobotPosition.Stage));
+    private RelayCommand? cmd_RobotMoveStage;
+    public ICommand Cmd_RobotMoveStage => cmd_RobotMoveStage ??= new RelayCommand(_ => RobotMove(RobotPosition.Stage));
 
-    private BiRelayCommand? cmd_RobotMoveUpper;
-    public ICommand Cmd_RobotMoveUpper => cmd_RobotMoveUpper ??= new BiRelayCommand(_ => RobotMove(RobotPosition.UpperChamberLoad));
+    private RelayCommand? cmd_RobotMoveUpper;
+    public ICommand Cmd_RobotMoveUpper => cmd_RobotMoveUpper ??= new RelayCommand(_ => RobotMove(RobotPosition.UpperChamberLoad));
 
-    private BiRelayCommand? cmd_RobotMoveLower;
-    public ICommand Cmd_RobotMoveLower => cmd_RobotMoveLower ??= new BiRelayCommand(_ => RobotMove(RobotPosition.LowerChamberLoad));
+    private RelayCommand? cmd_RobotMoveLower;
+    public ICommand Cmd_RobotMoveLower => cmd_RobotMoveLower ??= new RelayCommand(_ => RobotMove(RobotPosition.LowerChamberLoad));
 
     private void RobotMove(RobotPosition pos)
     {

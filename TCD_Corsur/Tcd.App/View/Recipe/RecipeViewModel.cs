@@ -51,17 +51,17 @@ public sealed class RecipeViewModel : NotifyPropertyChangedBase
 
     private TcdRecipe? _loaded;
 
-    private BiRelayCommand? cmd_Reload;
-    public ICommand Cmd_Reload => cmd_Reload ??= new BiRelayCommand(_ => CmdReload());
+    private RelayCommand? cmd_Reload;
+    public ICommand Cmd_Reload => cmd_Reload ??= new RelayCommand(_ => CmdReload());
 
-    private BiRelayCommand? cmd_New;
-    public ICommand Cmd_New => cmd_New ??= new BiRelayCommand(_ => CmdNew());
+    private RelayCommand? cmd_New;
+    public ICommand Cmd_New => cmd_New ??= new RelayCommand(_ => CmdNew());
 
-    private BiRelayCommand? cmd_Save;
-    public ICommand Cmd_Save => cmd_Save ??= new BiRelayCommand(_ => CmdSave());
+    private RelayCommand? cmd_Save;
+    public ICommand Cmd_Save => cmd_Save ??= new RelayCommand(_ => CmdSave());
 
-    private BiRelayCommand? cmd_SaveAs;
-    public ICommand Cmd_SaveAs => cmd_SaveAs ??= new BiRelayCommand(_ => CmdSaveAs());
+    private RelayCommand? cmd_SaveAs;
+    public ICommand Cmd_SaveAs => cmd_SaveAs ??= new RelayCommand(_ => CmdSaveAs());
 
     public void Reload()
     {

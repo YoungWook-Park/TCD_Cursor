@@ -59,7 +59,7 @@ public sealed class MainCore
 
         // 5) Register all sequences once (Simulator 기반 + App Manual 시퀀스)
         Sequences = TcdSequenceRegistry.Build(Simulation, Motion);
-        Sequences.Register(new Axis0AbsMoveSequence());
+        Sequences.Register(new Manual_Axis0_U_AbsMove());
         Sequences.Register(new Axis0StopSequence());
 
         IsInitialized = true;
