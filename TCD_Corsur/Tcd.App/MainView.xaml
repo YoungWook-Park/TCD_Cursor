@@ -4,11 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
-             xmlns:equip="clr-namespace:Tcd.App.View.Equipment"
+             xmlns:equip="clr-namespace:Tcd.App.View"
              mc:Ignorable="d"
              d:DesignHeight="850" d:DesignWidth="1600"
              d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
             <ColumnDefinition Width="*"/>
@@ -16,7 +20,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- 좌측: Materials (위) + Devices (아래) -->
-        <Grid Grid.Column="0" Margin="12,12,8,12">
+        <Grid Grid.Row="0" Grid.Column="0" Margin="12,12,8,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -52,33 +56,36 @@
         </Grid>
 
         <!-- 중앙: 설비 도형 뷰 -->
-        <Border Grid.Column="1" Margin="8,12,8,12" Background="{StaticResource PanelBackgroundBrush}" Padding="8">
+        <Border Grid.Row="0" Grid.Column="1" Margin="8,12,8,8" Background="{StaticResource PanelBackgroundBrush}" Padding="8">
             <equip:EquipmentDiagramView DataContext="{Binding}"/>
         </Border>
 
-        <!-- 우측: 시퀀스 버튼 (위) + Alarms (아래) -->
-        <Grid Grid.Column="2" Margin="0,12,12,12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,8">
-                <Button Content="Load Stage" Width="160" Margin="0,0,0,6"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding Cmd_LoadStageCommand}"/>
-                <Button Content="Start" Width="160" Margin="0,0,0,6"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding Cmd_StartAutoCommand}"/>
-                <Button Content="Stop" Width="160" Margin="0,0,0,6"
-                        Style="{StaticResource DangerButtonStyle}"
-                        Command="{Binding Cmd_StopCommand}"/>
-                <Button Content="Clear" Width="160" Margin="0,0,0,0"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding Cmd_ClearCommand}"/>
-            </StackPanel>
-            <GroupBox Grid.Row="1" Header="Alarms" Margin="0,0,0,0">
-                <ListBox Margin="10" ItemsSource="{Binding Alarms}"/>
-            </GroupBox>
-        </Grid>
+        <!-- 우측: 시퀀스 버튼만 (상단 유지) -->
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" Margin="0,12,12,12" VerticalAlignment="Top">
+            <Button Content="Load Stage" Width="160" Margin="0,0,0,6"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LoadStageCommand}"/>
+            <Button Content="Start" Width="160" Margin="0,0,0,6"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_StartAutoCommand}"/>
+            <Button Content="Stop" Width="160" Margin="0,0,0,6"
+                    Style="{StaticResource DangerButtonStyle}"
+                    Command="{Binding Cmd_StopCommand}"/>
+            <Button Content="완제품 제거" Width="160" Margin="0,0,0,6"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_UnloadProductCommand}"/>
+            <Button Content="Clear" Width="160" Margin="0,0,0,0"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_ClearCommand}"/>
+        </StackPanel>
+
+        <!-- 알람/로그: 아래쪽 전체 폭 (ColumnSpan=2) -->
+        <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Alarms / Log" Margin="8,0,12,12" Padding="8,4">
+            <ListBox Margin="4" MinHeight="80" MaxHeight="240"
+                     ItemsSource="{Binding Alarms}"
+                     Background="{StaticResource PanelBackgroundBrush}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+        </GroupBox>
     </Grid>
 </UserControl>

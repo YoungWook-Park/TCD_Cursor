@@ -7,16 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- 브러시 정의 -->
-                <ResourceDictionary Source="Styles/Brushes.xaml" />
-                <!-- 컨트롤별 스타일 -->
-                <ResourceDictionary Source="Styles/Controls/Window.xaml" />
-                <ResourceDictionary Source="Styles/Controls/TextBlock.xaml" />
-                <ResourceDictionary Source="Styles/Controls/Button.xaml" />
-                <ResourceDictionary Source="Styles/Controls/GroupBox.xaml" />
-                <ResourceDictionary Source="Styles/Controls/TextBox.xaml" />
-                <ResourceDictionary Source="Styles/Controls/TabControl.xaml" />
-                <ResourceDictionary Source="Styles/Controls/DataGrid.xaml" />
+                <ResourceDictionary Source="Styles/Generic.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

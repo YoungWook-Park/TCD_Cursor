@@ -2,15 +2,18 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media.Animation;
 using System.Windows.Controls;
+using System.Windows.Shapes;
 using Tcd.App;
 using Tcd.Devices;
 
-namespace Tcd.App.View.Equipment;
+namespace Tcd.App.View;
 
 public partial class EquipmentDiagramView
 {
-    private const double RobotHomeX = 320;
-    private const double RobotHomeY = 20;
+    private const double RobotHomeX = 306;
+    private const double RobotHomeY = 6;
+    private const double RobotHandSize = 28;
+    private const double RobotCenterOffset = RobotHandSize / 2; // 14
     private const double RobotStageX = 120;
     private const double RobotStageY = 140;
     private const double RobotUpperLoadX = 120;
@@ -57,15 +60,26 @@ public partial class EquipmentDiagramView
             _ => (RobotHomeX, RobotHomeY)
         };
 
+        double centerX = x + RobotCenterOffset;
+        double centerY = y + RobotCenterOffset;
+        double baseCenterX = RobotHomeX + RobotCenterOffset;
+        double baseCenterY = RobotHomeY + RobotCenterOffset;
+
         if (animate)
         {
             AnimateTo(RobotEllipse, Canvas.LeftProperty, x, AnimDurationSec);
             AnimateTo(RobotEllipse, Canvas.TopProperty, y, AnimDurationSec);
+            AnimateTo(RobotArmLine, Line.X2Property, centerX, AnimDurationSec);
+            AnimateTo(RobotArmLine, Line.Y2Property, centerY, AnimDurationSec);
         }
         else
         {
             Canvas.SetLeft(RobotEllipse, x);
             Canvas.SetTop(RobotEllipse, y);
+            RobotArmLine.X1 = baseCenterX;
+            RobotArmLine.Y1 = baseCenterY;
+            RobotArmLine.X2 = centerX;
+            RobotArmLine.Y2 = centerY;
         }
     }
 

@@ -5,8 +5,8 @@
     <Setter Property="Margin" Value="4"/>
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="Background" Value="#FF3A3A3A"/>
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource AccentBrushSoft}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrushSoft}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Cursor" Value="Hand"/>
@@ -24,13 +24,13 @@
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter Property="Background" Value="#FF444444"/>
-              <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+              <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
               <Setter Property="Background" Value="#FF2B2B2B"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-              <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
+              <Setter Property="Foreground" Value="{DynamicResource TextSubtleBrush}"/>
               <Setter Property="Background" Value="#FF333333"/>
             </Trigger>
           </ControlTemplate.Triggers>
@@ -43,7 +43,7 @@
   <Style x:Key="DangerButtonStyle"
          TargetType="Button"
          BasedOn="{StaticResource PrimaryButtonStyle}">
-    <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
+    <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
     <Setter Property="BorderBrush" Value="#FF990000"/>
     <Setter Property="Foreground" Value="White"/>
     <Style.Triggers>

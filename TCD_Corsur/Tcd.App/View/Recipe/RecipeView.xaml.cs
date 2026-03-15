@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace Tcd.App;
+namespace Tcd.App.View;
 
 public partial class RecipeView : UserControl
 {

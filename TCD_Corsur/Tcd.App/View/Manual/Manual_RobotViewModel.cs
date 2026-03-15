@@ -10,28 +10,32 @@ namespace Tcd.App;
 
 public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 {
-    private readonly MainCore _core = MainCore.Instance;
+    #region Variable
 
+    private readonly MainCore _core = MainCore.Instance;
     private string _status = "";
+
+    #endregion
+
+    #region Constructor
+
+    public Manual_RobotViewModel()
+    {
+    }
+
+    #endregion
+
+    #region Property
+
     public string Status
     {
         get => _status;
         private set => Set(ref _status, value);
     }
 
-    public Manual_RobotViewModel()
-    {
-    }
+    #endregion
 
-    // Robot moves (discrete)
-    private RelayCommand? cmd_RobotMoveStage;
-    public ICommand Cmd_RobotMoveStage => cmd_RobotMoveStage ??= new RelayCommand(_ => RobotMove(RobotPosition.Stage));
-
-    private RelayCommand? cmd_RobotMoveUpper;
-    public ICommand Cmd_RobotMoveUpper => cmd_RobotMoveUpper ??= new RelayCommand(_ => RobotMove(RobotPosition.UpperChamberLoad));
-
-    private RelayCommand? cmd_RobotMoveLower;
-    public ICommand Cmd_RobotMoveLower => cmd_RobotMoveLower ??= new RelayCommand(_ => RobotMove(RobotPosition.LowerChamberLoad));
+    #region Function
 
     private void RobotMove(RobotPosition pos)
     {
@@ -47,15 +51,23 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     {
         return Task.Run(async () =>
         {
-            try
-            {
-                await body(CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Status = ex.Message;
-            }
+            try { await body(CancellationToken.None).ConfigureAwait(false); }
+            catch (Exception ex) { Status = ex.Message; }
         });
     }
-}
 
+    #endregion
+
+    #region UI Function
+
+    private RelayCommand? cmd_RobotMoveStage;
+    public ICommand Cmd_RobotMoveStage => cmd_RobotMoveStage ??= new RelayCommand(_ => RobotMove(RobotPosition.Stage));
+
+    private RelayCommand? cmd_RobotMoveUpper;
+    public ICommand Cmd_RobotMoveUpper => cmd_RobotMoveUpper ??= new RelayCommand(_ => RobotMove(RobotPosition.UpperChamberLoad));
+
+    private RelayCommand? cmd_RobotMoveLower;
+    public ICommand Cmd_RobotMoveLower => cmd_RobotMoveLower ??= new RelayCommand(_ => RobotMove(RobotPosition.LowerChamberLoad));
+
+    #endregion
+}

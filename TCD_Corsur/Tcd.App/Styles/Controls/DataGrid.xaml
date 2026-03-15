@@ -4,26 +4,26 @@
   
   <!-- WPF DataGrid 다크 테마 스타일 -->
   <Style TargetType="DataGrid">
-    <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+    <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="RowBackground" Value="#FF2B2B2B" />
     <Setter Property="AlternatingRowBackground" Value="#FF242424" />
     <Setter Property="GridLinesVisibility" Value="All" />
-    <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource PanelBorderBrush}" />
-    <Setter Property="VerticalGridLinesBrush" Value="{StaticResource PanelBorderBrush}" />
+    <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource PanelBorderBrush}" />
+    <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource PanelBorderBrush}" />
   </Style>
 
   <Style TargetType="DataGridRow">
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
   </Style>
 
   <!-- DataGrid 헤더 다크 테마 -->
   <Style TargetType="DataGridColumnHeader">
     <Setter Property="Background" Value="#FF333333" />
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="0,0,1,1" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -32,14 +32,14 @@
 
   <!-- 셀 선택 시도 포함한 다크 테마 셀 스타일 -->
   <Style TargetType="DataGridCell">
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="0,0,1,1" />
     <Style.Triggers>
       <Trigger Property="IsSelected" Value="True">
         <Setter Property="Background" Value="#FF3A3A3A" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
       </Trigger>
     </Style.Triggers>
   </Style>

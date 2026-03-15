@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace Tcd.App.Manual;
+namespace Tcd.App.View;
 
 public partial class Manual_RobotView : UserControl
 {

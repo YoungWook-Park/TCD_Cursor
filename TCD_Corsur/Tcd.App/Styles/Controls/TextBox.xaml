@@ -5,10 +5,10 @@
     <Setter Property="Margin" Value="2"/>
     <Setter Property="Padding" Value="4,2"/>
     <Setter Property="Background" Value="#FF2B2B2B"/>
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}"/>
     <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}"/>
+    <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}"/>
   </Style>
 </ResourceDictionary>
 

@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tcd.Core;
 using Tcd.Devices;
 using Tcd.Materials;
 using Tcd.Sequence;
@@ -39,6 +40,10 @@ namespace Tcd.Simulator
             // Robot moves
             mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_Stage, "Robot CMD move stage",
                 (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.Stage, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_Home, "Robot CMD move home",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.Home, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_Home, "Robot WAIT home",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.Home, Timeout(p, 2), ct)));
             mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_UpperLoad, "Robot CMD move upper load",
                 (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.UpperChamberLoad, ct)));
             mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_LowerLoad, "Robot CMD move lower load",
@@ -149,6 +154,13 @@ namespace Tcd.Simulator
                 "SEMI: Align UVW (fork/join)",
                 async (ctx, p, ct) =>
                 {
+                    // 인터락: UVW 얼라인 전 로봇이 홈 위치에 있어야 함
+                    if (sim.Robot.CurrentPosition != RobotPosition.Home)
+                    {
+                        ctx.Alarms.Raise(new Alarm("ROBOT_NOT_AT_HOME", "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, ctx.Time.Now));
+                        throw new InvalidOperationException("Robot must be at home before UVW align.");
+                    }
+
                     // fork: command all three simultaneously
                     await Task.WhenAll(
                         mgr.RunAsync(TcdSequenceKeys.AxisU_Command_Zero, ctx, null, ct),
@@ -201,6 +213,9 @@ namespace Tcd.Simulator
                     await mgr.RunAsync(TcdSequenceKeys.Plc_Wait_StageLoaded, ctx, TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
                     await mgr.RunAsync(TcdSequenceKeys.SEMI_LoadUpperFilm, ctx, null, ct).ConfigureAwait(false);
                     await mgr.RunAsync(TcdSequenceKeys.SEMI_LoadLowerFilm, ctx, null, ct).ConfigureAwait(false);
+                    // 로봇을 초기(홈) 위치로 이동 후 대기
+                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_Home, ctx, null, ct).ConfigureAwait(false);
+                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_Home, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
                     await mgr.RunAsync(TcdSequenceKeys.SEMI_AlignUVW, ctx, null, ct).ConfigureAwait(false);
                     await mgr.RunAsync(TcdSequenceKeys.SEMI_Bond, ctx, null, ct).ConfigureAwait(false);
                     await mgr.RunAsync(TcdSequenceKeys.SEMI_UnloadProductToStage2, ctx, null, ct).ConfigureAwait(false);

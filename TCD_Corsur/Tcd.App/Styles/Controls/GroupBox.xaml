@@ -4,9 +4,9 @@
   <Style TargetType="GroupBox">
     <Setter Property="Margin" Value="0,0,8,0"/>
     <Setter Property="Padding" Value="4"/>
-    <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}"/>
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+    <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
   </Style>
 </ResourceDictionary>
 

@@ -2,6 +2,23 @@ using System.Windows.Input;
 
 namespace Tcd.App.Mvvm;
 
+/// <summary>CanExecute 없이 동작하는 커맨드. Perform 패턴과 함께 사용.</summary>
+public sealed class RelayCommand : ICommand
+{
+    private readonly Action<object?> _execute;
+
+    public RelayCommand(Action<object?> execute)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+    }
+
+    public event EventHandler? CanExecuteChanged;
+
+    public bool CanExecute(object? parameter) => true;
+
+    public void Execute(object? parameter) => _execute(parameter);
+}
+
 public sealed class BiRelayCommand : ICommand
 {
     private readonly Action<object?> _execute;
