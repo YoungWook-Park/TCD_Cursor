@@ -38,6 +38,8 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     private bool _lowerChamberHasMaterial;
     private double _zPosition;
     private RobotPosition _currentRobotPosition;
+    private bool _isBonding;
+    private bool _robotHasVacuum;
 
     #endregion
 
@@ -117,6 +119,10 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     public bool LowerChamberHasMaterial { get => _lowerChamberHasMaterial; private set => Set(ref _lowerChamberHasMaterial, value); }
     public double ZPosition { get => _zPosition; private set => Set(ref _zPosition, value); }
     public RobotPosition CurrentRobotPosition { get => _currentRobotPosition; private set => Set(ref _currentRobotPosition, value); }
+    /// <summary>양쪽 ESC에 자재 부착 완료 후 합착 진행 중. 개략도 Z 이동 애니메이션용.</summary>
+    public bool IsBonding { get => _isBonding; private set => Set(ref _isBonding, value); }
+    /// <summary>로봇 진공 흡착 상태. 개략도 로봇 표시용.</summary>
+    public bool RobotHasVacuum { get => _robotHasVacuum; private set => Set(ref _robotHasVacuum, value); }
 
     #endregion
 
@@ -139,11 +145,13 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         UpperChamberHasMaterial = up != null;
         LowerChamberHasMaterial = low != null;
 
-        ZPosition = _sim.LowerMotion.Z.Position;
-        CurrentRobotPosition = _sim.Robot.CurrentPosition;
+        ZPosition             = _sim.LowerMotion.Z.Position;
+        CurrentRobotPosition  = _sim.Robot.CurrentPosition;
+        RobotHasVacuum        = _sim.Robot.HasVacuum;
+        IsBonding             = IsRunning && UpperChamberHasMaterial && LowerChamberHasMaterial;
 
         Robot = $"{_sim.Robot.CurrentPosition} | Vacuum={_sim.Robot.HasVacuum}";
-        Axes = $"U={_sim.LowerMotion.U.Position:0.0}, V={_sim.LowerMotion.V.Position:0.0}, W={_sim.LowerMotion.W.Position:0.0}, Z={_sim.LowerMotion.Z.Position:0.0}";
+        Axes  = $"U={_sim.LowerMotion.U.Position:0.0}, V={_sim.LowerMotion.V.Position:0.0}, W={_sim.LowerMotion.W.Position:0.0}, Z={_sim.LowerMotion.Z.Position:0.0}";
     }
 
     #endregion

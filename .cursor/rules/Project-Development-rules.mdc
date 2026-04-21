@@ -1,0 +1,145 @@
+---
+alwaysApply: true
+---
+
+# Project Development Guidelines
+
+## Code Quality
+- Write all code with readability as the highest priority.
+- Minimize duplicate code and extract reusable functions or classes.
+- Ensure every function and method follows the Single Responsibility Principle.
+- Use clear and meaningful names for variables and functions.
+- Extract hard-coded values into constants.
+
+## Code Style
+- Maintain consistent coding conventions throughout the project.
+- Use 2 spaces for indentation.
+- Keep each line under 80 characters whenever possible.
+- Follow naming conventions for classes, functions, and variables.
+- Comments should explain why the code is written that way,
+  not just what it does.
+
+## Documentation
+- Write documentation comments for all public APIs.
+- Describe project setup and execution steps clearly in the README.
+- Document complex algorithms or business logic in separate documents.
+- Record all changes in the CHANGELOG.
+
+## Testing
+- Write unit tests for all new features.
+- Maintain at least 80% test coverage.
+- Ensure tests are independent and repeatable.
+- Implement integration tests for critical user flows.
+
+## Security
+- Always validate and sanitize user input.
+- Store sensitive data in environment variables or secure storage.
+- Regularly check external libraries for security vulnerabilities.
+- Prevent common vulnerabilities such as SQL Injection and XSS.
+
+## Performance
+- Optimize database queries.
+- Minimize unnecessary API calls.
+- Apply pagination for large datasets.
+- Handle resource-intensive tasks asynchronously.
+
+## Version Control
+- Write clear and descriptive commit messages.
+- Develop features in separate branches.
+- Conduct code reviews before merging pull requests.
+- Keep the main branch always deployable.
+
+## Project Structure
+- Organize packages based on a layered architecture.
+- Each package should have a single responsibility.
+- Circular dependencies are strictly prohibited.
+- Follow Domain-Driven Design principles where applicable.
+
+# React Project Structure (UCEO)
+
+src/
+├── assets/       # Static resources such as images and fonts
+├── components/   # Reusable components
+│  ├── common/    # Shared components
+│  ├── layout/    # Layout components
+│  └── features/  # Feature-specific components
+├── hooks/        # Custom hooks
+├── pages/        # Page components
+├── services/     # API communication logic
+├── store/        # State management (Redux, Recoil, etc.)
+├── styles/       # Global styles and theme configuration
+├── types/        # TypeScript type definitions
+├── utils/        # Utility functions
+└── constants/    # Constants
+
+public/
+├── index.html
+└── static/       # Static files
+
+# Main Directory Description
+
+components/
+- Reusable UI components
+  - common/: Shared components such as buttons and inputs
+  - layout/: Layout elements like header, footer, sidebar
+  - features/: Components tied to specific features
+
+hooks/
+- Collection of custom hooks
+
+pages/
+- Page components mapped to routes
+
+services/
+- API communication and external service integrations
+
+store/
+- Global state management logic
+
+styles/
+- Global styles, themes, and styling utilities
+
+types/
+- TypeScript interfaces and type definitions
+
+utils/
+- Utility and helper functions
+
+constants/
+- Constants and configuration values
+
+# Naming Conventions
+
+Component files:
+PascalCase.tsx
+Example: Button.tsx
+
+Hook files:
+camelCase.ts
+Example: useAuth.ts
+
+Utility files:
+camelCase.ts
+Example: formatDate.ts
+
+Style files:
+camelCase.module.css
+Example: button.module.css
+
+Test files:
+*.test.tsx
+*.spec.tsx
+
+# Component Structure
+
+components/
+└── ComponentName/
+    ├── index.tsx
+    ├── ComponentName.module.css
+    ├── ComponentName.test.tsx
+    └── types.ts
+
+index.tsx → Main component  
+ComponentName.module.css → Component styles  
+ComponentName.test.tsx → Unit tests  
+types.ts → Type definitions

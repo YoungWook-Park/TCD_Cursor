@@ -3,121 +3,332 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Tcd.App.View"
              xmlns:vm="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="280" d:DesignWidth="400"
+             d:DesignHeight="380" d:DesignWidth="540"
              d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}">
-    <UserControl.Resources>
-        <!-- 무채색 설비용 브러시 (실제 설비 느낌) -->
-        <SolidColorBrush x:Key="EquipBorderBrush" Color="#FF505050"/>
-        <SolidColorBrush x:Key="EquipPanelBrush" Color="#FF353535"/>
-        <SolidColorBrush x:Key="EquipFilledBrush" Color="#FF606060"/>
-        <SolidColorBrush x:Key="EquipTrackBrush" Color="#FF404040"/>
-        <SolidColorBrush x:Key="EquipThumbBrush" Color="#FF707070"/>
-        <SolidColorBrush x:Key="EquipRobotBaseBrush" Color="#FF454545"/>
-        <SolidColorBrush x:Key="EquipRobotArmBrush" Color="#FF5A5A5A"/>
-        <SolidColorBrush x:Key="EquipRobotHandBrush" Color="#FF787878"/>
+  <UserControl.Resources>
 
-        <Style x:Key="StageRectStyle" TargetType="Rectangle">
-            <Setter Property="Width" Value="70"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="RadiusX" Value="4"/>
-            <Setter Property="RadiusY" Value="4"/>
-            <Setter Property="Stroke" Value="{StaticResource EquipBorderBrush}"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding Stage1HasMaterial}" Value="True">
-                    <Setter Property="Fill" Value="{StaticResource EquipFilledBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Stage1HasMaterial}" Value="False">
-                    <Setter Property="Fill" Value="{StaticResource EquipPanelBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="Stage2RectStyle" TargetType="Rectangle">
-            <Setter Property="Width" Value="70"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="RadiusX" Value="4"/>
-            <Setter Property="RadiusY" Value="4"/>
-            <Setter Property="Stroke" Value="{StaticResource EquipBorderBrush}"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding Stage2HasMaterial}" Value="True">
-                    <Setter Property="Fill" Value="{StaticResource EquipFilledBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Stage2HasMaterial}" Value="False">
-                    <Setter Property="Fill" Value="{StaticResource EquipPanelBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="UpperChamberRectStyle" TargetType="Rectangle">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="RadiusX" Value="4"/>
-            <Setter Property="RadiusY" Value="4"/>
-            <Setter Property="Stroke" Value="{StaticResource EquipBorderBrush}"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding UpperChamberHasMaterial}" Value="True">
-                    <Setter Property="Fill" Value="{StaticResource EquipFilledBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding UpperChamberHasMaterial}" Value="False">
-                    <Setter Property="Fill" Value="{StaticResource EquipPanelBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="LowerChamberRectStyle" TargetType="Rectangle">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="RadiusX" Value="4"/>
-            <Setter Property="RadiusY" Value="4"/>
-            <Setter Property="Stroke" Value="{StaticResource EquipBorderBrush}"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding LowerChamberHasMaterial}" Value="True">
-                    <Setter Property="Fill" Value="{StaticResource EquipFilledBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding LowerChamberHasMaterial}" Value="False">
-                    <Setter Property="Fill" Value="{StaticResource EquipPanelBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
-    <Canvas Width="400" Height="280" Background="Transparent">
-        <!-- Stage1 -->
-        <Rectangle Canvas.Left="20" Canvas.Top="120" Style="{StaticResource StageRectStyle}"/>
-        <TextBlock Canvas.Left="35" Canvas.Top="132" Text="S1" Foreground="{DynamicResource TextBrush}" FontSize="10"/>
+    <!-- ── 색상 ── -->
+    <SolidColorBrush x:Key="EquipBodyBrush"    Color="#FF2A2A2A"/>
+    <SolidColorBrush x:Key="EquipBorderBrush"  Color="#FF565656"/>
+    <SolidColorBrush x:Key="EquipTrackBrush"   Color="#FF383838"/>
+    <SolidColorBrush x:Key="EquipRobotBrush"   Color="#FF3C3C3C"/>
+    <SolidColorBrush x:Key="MaterialFillBrush" Color="#263FA9F5"/>  <!-- 자재 있을 때 accent 틴트 -->
+    <SolidColorBrush x:Key="PathGuideBrush"    Color="#28FFFFFF"/>  <!-- 이동 경로 가이드 (매우 희미) -->
+    <SolidColorBrush x:Key="ArmActiveBrush"    Color="#CC3FA9F5"/>  <!-- 로봇팔 활성 -->
+    <SolidColorBrush x:Key="BondingBrush"      Color="#CCFF9500"/>  <!-- 합착 표시 (주황) -->
+    <SolidColorBrush x:Key="EscAccentBrush"    Color="#FF4B8AC7"/>  <!-- ESC 라벨 강조 -->
+    <SolidColorBrush x:Key="UvwAccentBrush"    Color="#FF6A9FCC"/>  <!-- UVW 라벨 -->
+    <SolidColorBrush x:Key="VacuumOnBrush"     Color="#FF22AA44"/>  <!-- 진공 ON -->
+    <SolidColorBrush x:Key="VacuumOffBrush"    Color="#FF505050"/>  <!-- 진공 OFF -->
 
-        <!-- Stage2 -->
-        <Rectangle Canvas.Left="20" Canvas.Top="180" Style="{StaticResource Stage2RectStyle}"/>
-        <TextBlock Canvas.Left="35" Canvas.Top="192" Text="S2" Foreground="{DynamicResource TextBrush}" FontSize="10"/>
+    <!-- ── Lower Assembly (챔버 + UVW): 합착 시 위로 이동 ── -->
+    <!-- Canvas.Top은 Style에서만 제어 (로컬 값 없음) -->
+    <Style x:Key="LowerAssemblyStyle" TargetType="Border">
+      <Setter Property="Canvas.Left" Value="15"/>
+      <Setter Property="Canvas.Top"  Value="228"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsBonding}" Value="True">
+          <Setter Property="Canvas.Top" Value="148"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
 
-        <!-- Upper Chamber -->
-        <Rectangle Canvas.Left="110" Canvas.Top="40" Style="{StaticResource UpperChamberRectStyle}"/>
-        <TextBlock Canvas.Left="145" Canvas.Top="52" Text="Upper" Foreground="{DynamicResource TextBrush}" FontSize="9"/>
+    <!-- ── 합착 표시 요소: IsBonding=True 일 때만 Visible ── -->
+    <Style x:Key="BondingVisibleStyle" TargetType="FrameworkElement">
+      <Setter Property="Visibility" Value="Collapsed"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsBonding}" Value="True">
+          <Setter Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ── 로봇팔: Stage 위치 ── -->
+    <Style x:Key="ArmStageStyle" TargetType="Line">
+      <Setter Property="Visibility" Value="Collapsed"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding CurrentRobotPosition}" Value="Stage">
+          <Setter Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ── 로봇팔: Upper Chamber 위치 ── -->
+    <Style x:Key="ArmUpperStyle" TargetType="Line">
+      <Setter Property="Visibility" Value="Collapsed"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding CurrentRobotPosition}" Value="UpperChamberLoad">
+          <Setter Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ── 로봇팔: Lower Chamber 위치 ── -->
+    <Style x:Key="ArmLowerStyle" TargetType="Line">
+      <Setter Property="Visibility" Value="Collapsed"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding CurrentRobotPosition}" Value="LowerChamberLoad">
+          <Setter Property="Visibility" Value="Visible"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+  </UserControl.Resources>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       평면(Plan View) 개략도  Canvas 540 × 380
+       좌측: Upper/Lower Chamber  |  우측: Robot / S1 / S2
+       ══════════════════════════════════════════════════════════════ -->
+  <Canvas Width="540" Height="380" Background="Transparent">
+
+    <!-- ┌─────────────────────────────────────────────────────────┐ -->
+    <!-- │  좌측 – 챔버 영역                                        │ -->
+    <!-- └─────────────────────────────────────────────────────────┘ -->
+
+    <!-- 구역 레이블 -->
+    <TextBlock Canvas.Left="15" Canvas.Top="20"
+               Text="③  ESC 부착 / 합착" FontSize="9"
+               Foreground="#55FFFFFF"/>
+
+    <!-- ── Upper Chamber ── -->
+    <Border Canvas.Left="15" Canvas.Top="38" Width="152" Height="72"
+            BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4">
+      <Border.Style>
+        <Style TargetType="Border">
+          <Setter Property="Background" Value="{StaticResource EquipBodyBrush}"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding UpperChamberHasMaterial}" Value="True">
+              <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <Grid>
+        <TextBlock Text="Upper Chamber" Foreground="{DynamicResource TextSubtleBrush}"
+                   FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
+        <!-- ESC 배지 -->
+        <Border Background="#1A3FA9F5" BorderBrush="{StaticResource EscAccentBrush}"
+                BorderThickness="1" CornerRadius="2"
+                Margin="16,24,16,8" VerticalAlignment="Bottom">
+          <TextBlock Text="ESC" Foreground="{StaticResource EscAccentBrush}"
+                     FontSize="9" FontWeight="SemiBold" HorizontalAlignment="Center" Padding="0,2"/>
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- ── 합착 표시: 챔버 사이 주황 커넥터 ── -->
+    <Rectangle Canvas.Left="85" Canvas.Top="113" Width="20" Height="4"
+               Fill="{StaticResource BondingBrush}" RadiusX="1" RadiusY="1"
+               Style="{StaticResource BondingVisibleStyle}"/>
+    <TextBlock Canvas.Left="108" Canvas.Top="108" Text="합착 중" FontSize="9" FontWeight="SemiBold"
+               Foreground="{StaticResource BondingBrush}"
+               Style="{StaticResource BondingVisibleStyle}"/>
+
+    <!-- ── Lower Assembly: Lower Chamber + UVW (합착 시 위로 이동) ── -->
+    <!-- Canvas.Top은 LowerAssemblyStyle에서만 제어 -->
+    <Border Width="152" Height="104" Style="{StaticResource LowerAssemblyStyle}"
+            Background="Transparent">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="72"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
         <!-- Lower Chamber -->
-        <Rectangle Canvas.Left="110" Canvas.Top="220" Style="{StaticResource LowerChamberRectStyle}"/>
-        <TextBlock Canvas.Left="142" Canvas.Top="232" Text="Lower" Foreground="{DynamicResource TextBrush}" FontSize="9"/>
+        <Border Grid.Row="0"
+                BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="Background" Value="{StaticResource EquipBodyBrush}"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding LowerChamberHasMaterial}" Value="True">
+                  <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <Grid>
+            <TextBlock Text="Lower Chamber" Foreground="{DynamicResource TextSubtleBrush}"
+                       FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
+            <Border Background="#1A3FA9F5" BorderBrush="{StaticResource EscAccentBrush}"
+                    BorderThickness="1" CornerRadius="2"
+                    Margin="16,24,16,8" VerticalAlignment="Bottom">
+              <TextBlock Text="ESC" Foreground="{StaticResource EscAccentBrush}"
+                         FontSize="9" FontWeight="SemiBold" HorizontalAlignment="Center" Padding="0,2"/>
+            </Border>
+          </Grid>
+        </Border>
 
-        <!-- Z axis track (무채색) -->
-        <Rectangle Canvas.Left="230" Canvas.Top="230" Width="24" Height="120"
-                   Fill="{StaticResource EquipTrackBrush}"
-                   Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1"/>
-        <Rectangle x:Name="ZBarThumb" Canvas.Left="232" Canvas.Top="250" Width="20" Height="80"
-                   Fill="{StaticResource EquipThumbBrush}" RadiusX="2" RadiusY="2"/>
+        <!-- UVW 정렬 축 인디케이터 -->
+        <Border Grid.Row="1" Margin="0,5,0,0"
+                Background="#FF252525" BorderBrush="#FF484848" BorderThickness="1" CornerRadius="3">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="U" Foreground="{StaticResource UvwAccentBrush}"
+                       FontSize="10" FontWeight="SemiBold" Margin="6,0"/>
+            <TextBlock Text="V" Foreground="{StaticResource UvwAccentBrush}"
+                       FontSize="10" FontWeight="SemiBold" Margin="6,0"/>
+            <TextBlock Text="W" Foreground="{StaticResource UvwAccentBrush}"
+                       FontSize="10" FontWeight="SemiBold" Margin="6,0"/>
+            <TextBlock Text="(θ)" Foreground="{DynamicResource TextSubtleBrush}"
+                       FontSize="8" VerticalAlignment="Center" Margin="2,0"/>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
 
-        <!-- Robot: 2D 로봇 (베이스 + 팔 + 엔드이펙터) -->
-        <Line x:Name="RobotArmLine" X1="320" Y1="20" X2="320" Y2="20"
-              Stroke="{StaticResource EquipRobotArmBrush}" StrokeThickness="6"
-              StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-        <Ellipse Canvas.Left="302" Canvas.Top="2" Width="36" Height="36"
-                 Fill="{StaticResource EquipRobotBaseBrush}" Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1"/>
-        <Ellipse x:Name="RobotEllipse" Width="28" Height="28" Canvas.Left="306" Canvas.Top="6"
-                 Fill="{StaticResource EquipRobotHandBrush}" Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1"/>
+    <!-- ┌─────────────────────────────────────────────────────────┐ -->
+    <!-- │  중앙 구분선                                              │ -->
+    <!-- └─────────────────────────────────────────────────────────┘ -->
+    <Line X1="272" Y1="8" X2="272" Y2="372"
+          Stroke="#1AFFFFFF" StrokeThickness="1" StrokeDashArray="5,5"/>
 
-        <!-- Labels -->
-        <TextBlock Canvas.Left="228" Canvas.Top="208" Text="Z" Foreground="{DynamicResource TextSubtleBrush}" FontSize="10"/>
-    </Canvas>
+    <!-- ┌─────────────────────────────────────────────────────────┐ -->
+    <!-- │  우측 – 로봇 + 스테이지 영역                              │ -->
+    <!-- └─────────────────────────────────────────────────────────┘ -->
+
+    <!-- 구역 레이블 상단 (로봇) -->
+    <TextBlock Canvas.Left="290" Canvas.Top="100" Text="②  픽업 / 이송" FontSize="9"
+               Foreground="#55FFFFFF"/>
+
+    <!-- 구역 레이블 하단 (스테이지) -->
+    <TextBlock Canvas.Left="290" Canvas.Top="224" Text="①  자재 공급" FontSize="9"
+               Foreground="#55FFFFFF"/>
+
+    <!-- ── 이동 경로 가이드 (항상 희미하게 표시) ── -->
+    <!-- S1 → Robot -->
+    <Line X1="340" Y1="242" X2="447" Y2="88"
+          Stroke="{StaticResource PathGuideBrush}" StrokeThickness="1.5" StrokeDashArray="5,5"/>
+    <!-- S2 → Robot -->
+    <Line X1="450" Y1="242" X2="463" Y2="88"
+          Stroke="{StaticResource PathGuideBrush}" StrokeThickness="1.5" StrokeDashArray="5,5"/>
+    <!-- Robot → Upper Chamber -->
+    <Line X1="432" Y1="52" X2="167" Y2="72"
+          Stroke="{StaticResource PathGuideBrush}" StrokeThickness="1.5" StrokeDashArray="5,5"/>
+    <!-- Robot → Lower Chamber -->
+    <Line X1="432" Y1="68" X2="167" Y2="258"
+          Stroke="{StaticResource PathGuideBrush}" StrokeThickness="1.5" StrokeDashArray="5,5"/>
+
+    <!-- ── 로봇팔 활성 라인 (CurrentRobotPosition에 따라 표시) ── -->
+    <!-- Stage(S1/S2) -->
+    <Line X1="468" Y1="52" X2="397" Y2="270"
+          Stroke="{StaticResource ArmActiveBrush}" StrokeThickness="2.5"
+          StrokeEndLineCap="Round" StrokeStartLineCap="Round"
+          Style="{StaticResource ArmStageStyle}"/>
+    <!-- Upper Chamber -->
+    <Line X1="468" Y1="52" X2="167" Y2="72"
+          Stroke="{StaticResource ArmActiveBrush}" StrokeThickness="2.5"
+          StrokeEndLineCap="Round" StrokeStartLineCap="Round"
+          Style="{StaticResource ArmUpperStyle}"/>
+    <!-- Lower Chamber -->
+    <Line X1="468" Y1="52" X2="167" Y2="264"
+          Stroke="{StaticResource ArmActiveBrush}" StrokeThickness="2.5"
+          StrokeEndLineCap="Round" StrokeStartLineCap="Round"
+          Style="{StaticResource ArmLowerStyle}"/>
+
+    <!-- ── Robot (우측 상단) ── -->
+    <!-- 외곽 링 -->
+    <Ellipse Canvas.Left="432" Canvas.Top="14" Width="72" Height="72"
+             Fill="{StaticResource EquipRobotBrush}"
+             Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1.5"/>
+    <!-- 내부 링 -->
+    <Ellipse Canvas.Left="447" Canvas.Top="29" Width="42" Height="42"
+             Fill="#FF2E2E2E" Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1"/>
+    <!-- 진공 상태 인디케이터 (중앙 작은 원) -->
+    <Ellipse Canvas.Left="461" Canvas.Top="43" Width="14" Height="14">
+      <Ellipse.Style>
+        <Style TargetType="Ellipse">
+          <Setter Property="Fill" Value="{StaticResource VacuumOffBrush}"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding RobotHasVacuum}" Value="True">
+              <Setter Property="Fill" Value="{StaticResource VacuumOnBrush}"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Ellipse.Style>
+    </Ellipse>
+    <!-- Robot 레이블 -->
+    <TextBlock Canvas.Left="448" Canvas.Top="63" Text="Robot" FontSize="8"
+               Foreground="{DynamicResource TextSubtleBrush}" HorizontalAlignment="Center"/>
+
+    <!-- ── S1 (우측 하단 왼쪽) ── -->
+    <Border Canvas.Left="295" Canvas.Top="242" Width="90" Height="58"
+            BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4">
+      <Border.Style>
+        <Style TargetType="Border">
+          <Setter Property="Background" Value="{StaticResource EquipBodyBrush}"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Stage1HasMaterial}" Value="True">
+              <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <Grid>
+        <TextBlock Text="S1" Foreground="{DynamicResource TextBrush}"
+                   FontSize="16" FontWeight="Bold"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-6,0,0"/>
+        <TextBlock Foreground="{DynamicResource TextSubtleBrush}" FontSize="8"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,5">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Text" Value="자재 공급"/>
+              <Style.Triggers>
+                <!-- 공정 완료 후 S1에 완제품 안착 -->
+                <MultiDataTrigger>
+                  <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Stage1HasMaterial}" Value="True"/>
+                    <Condition Binding="{Binding IsRunning}" Value="False"/>
+                  </MultiDataTrigger.Conditions>
+                  <Setter Property="Text" Value="완제품 안착"/>
+                </MultiDataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </Grid>
+    </Border>
+
+    <!-- ── S2 (우측 하단 오른쪽) ── -->
+    <Border Canvas.Left="403" Canvas.Top="242" Width="90" Height="58"
+            BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4">
+      <Border.Style>
+        <Style TargetType="Border">
+          <Setter Property="Background" Value="{StaticResource EquipBodyBrush}"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Stage2HasMaterial}" Value="True">
+              <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <Grid>
+        <TextBlock Text="S2" Foreground="{DynamicResource TextBrush}"
+                   FontSize="16" FontWeight="Bold"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-6,0,0"/>
+        <TextBlock Text="자재 공급" Foreground="{DynamicResource TextSubtleBrush}" FontSize="8"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+      </Grid>
+    </Border>
+
+    <!-- ── 범례 (우측 하단) ── -->
+    <StackPanel Canvas.Left="295" Canvas.Top="310" Orientation="Vertical">
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+        <Rectangle Width="12" Height="12" Fill="{StaticResource MaterialFillBrush}"
+                   Stroke="{StaticResource EquipBorderBrush}" StrokeThickness="1" RadiusX="2" RadiusY="2" Margin="0,0,5,0"/>
+        <TextBlock Text="자재 있음" FontSize="9" Foreground="{DynamicResource TextSubtleBrush}" VerticalAlignment="Center"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+        <Ellipse Width="12" Height="12" Fill="{StaticResource VacuumOnBrush}" Margin="0,0,5,0"/>
+        <TextBlock Text="로봇 진공 ON" FontSize="9" Foreground="{DynamicResource TextSubtleBrush}" VerticalAlignment="Center"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Rectangle Width="12" Height="4" Fill="{StaticResource BondingBrush}"
+                   RadiusX="1" RadiusY="1" Margin="0,0,5,4" VerticalAlignment="Center"/>
+        <TextBlock Text="합착 진행 중" FontSize="9" Foreground="{DynamicResource TextSubtleBrush}" VerticalAlignment="Center"/>
+      </StackPanel>
+    </StackPanel>
+
+  </Canvas>
 </UserControl>

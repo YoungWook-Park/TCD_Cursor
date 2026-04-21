@@ -7,10 +7,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tcd.Core\Tcd.Core.csproj" />
-    <ProjectReference Include="..\Tcd.Materials\Tcd.Materials.csproj" />
-    <ProjectReference Include="..\Tcd.Devices\Tcd.Devices.csproj" />
-    <ProjectReference Include="..\Tcd.Sequence\Tcd.Sequence.csproj" />
+    <ProjectReference Include="..\Tcd.Engine\Tcd.Engine.csproj" />
     <ProjectReference Include="..\Tcd.Simulator\Tcd.Simulator.csproj" />
   </ItemGroup>
 
@@ -28,9 +25,5 @@
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;ARM64;ARM32</Platforms>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-  </ItemGroup>
 
 </Project>

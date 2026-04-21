@@ -66,7 +66,8 @@ public sealed class SpiiPlusMotionService : IMotionService, IAxisStateProvider, 
                 Position = c.Position,
                 IsMoving = c.IsMoving,
                 IsFault = c.IsFault,
-                IsHome = c.IsHome
+                IsHome = c.IsHome,
+                IsServoOn = c.IsServoOn
             };
         }
     }
@@ -106,12 +107,14 @@ public sealed class SpiiPlusMotionService : IMotionService, IAxisStateProvider, 
                     int isMove = _conn.ReadInt($"{SpiiDefine.ACS_PC_IS_MOVE_AXIS}{i}");
                     int isFault = _conn.ReadInt($"{SpiiDefine.ACS_PC_IS_FAULT_AXIS}{i}");
                     int isHome = _conn.ReadInt($"{SpiiDefine.ACS_PC_IS_HOME_AXIS}{i}");
+                    int isServoOn = _conn.ReadInt($"{SpiiDefine.ACS_PC_IS_ENABLED_AXIS}{i}");
                     lock (_cacheLock)
                     {
                         _cache[i].Position = pos;
                         _cache[i].IsMoving = isMove != 0;
                         _cache[i].IsFault = isFault != 0;
                         _cache[i].IsHome = isHome != 0;
+                        _cache[i].IsServoOn = isServoOn != 0;
                     }
                 }
             }

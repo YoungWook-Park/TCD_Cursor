@@ -27,14 +27,16 @@ namespace Tcd.Simulator
         public AxisState GetAxisState(string axisName)
         {
             var a = Axis(axisName);
-            double pos = a.Position;
             return new AxisState
             {
-                AxisName = axisName,
-                Position = pos,
-                IsMoving = false,
-                IsFault = false,
-                IsHome = Math.Abs(pos) < 0.01
+                AxisName  = axisName,
+                Position  = a.Position,
+                IsMoving  = a.IsMoving,
+                IsFault   = false,
+                IsHome    = Math.Abs(a.Position) < 0.01,
+                IsServoOn = a.IsServoOn,
+                IsLimitPos = false,   // 시뮬레이터는 한계 없음
+                IsLimitNeg = false,
             };
         }
 
@@ -42,9 +44,7 @@ namespace Tcd.Simulator
         {
             var list = new List<AxisState>(5);
             foreach (var name in SimAxisOrder)
-            {
                 list.Add(GetAxisState(name));
-            }
             return list;
         }
 
@@ -57,52 +57,43 @@ namespace Tcd.Simulator
         public Task IncMoveAsync(string axis, double delta, CancellationToken cancellationToken)
         {
             var a = Axis(axis);
-            var target = a.Position + delta;
-            return MoveAndWaitAsync(a, target, cancellationToken);
+            return MoveAndWaitAsync(a, a.Position + delta, cancellationToken);
         }
 
         public Task JogAsync(string axis, double velocity, CancellationToken cancellationToken)
         {
-            // Simple simulator: treat jog as small incremental move in the given direction.
             var delta = Math.Sign(velocity) * 10.0;
             return IncMoveAsync(axis, delta, cancellationToken);
         }
 
         public Task StopAsync(string axis, CancellationToken cancellationToken)
-        {
-            // Simulator: nothing special to do; real SPII would stop the buffer/axis.
-            return Task.CompletedTask;
-        }
+            => Task.CompletedTask;
 
         public Task HomeAsync(string axis, CancellationToken cancellationToken)
-        {
-            // Simulator: treat home as move to 0.
-            return AbsMoveAsync(axis, 0, cancellationToken);
-        }
+            => AbsMoveAsync(axis, 0, cancellationToken);
 
         public Task FaultClearAsync(string axis, CancellationToken cancellationToken)
-        {
-            // Simulator: nothing to clear.
-            return Task.CompletedTask;
-        }
+            => Task.CompletedTask;
 
         public Task ServoOnAsync(string axis, CancellationToken cancellationToken)
         {
+            Axis(axis).IsServoOn = true;
             return Task.CompletedTask;
         }
 
         public Task ServoOffAsync(string axis, CancellationToken cancellationToken)
         {
+            Axis(axis).IsServoOn = false;
             return Task.CompletedTask;
         }
 
-        private async Task MoveAndWaitAsync(IAxis axis, double target, CancellationToken cancellationToken)
+        private async Task MoveAndWaitAsync(SimAxis axis, double target, CancellationToken cancellationToken)
         {
             await axis.CommandMoveToAsync(target, cancellationToken).ConfigureAwait(false);
             await axis.WaitForInPositionAsync(target, 0.01, _settings.AxisMoveTimeout, cancellationToken).ConfigureAwait(false);
         }
 
-        private IAxis Axis(string axis)
+        private SimAxis Axis(string axis)
         {
             axis = (axis ?? string.Empty).Trim().ToUpperInvariant();
             if (axis == "U") return _sim.LowerMotion.U;
@@ -113,9 +104,6 @@ namespace Tcd.Simulator
         }
     }
 
-    /// <summary>
-    /// Small adapter so SimMotionService can read timeout settings without referencing App project types.
-    /// </summary>
     public sealed class AppSettingsProxy
     {
         public TimeSpan AxisMoveTimeout { get; }
@@ -126,4 +114,3 @@ namespace Tcd.Simulator
         }
     }
 }
-

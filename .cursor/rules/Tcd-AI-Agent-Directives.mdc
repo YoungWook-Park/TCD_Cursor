@@ -1,0 +1,68 @@
+---
+description: Always-on agent behavior — precedence, MUST/MUST NOT, output contract, TCD repo scope
+alwaysApply: true
+---
+
+# TCD Cursor Agent Directives (Always On)
+
+You operate in the **TCD_Cursor** repository. Primary application code lives under **`TCD_Corsur/`** (WPF host **`Tcd.App`**, libraries **`Tcd.Core`**, **`Tcd.Sequence`**, **`Tcd.Devices`**, **`Tcd.Materials`**, **`Tcd.Simulator`**). Treat **`MainCore`** in `Tcd.App` as the app composition root unless the task says otherwise.
+
+---
+
+## Precedence (resolve conflicts in this order)
+
+1. **User’s latest message** in the thread overrides earlier instructions.
+2. **System constraints** for the current mode (e.g. Ask mode = read-only; Agent mode = edits allowed) override everything else.
+3. **Workspace / Cursor rules** apply together; when two rules disagree, follow the **more specific** rule for the file or topic (e.g. sequences and ViewModels → **`WPF-Implemention-Rule.mdc`**).
+4. **This file** states global agent behavior; it does not replace topic-specific rules.
+
+---
+
+## MUST (non-negotiable)
+
+- **Ground claims in the codebase** before describing behavior, APIs, or file layout: read or search the repo; do not guess.
+- **Honor the active mode**: in Ask mode, do not edit files, run mutating commands, or suggest “switch to Agent” as a substitute for answering when the user asked for information.
+- **Scope every change** to what the user requested: touch only files and lines needed for the task.
+- **Match existing style** in the file you edit (indentation, naming, regions, patterns). When project rules conflict with local precedent (e.g. spacing), **prefer the surrounding file** and note the discrepancy only if it matters for the task.
+- **Obey sequence and ViewModel conventions** in `TCD_Corsur` per **`WPF-Implemention-Rule.mdc`** (e.g. `Param` on sequences, two regions, `LogContext`, ViewModel region order, command pattern).
+- **Follow general quality expectations** in **`Project-Development-rules.mdc`** where they apply (readability, SRP, public API docs, security for inputs, no circular dependencies).
+- **Cite existing code** using the required format: a fenced block with ```startLine:endLine:filepath``` on its **own line** (no list markers on the same line as the opening fence).
+
+---
+
+## MUST NOT / NEVER
+
+- **NEVER** invent types, methods, file paths, or sequence keys that are not in the repo or confirmed by reading it.
+- **NEVER** perform drive-by refactors, reformat unrelated code, or delete comments/code outside the requested scope.
+- **NEVER** add README, CHANGELOG, or other documentation files **unless the user explicitly asked** for them.
+- **NEVER** swallow exceptions in new code without logging or rethrowing where the project already logs errors (see existing sequence / service patterns).
+- **NEVER** rely on a global “current sequence parameter” on **`MainCore`** for sequence logic; each sequence owns its parameter (per **`WPF-Implemention-Rule.mdc`**).
+- **NEVER** ignore **user rules**, **tool instructions**, or **skills** attached to the task when they specify format, workflow, or constraints.
+- **NEVER** cite code with broken fences (e.g. opening ``` not on its own line, or HTML entities instead of real characters inside code).
+
+---
+
+## SHOULD (strong preferences)
+
+- Prefer **short, structured** answers; use headings and bullets when it improves scanning.
+- Run **verification** (build/test) after non-trivial edits when the environment allows, and fix what you broke.
+- Use **absolute paths** in tool arguments when the user or workspace expects them.
+- If requirements are ambiguous, **ask one focused question** instead of assuming.
+
+---
+
+## Output contract
+
+- Default to **clear prose**; add code blocks only when they teach, prove a point, or provide a patch.
+- For **new** code in replies, use normal markdown fences with a language tag when appropriate.
+- For **references to the workspace**, use line-number citations as specified under MUST.
+- Do not dump large irrelevant file contents; **ellipsis or skip** middle sections in citations when helpful.
+
+---
+
+## Where to look for detail
+
+- **Sequences, ViewModels, folders, naming**: **`WPF-Implemention-Rule.mdc`**
+- **Quality, docs, tests, security, layering**: **`Project-Development-rules.mdc`**
+
+Do not duplicate those documents here; keep this file focused on **agent behavior and hard constraints**.

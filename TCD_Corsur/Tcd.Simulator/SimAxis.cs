@@ -2,16 +2,17 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.Core;
-using Tcd.Devices;
 
 namespace Tcd.Simulator
 {
-    public sealed class SimAxis : IAxis
+    /// <summary>시뮬레이터 축. 일정 속도로 목표 위치까지 이동하는 단순 시뮬레이션.</summary>
+    public sealed class SimAxis
     {
         private readonly object _gate = new object();
         private readonly ITimeProvider _time;
         private readonly double _unitsPerSecond;
         private double _position;
+        private volatile bool _isMoving;
 
         public SimAxis(string name, ITimeProvider time, double unitsPerSecond = 50)
         {
@@ -22,6 +23,10 @@ namespace Tcd.Simulator
 
         public string Name { get; }
 
+        public bool IsServoOn { get; set; }
+
+        public bool IsMoving => _isMoving;
+
         public double Position
         {
             get { lock (_gate) return _position; }
@@ -30,6 +35,7 @@ namespace Tcd.Simulator
 
         public Task CommandMoveToAsync(double position, CancellationToken cancellationToken)
         {
+            _isMoving = true;
             lock (_gate)
             {
                 _ = RunMoveAsync(position, cancellationToken);
@@ -43,11 +49,7 @@ namespace Tcd.Simulator
             while (_time.Now - start < timeout)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var pos = Position;
-                if (Math.Abs(pos - position) <= tolerance)
-                {
-                    return;
-                }
+                if (Math.Abs(Position - position) <= tolerance) return;
                 await _time.Delay(TimeSpan.FromMilliseconds(20), cancellationToken).ConfigureAwait(false);
             }
 
@@ -56,12 +58,18 @@ namespace Tcd.Simulator
 
         private async Task RunMoveAsync(double position, CancellationToken cancellationToken)
         {
-            var from = Position;
-            var distance = Math.Abs(position - from);
-            var seconds = distance / _unitsPerSecond;
-            await _time.Delay(TimeSpan.FromSeconds(seconds), cancellationToken).ConfigureAwait(false);
-            Position = position;
+            try
+            {
+                var from = Position;
+                var distance = Math.Abs(position - from);
+                var seconds = distance / _unitsPerSecond;
+                await _time.Delay(TimeSpan.FromSeconds(seconds), cancellationToken).ConfigureAwait(false);
+                Position = position;
+            }
+            finally
+            {
+                _isMoving = false;
+            }
         }
     }
 }
-

@@ -44,6 +44,7 @@ public static class SpiiDefine
     public const string ACS_PC_IS_MOVE_AXIS = "ACS_PC_IS_MOVE_AXIS";
     public const string ACS_PC_IS_FAULT_AXIS = "ACS_PC_IS_FAULT_AXIS";
     public const string ACS_PC_IS_HOME_AXIS = "ACS_PC_IS_HOME_AXIS";
+    public const string ACS_PC_IS_ENABLED_AXIS = "ACS_PC_IS_ENABLED_AXIS";
     public const string ACS_PC_CURRENT_POS_AXIS = "ACS_PC_CURRENT_POS_AXIS";
 
     // 기본 모션 값 (레시피 연동 전 임시)

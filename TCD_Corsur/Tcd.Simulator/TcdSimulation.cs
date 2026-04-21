@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Tcd.Core;
 using Tcd.Devices;
 using Tcd.Materials;
@@ -27,7 +26,7 @@ namespace Tcd.Simulator
 
         public IMaterialTracker Materials { get; }
         public IRobot Robot { get; }
-        public ILowerChamberMotion LowerMotion { get; }
+        public SimLowerChamberMotion LowerMotion { get; }
         public IPlc Plc { get; }
 
         public void BindStopToken(CancellationToken stopToken)
@@ -48,4 +47,3 @@ namespace Tcd.Simulator
         }
     }
 }
-

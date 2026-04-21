@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,18 +7,21 @@ using System.Windows.Input;
 using Tcd.App.Core;
 using Tcd.App.Mvvm;
 using Tcd.Devices;
+using Tcd.Sequence;
 using Tcd.Simulator;
 
 namespace Tcd.App;
 
 public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
 {
-    #region Variable
+    #region Fields
+
     private readonly MainCore _core = MainCore.Instance;
-    private CancellationTokenSource? _jogCts;
+    private CancellationTokenSource? _activeCts;    // 현재 실행 중인 동작(Move/Home/Servo 등) 취소용
+    private CancellationTokenSource? _jogCts;       // Jog 전용 취소용 (버튼 누름/뗌으로 제어)
     private readonly System.Windows.Threading.DispatcherTimer _statusTimer;
 
-    private string _status = "";
+    private string _logStatus = "";
     private string _u = "0";
     private string _v = "0";
     private string _w = "0";
@@ -26,17 +30,36 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     private string _selectedAxis = AxisDefine.U;
     private string _jogSpeed = "10";
 
+    // 축별 AbsMove 시퀀스 키 테이블
+    private static readonly IReadOnlyDictionary<string, string> AbsMoveSeqKeys = new Dictionary<string, string>
+    {
+        [AxisDefine.U]      = TcdSequenceKeys.Manual_Motor_U_AbsMove,
+        [AxisDefine.V]      = TcdSequenceKeys.Manual_Motor_V_AbsMove,
+        [AxisDefine.W]      = TcdSequenceKeys.Manual_Motor_W_AbsMove,
+        [AxisDefine.ZLower] = TcdSequenceKeys.Manual_Motor_ZLower_AbsMove,
+        [AxisDefine.ZUpper] = TcdSequenceKeys.Manual_Motor_ZUpper_AbsMove,
+    };
+
+    // 축별 Stop 시퀀스 키 테이블
+    private static readonly IReadOnlyDictionary<string, string> StopSeqKeys = new Dictionary<string, string>
+    {
+        [AxisDefine.U]      = TcdSequenceKeys.Manual_Motor_U_Stop,
+        [AxisDefine.V]      = TcdSequenceKeys.Manual_Motor_V_Stop,
+        [AxisDefine.W]      = TcdSequenceKeys.Manual_Motor_W_Stop,
+        [AxisDefine.ZLower] = TcdSequenceKeys.Manual_Motor_ZLower_Stop,
+        [AxisDefine.ZUpper] = TcdSequenceKeys.Manual_Motor_ZUpper_Stop,
+    };
+
     #endregion
+
     #region Constructor
 
     public Manual_MotorViewModel()
     {
         PullFromRecipe();
 
-        foreach (var name in AxisDefine.InOrder)
-        {
-            AxisStatuses.Add(new AxisStatusItem { AxisName = name });
-        }
+        foreach (var axisName in AxisDefine.InOrder)
+            AxisStatuses.Add(new AxisStatusItem { AxisName = axisName });
 
         _statusTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
         _statusTimer.Tick += (_, _) => RefreshAxisStatus();
@@ -44,165 +67,90 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     }
 
     #endregion
-    #region Property
 
-    public string Status
+    #region Properties
+
+    /// <summary>마지막 동작 결과 메시지. XAML 상태 표시줄에 바인딩.</summary>
+    public string LogStatus
     {
-        get { return _status; }
-        private set { Set(ref _status, value); }
+        get => _logStatus;
+        private set => Set(ref _logStatus, value);
     }
 
-    public string U
-    {
-        get { return _u; }
-        set { Set(ref _u, value); }
-    }
-
-    public string V
-    {
-        get { return _v; }
-        set { Set(ref _v, value); }
-    }
-
-    public string W
-    {
-        get { return _w; }
-        set { Set(ref _w, value); }
-    }
-
-    public string ZLoad
-    {
-        get { return _zLoad; }
-        set { Set(ref _zLoad, value); }
-    }
-
-    public string ZBond
-    {
-        get { return _zBond; }
-        set { Set(ref _zBond, value); }
-    }
-
-    public string SelectedAxis
-    {
-        get { return _selectedAxis; }
-        set { Set(ref _selectedAxis, value); }
-    }
-
-    public string JogSpeed
-    {
-        get { return _jogSpeed; }
-        set { Set(ref _jogSpeed, value); }
-    }
+    public string U          { get => _u;             set => Set(ref _u, value); }
+    public string V          { get => _v;             set => Set(ref _v, value); }
+    public string W          { get => _w;             set => Set(ref _w, value); }
+    public string ZLoad      { get => _zLoad;         set => Set(ref _zLoad, value); }
+    public string ZBond      { get => _zBond;         set => Set(ref _zBond, value); }
+    public string SelectedAxis { get => _selectedAxis; set => Set(ref _selectedAxis, value); }
+    public string JogSpeed   { get => _jogSpeed;      set => Set(ref _jogSpeed, value); }
 
     public ObservableCollection<string> Axes { get; } = new(AxisDefine.InOrder);
     public ObservableCollection<AxisStatusItem> AxisStatuses { get; } = new();
 
     #endregion
-    #region Function
+
+    #region Logic
 
     private void PullFromRecipe()
     {
-        var r = _core.Recipes.Current;
-        if (r == null)
-        {
-            return;
-        }
+        var recipe = _core.Recipes.Current;
+        if (recipe == null) return;
 
-        U = r.GetAxis(AxisDefine.U).ToString("0.###");
-        V = r.GetAxis(AxisDefine.V).ToString("0.###");
-        W = r.GetAxis(AxisDefine.W).ToString("0.###");
-        ZLoad = r.GetAxis(AxisDefine.ZLower).ToString("0.###");
-        ZBond = r.GetAxis(AxisDefine.ZUpper).ToString("0.###");
+        U     = recipe.GetAxis(AxisDefine.U).ToString("0.###");
+        V     = recipe.GetAxis(AxisDefine.V).ToString("0.###");
+        W     = recipe.GetAxis(AxisDefine.W).ToString("0.###");
+        ZLoad = recipe.GetAxis(AxisDefine.ZLower).ToString("0.###");
+        ZBond = recipe.GetAxis(AxisDefine.ZUpper).ToString("0.###");
     }
 
-    private void TeachAxis(string key, double value)
+    private void TeachAxis(string axisKey, double position)
     {
         try
         {
-            var r = _core.Recipes.Current ?? new TcdRecipe();
-            r.SetAxis(key, value);
-            _core.RecipeRepository.Save(r);
-            _core.Recipes.Current = r;
+            var recipe = _core.Recipes.Current ?? new TcdRecipe();
+            recipe.SetAxis(axisKey, position);
+            _core.RecipeRepository.Save(recipe);
+            _core.Recipes.Current = recipe;
             PullFromRecipe();
-            Status = $"Taught {key} = {value:0.###} (saved)";
+            LogStatus = $"Taught {axisKey} = {position:0.###} (saved)";
         }
         catch (Exception ex)
         {
-            Status = ex.Message;
-        }
-        finally
-        {
+            LogStatus = ex.Message;
         }
     }
 
-    private string GetAbsMoveKey(string axis)
+    private void MoveAxis(string axis)
     {
-        switch (axis)
-        {
-            case var _ when axis == AxisDefine.U:
-                return TcdSequenceKeys.Manual_Motor_U_AbsMove;
-            case var _ when axis == AxisDefine.V:
-                return TcdSequenceKeys.Manual_Motor_V_AbsMove;
-            case var _ when axis == AxisDefine.W:
-                return TcdSequenceKeys.Manual_Motor_W_AbsMove;
-            case var _ when axis == AxisDefine.ZLower:
-                return TcdSequenceKeys.Manual_Motor_ZLower_AbsMove;
-            case var _ when axis == AxisDefine.ZUpper:
-                return TcdSequenceKeys.Manual_Motor_ZUpper_AbsMove;
-            default:
-                return string.Empty;
-        }
+        if (!AbsMoveSeqKeys.TryGetValue(axis, out var seqKey)) return;
+        RunOperation(seqKey, axis, "Move");
     }
 
-    private void MoveAxis(string axis, double target)
+    private void StopAxis(string axis)
     {
-        var key = GetAbsMoveKey(axis);
-        _ = RunAsync(async ct =>
-        {
-            if (!string.IsNullOrEmpty(key))
-            {
-                var result = await _core.Sequences.RunAsync(key, _core.Simulation, null, ct).ConfigureAwait(false);
-                var recipeTarget = _core.Recipes.Current?.GetAxis(axis, 0) ?? target;
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = $"{axis} at {recipeTarget:0.###}";
-                }
-                else
-                {
-                    Status = result.Error ?? $"{axis} move failed";
-                }
-            }
-            else
-            {
-                await _core.Motion.AbsMoveAsync(axis, target, ct).ConfigureAwait(false);
-                Status = $"{axis} at {target:0.###}";
-            }
-        });
+        // RunOperation 내부에서 _activeCts 취소 → 진행 중인 Move/Home/Servo 즉시 중단 후 Stop 실행
+        if (!StopSeqKeys.TryGetValue(axis, out var seqKey)) return;
+        RunOperation(seqKey, axis, "Stop");
     }
 
     private void StartJog(int direction)
     {
-        if (!double.TryParse(JogSpeed, out var spd) || spd <= 0)
-        {
-            return;
-        }
+        if (!double.TryParse(JogSpeed, out var speed) || speed <= 0) return;
 
-        var vel = spd * direction;
+        _activeCts?.Cancel();   // Move 중이면 먼저 취소
         _jogCts?.Cancel();
         _jogCts = new CancellationTokenSource();
+
+        var velocity = speed * direction;
         _ = Task.Run(async () =>
         {
             try
             {
-                await _core.Motion.JogAsync(SelectedAxis, vel, _jogCts.Token).ConfigureAwait(false);
+                await _core.Motion.JogAsync(SelectedAxis, velocity, _jogCts.Token).ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                Status = ex.Message;
-            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { LogStatus = ex.Message; }
         });
     }
 
@@ -215,27 +163,14 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
 
     private void StopAllMotors()
     {
+        _activeCts?.Cancel();
+        _jogCts?.Cancel();
         foreach (var axis in Axes)
-        {
             _ = _core.Motion.StopAsync(axis, CancellationToken.None);
-        }
-
-        Status = "All motors stop requested.";
+        LogStatus = "All motors stop requested.";
     }
 
     private double CurrentPosition(string axis) => _core.AxisStateProvider.GetAxisState(axis).Position;
-    private double CurrentU() => CurrentPosition(AxisDefine.U);
-    private double CurrentV() => CurrentPosition(AxisDefine.V);
-    private double CurrentW() => CurrentPosition(AxisDefine.W);
-
-    private static double Parse(string s)
-    {
-        if (double.TryParse(s, out var v))
-        {
-            return v;
-        }
-        return 0;
-    }
 
     private void RefreshAxisStatus()
     {
@@ -243,436 +178,161 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
         {
             foreach (var item in AxisStatuses)
             {
-                var s = _core.AxisStateProvider.GetAxisState(item.AxisName);
-                item.Position = s.Position;
-                item.IsMoving = s.IsMoving;
-                item.IsFault = s.IsFault;
-                item.IsHome = s.IsHome;
+                var axisState  = _core.AxisStateProvider.GetAxisState(item.AxisName);
+                item.Position  = axisState.Position;
+                item.IsMoving  = axisState.IsMoving;
+                item.IsFault   = axisState.IsFault;
+                item.IsHome    = axisState.IsHome;
+                item.IsServoOn = axisState.IsServoOn;
+                item.IsLimitPos = axisState.IsLimitPos;
+                item.IsLimitNeg = axisState.IsLimitNeg;
             }
         }
-        catch
+        catch (Exception ex)
         {
+            LogStatus = $"Status refresh error: {ex.Message}";
         }
     }
 
-    private Task RunAsync(Func<CancellationToken, Task> body)
+    /// <summary>
+    /// 시퀀스를 비동기 실행. 이전 동작이 진행 중이면 취소 후 새 동작 시작.
+    /// 같은 버튼을 다시 누르면 이전 시퀀스가 취소되고 재시작됨.
+    /// </summary>
+    private void RunOperation(string seqKey, string axisLabel, string actionLabel)
     {
-        return Task.Run(async () =>
+        _activeCts?.Cancel();
+        _activeCts?.Dispose();
+        var cts = new CancellationTokenSource();
+        _activeCts = cts;
+
+        _ = Task.Run(async () =>
         {
             try
             {
-                await body(CancellationToken.None).ConfigureAwait(false);
+                var result = await _core.Sequences.RunAsync(seqKey, _core.Simulation, null, cts.Token).ConfigureAwait(false);
+                LogStatus = result.Status == SequenceStatus.Succeeded
+                    ? $"{axisLabel} {actionLabel} completed"
+                    : result.Error ?? $"{axisLabel} {actionLabel} failed";
             }
-            catch (Exception ex)
-            {
-                Status = ex.Message;
-            }
+            catch (OperationCanceledException) { LogStatus = $"{axisLabel} {actionLabel} cancelled"; }
+            catch (Exception ex)               { LogStatus = ex.Message; }
         });
     }
 
     #endregion
-    #region UI Function
 
+    #region Commands
+
+    // ── Move ──────────────────────────────────────────────────────────────────
     private BiRelayCommand? cmd_MoveU;
-    public ICommand Cmd_MoveU
-    {
-        get
-        {
-            return cmd_MoveU ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.U, Parse(U)));
-        }
-    }
+    public ICommand Cmd_MoveU => cmd_MoveU ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.U));
 
     private BiRelayCommand? cmd_MoveV;
-    public ICommand Cmd_MoveV
-    {
-        get
-        {
-            return cmd_MoveV ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.V, Parse(V)));
-        }
-    }
+    public ICommand Cmd_MoveV => cmd_MoveV ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.V));
 
     private BiRelayCommand? cmd_MoveW;
-    public ICommand Cmd_MoveW
-    {
-        get
-        {
-            return cmd_MoveW ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.W, Parse(W)));
-        }
-    }
+    public ICommand Cmd_MoveW => cmd_MoveW ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.W));
 
     private BiRelayCommand? cmd_MoveZLoad;
-    public ICommand Cmd_MoveZLoad
-    {
-        get
-        {
-            return cmd_MoveZLoad ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZLower, Parse(ZLoad)));
-        }
-    }
+    public ICommand Cmd_MoveZLoad => cmd_MoveZLoad ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZLower));
 
     private BiRelayCommand? cmd_MoveZBond;
-    public ICommand Cmd_MoveZBond
-    {
-        get
-        {
-            return cmd_MoveZBond ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZUpper, Parse(ZBond)));
-        }
-    }
+    public ICommand Cmd_MoveZBond => cmd_MoveZBond ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZUpper));
 
+    // ── Teach ─────────────────────────────────────────────────────────────────
     private BiRelayCommand? cmd_TeachU;
-    public ICommand Cmd_TeachU
-    {
-        get
-        {
-            return cmd_TeachU ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.U, CurrentU()));
-        }
-    }
+    public ICommand Cmd_TeachU => cmd_TeachU ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.U, CurrentPosition(AxisDefine.U)));
 
     private BiRelayCommand? cmd_TeachV;
-    public ICommand Cmd_TeachV
-    {
-        get
-        {
-            return cmd_TeachV ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.V, CurrentV()));
-        }
-    }
+    public ICommand Cmd_TeachV => cmd_TeachV ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.V, CurrentPosition(AxisDefine.V)));
 
     private BiRelayCommand? cmd_TeachW;
-    public ICommand Cmd_TeachW
-    {
-        get
-        {
-            return cmd_TeachW ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.W, CurrentW()));
-        }
-    }
+    public ICommand Cmd_TeachW => cmd_TeachW ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.W, CurrentPosition(AxisDefine.W)));
 
     private BiRelayCommand? cmd_TeachZLoad;
-    public ICommand Cmd_TeachZLoad
-    {
-        get
-        {
-            return cmd_TeachZLoad ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZLower, CurrentPosition(AxisDefine.ZLower)));
-        }
-    }
+    public ICommand Cmd_TeachZLoad => cmd_TeachZLoad ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZLower, CurrentPosition(AxisDefine.ZLower)));
 
     private BiRelayCommand? cmd_TeachZBond;
-    public ICommand Cmd_TeachZBond
-    {
-        get
-        {
-            return cmd_TeachZBond ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZUpper, CurrentPosition(AxisDefine.ZUpper)));
-        }
-    }
+    public ICommand Cmd_TeachZBond => cmd_TeachZBond ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZUpper, CurrentPosition(AxisDefine.ZUpper)));
 
-    private BiRelayCommand? cmd_JogPlusDown;
-    public ICommand Cmd_JogPlusDown
-    {
-        get
-        {
-            return cmd_JogPlusDown ??= new BiRelayCommand(_ => StartJog(+1));
-        }
-    }
-
-    private BiRelayCommand? cmd_JogPlusUp;
-    public ICommand Cmd_JogPlusUp
-    {
-        get
-        {
-            return cmd_JogPlusUp ??= new BiRelayCommand(_ => StopJog());
-        }
-    }
-
-    private BiRelayCommand? cmd_JogMinusDown;
-    public ICommand Cmd_JogMinusDown
-    {
-        get
-        {
-            return cmd_JogMinusDown ??= new BiRelayCommand(_ => StartJog(-1));
-        }
-    }
-
-    private BiRelayCommand? cmd_JogMinusUp;
-    public ICommand Cmd_JogMinusUp
-    {
-        get
-        {
-            return cmd_JogMinusUp ??= new BiRelayCommand(_ => StopJog());
-        }
-    }
-
-    private BiRelayCommand? cmd_StopAllMotors;
-    public ICommand Cmd_StopAllMotors
-    {
-        get
-        {
-            return cmd_StopAllMotors ??= new BiRelayCommand(_ => StopAllMotors());
-        }
-    }
-
+    // ── Stop ──────────────────────────────────────────────────────────────────
     private BiRelayCommand? cmd_StopU;
-    public ICommand Cmd_StopU
-    {
-        get
-        {
-            return cmd_StopU ??= new BiRelayCommand(PerformCmd_StopU);
-        }
-    }
-
-    private void PerformCmd_StopU(object? commandParameter)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(TcdSequenceKeys.Manual_Motor_U_Stop, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = "U stop completed";
-                }
-                else
-                {
-                    Status = result.Error ?? "U stop failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
+    public ICommand Cmd_StopU => cmd_StopU ??= new BiRelayCommand(_ => StopAxis(AxisDefine.U));
 
     private BiRelayCommand? cmd_StopV;
-    public ICommand Cmd_StopV
-    {
-        get
-        {
-            return cmd_StopV ??= new BiRelayCommand(PerformCmd_StopV);
-        }
-    }
-
-    private void PerformCmd_StopV(object? commandParameter)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(TcdSequenceKeys.Manual_Motor_V_Stop, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = "V stop completed";
-                }
-                else
-                {
-                    Status = result.Error ?? "V stop failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
-
-    private BiRelayCommand? cmd_StopZBond;
-    public ICommand Cmd_StopZBond
-    {
-        get
-        {
-            return cmd_StopZBond ??= new BiRelayCommand(PerformCmd_StopZBond);
-        }
-    }
-
-    private void PerformCmd_StopZBond(object? commandParameter)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(TcdSequenceKeys.Manual_Motor_ZUpper_Stop, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = "ZUpper stop completed";
-                }
-                else
-                {
-                    Status = result.Error ?? "ZUpper stop failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
-
-    private BiRelayCommand? cmd_StopZLoad;
-    public ICommand Cmd_StopZLoad
-    {
-        get
-        {
-            return cmd_StopZLoad ??= new BiRelayCommand(PerformCmd_StopZLoad);
-        }
-    }
-
-    private void PerformCmd_StopZLoad(object? commandParameter)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(TcdSequenceKeys.Manual_Motor_ZLower_Stop, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = "ZLower stop completed";
-                }
-                else
-                {
-                    Status = result.Error ?? "ZLower stop failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
+    public ICommand Cmd_StopV => cmd_StopV ??= new BiRelayCommand(_ => StopAxis(AxisDefine.V));
 
     private BiRelayCommand? cmd_StopW;
-    public ICommand Cmd_StopW
-    {
-        get
-        {
-            return cmd_StopW ??= new BiRelayCommand(PerformCmd_StopW);
-        }
-    }
+    public ICommand Cmd_StopW => cmd_StopW ??= new BiRelayCommand(_ => StopAxis(AxisDefine.W));
 
-    private void PerformCmd_StopW(object? commandParameter)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(TcdSequenceKeys.Manual_Motor_W_Stop, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = "W stop completed";
-                }
-                else
-                {
-                    Status = result.Error ?? "W stop failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
+    private BiRelayCommand? cmd_StopZLoad;
+    public ICommand Cmd_StopZLoad => cmd_StopZLoad ??= new BiRelayCommand(_ => StopAxis(AxisDefine.ZLower));
 
-    // -------- U: Servo On / Servo Off / Home --------
+    private BiRelayCommand? cmd_StopZBond;
+    public ICommand Cmd_StopZBond => cmd_StopZBond ??= new BiRelayCommand(_ => StopAxis(AxisDefine.ZUpper));
+
+    // ── Servo On / Servo Off / Home ───────────────────────────────────────────
     private BiRelayCommand? cmd_ServoOnU;
-    public ICommand Cmd_ServoOnU { get { return cmd_ServoOnU ??= new BiRelayCommand(PerformCmd_ServoOnU); } }
-    private void PerformCmd_ServoOnU(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_U_ServoOn, "U", "Servo On"); }
+    public ICommand Cmd_ServoOnU => cmd_ServoOnU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOn, "U", "Servo On"));
 
     private BiRelayCommand? cmd_ServoOffU;
-    public ICommand Cmd_ServoOffU { get { return cmd_ServoOffU ??= new BiRelayCommand(PerformCmd_ServoOffU); } }
-    private void PerformCmd_ServoOffU(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_U_ServoOff, "U", "Servo Off"); }
+    public ICommand Cmd_ServoOffU => cmd_ServoOffU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOff, "U", "Servo Off"));
 
     private BiRelayCommand? cmd_HomeU;
-    public ICommand Cmd_HomeU { get { return cmd_HomeU ??= new BiRelayCommand(PerformCmd_HomeU); } }
-    private void PerformCmd_HomeU(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_U_Home, "U", "Home"); }
+    public ICommand Cmd_HomeU => cmd_HomeU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_Home, "U", "Home"));
 
-    // -------- V --------
     private BiRelayCommand? cmd_ServoOnV;
-    public ICommand Cmd_ServoOnV { get { return cmd_ServoOnV ??= new BiRelayCommand(PerformCmd_ServoOnV); } }
-    private void PerformCmd_ServoOnV(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_V_ServoOn, "V", "Servo On"); }
+    public ICommand Cmd_ServoOnV => cmd_ServoOnV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOn, "V", "Servo On"));
 
     private BiRelayCommand? cmd_ServoOffV;
-    public ICommand Cmd_ServoOffV { get { return cmd_ServoOffV ??= new BiRelayCommand(PerformCmd_ServoOffV); } }
-    private void PerformCmd_ServoOffV(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_V_ServoOff, "V", "Servo Off"); }
+    public ICommand Cmd_ServoOffV => cmd_ServoOffV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOff, "V", "Servo Off"));
 
     private BiRelayCommand? cmd_HomeV;
-    public ICommand Cmd_HomeV { get { return cmd_HomeV ??= new BiRelayCommand(PerformCmd_HomeV); } }
-    private void PerformCmd_HomeV(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_V_Home, "V", "Home"); }
+    public ICommand Cmd_HomeV => cmd_HomeV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_Home, "V", "Home"));
 
-    // -------- W --------
     private BiRelayCommand? cmd_ServoOnW;
-    public ICommand Cmd_ServoOnW { get { return cmd_ServoOnW ??= new BiRelayCommand(PerformCmd_ServoOnW); } }
-    private void PerformCmd_ServoOnW(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_W_ServoOn, "W", "Servo On"); }
+    public ICommand Cmd_ServoOnW => cmd_ServoOnW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOn, "W", "Servo On"));
 
     private BiRelayCommand? cmd_ServoOffW;
-    public ICommand Cmd_ServoOffW { get { return cmd_ServoOffW ??= new BiRelayCommand(PerformCmd_ServoOffW); } }
-    private void PerformCmd_ServoOffW(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_W_ServoOff, "W", "Servo Off"); }
+    public ICommand Cmd_ServoOffW => cmd_ServoOffW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOff, "W", "Servo Off"));
 
     private BiRelayCommand? cmd_HomeW;
-    public ICommand Cmd_HomeW { get { return cmd_HomeW ??= new BiRelayCommand(PerformCmd_HomeW); } }
-    private void PerformCmd_HomeW(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_W_Home, "W", "Home"); }
+    public ICommand Cmd_HomeW => cmd_HomeW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_Home, "W", "Home"));
 
-    // -------- Z Load --------
     private BiRelayCommand? cmd_ServoOnZLoad;
-    public ICommand Cmd_ServoOnZLoad { get { return cmd_ServoOnZLoad ??= new BiRelayCommand(PerformCmd_ServoOnZLoad); } }
-    private void PerformCmd_ServoOnZLoad(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZLower_ServoOn, "ZLoad", "Servo On"); }
+    public ICommand Cmd_ServoOnZLoad => cmd_ServoOnZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOn, "ZLoad", "Servo On"));
 
     private BiRelayCommand? cmd_ServoOffZLoad;
-    public ICommand Cmd_ServoOffZLoad { get { return cmd_ServoOffZLoad ??= new BiRelayCommand(PerformCmd_ServoOffZLoad); } }
-    private void PerformCmd_ServoOffZLoad(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZLower_ServoOff, "ZLoad", "Servo Off"); }
+    public ICommand Cmd_ServoOffZLoad => cmd_ServoOffZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOff, "ZLoad", "Servo Off"));
 
     private BiRelayCommand? cmd_HomeZLoad;
-    public ICommand Cmd_HomeZLoad { get { return cmd_HomeZLoad ??= new BiRelayCommand(PerformCmd_HomeZLoad); } }
-    private void PerformCmd_HomeZLoad(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZLower_Home, "ZLoad", "Home"); }
+    public ICommand Cmd_HomeZLoad => cmd_HomeZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_Home, "ZLoad", "Home"));
 
-    // -------- Z Bond --------
     private BiRelayCommand? cmd_ServoOnZBond;
-    public ICommand Cmd_ServoOnZBond { get { return cmd_ServoOnZBond ??= new BiRelayCommand(PerformCmd_ServoOnZBond); } }
-    private void PerformCmd_ServoOnZBond(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOn, "ZBond", "Servo On"); }
+    public ICommand Cmd_ServoOnZBond => cmd_ServoOnZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOn, "ZBond", "Servo On"));
 
     private BiRelayCommand? cmd_ServoOffZBond;
-    public ICommand Cmd_ServoOffZBond { get { return cmd_ServoOffZBond ??= new BiRelayCommand(PerformCmd_ServoOffZBond); } }
-    private void PerformCmd_ServoOffZBond(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOff, "ZBond", "Servo Off"); }
+    public ICommand Cmd_ServoOffZBond => cmd_ServoOffZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOff, "ZBond", "Servo Off"));
 
     private BiRelayCommand? cmd_HomeZBond;
-    public ICommand Cmd_HomeZBond { get { return cmd_HomeZBond ??= new BiRelayCommand(PerformCmd_HomeZBond); } }
-    private void PerformCmd_HomeZBond(object? _) { RunAxisSequence(TcdSequenceKeys.Manual_Motor_ZUpper_Home, "ZBond", "Home"); }
+    public ICommand Cmd_HomeZBond => cmd_HomeZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_Home, "ZBond", "Home"));
 
-    private void RunAxisSequence(string key, string axisLabel, string actionLabel)
-    {
-        try
-        {
-            _ = RunAsync(async ct =>
-            {
-                var result = await _core.Sequences.RunAsync(key, _core.Simulation, null, ct).ConfigureAwait(false);
-                if (result.Status == Tcd.Sequence.SequenceStatus.Succeeded)
-                {
-                    Status = $"{axisLabel} {actionLabel} completed";
-                }
-                else
-                {
-                    Status = result.Error ?? $"{axisLabel} {actionLabel} failed";
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Status = ex.Message;
-        }
-        finally
-        {
-        }
-    }
+    // ── Jog ───────────────────────────────────────────────────────────────────
+    private BiRelayCommand? cmd_JogPlusDown;
+    public ICommand Cmd_JogPlusDown => cmd_JogPlusDown ??= new BiRelayCommand(_ => StartJog(+1));
+
+    private BiRelayCommand? cmd_JogPlusUp;
+    public ICommand Cmd_JogPlusUp => cmd_JogPlusUp ??= new BiRelayCommand(_ => StopJog());
+
+    private BiRelayCommand? cmd_JogMinusDown;
+    public ICommand Cmd_JogMinusDown => cmd_JogMinusDown ??= new BiRelayCommand(_ => StartJog(-1));
+
+    private BiRelayCommand? cmd_JogMinusUp;
+    public ICommand Cmd_JogMinusUp => cmd_JogMinusUp ??= new BiRelayCommand(_ => StopJog());
+
+    // ── Stop All ──────────────────────────────────────────────────────────────
+    private BiRelayCommand? cmd_StopAllMotors;
+    public ICommand Cmd_StopAllMotors => cmd_StopAllMotors ??= new BiRelayCommand(_ => StopAllMotors());
 
     #endregion
 
@@ -680,39 +340,20 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     {
         private string _axisName = "";
         private double _position;
+        private bool _isServoOn;
         private bool _isHome;
         private bool _isMoving;
         private bool _isFault;
+        private bool _isLimitPos;
+        private bool _isLimitNeg;
 
-        public string AxisName
-        {
-            get { return _axisName; }
-            set { Set(ref _axisName, value); }
-        }
-
-        public double Position
-        {
-            get { return _position; }
-            set { Set(ref _position, value); }
-        }
-
-        public bool IsHome
-        {
-            get { return _isHome; }
-            set { Set(ref _isHome, value); }
-        }
-
-        public bool IsMoving
-        {
-            get { return _isMoving; }
-            set { Set(ref _isMoving, value); }
-        }
-
-        public bool IsFault
-        {
-            get { return _isFault; }
-            set { Set(ref _isFault, value); }
-        }
+        public string AxisName  { get => _axisName;   set => Set(ref _axisName, value); }
+        public double Position  { get => _position;   set => Set(ref _position, value); }
+        public bool IsServoOn   { get => _isServoOn;  set => Set(ref _isServoOn, value); }
+        public bool IsHome      { get => _isHome;     set => Set(ref _isHome, value); }
+        public bool IsMoving    { get => _isMoving;   set => Set(ref _isMoving, value); }
+        public bool IsFault     { get => _isFault;    set => Set(ref _isFault, value); }
+        public bool IsLimitPos  { get => _isLimitPos; set => Set(ref _isLimitPos, value); }
+        public bool IsLimitNeg  { get => _isLimitNeg; set => Set(ref _isLimitNeg, value); }
     }
 }
-

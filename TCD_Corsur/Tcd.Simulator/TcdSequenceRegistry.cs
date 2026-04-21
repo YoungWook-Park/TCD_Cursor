@@ -18,9 +18,6 @@ namespace Tcd.Simulator
             var mgr = new SequenceManager();
 
             RegisterManual(sim, mgr, motion);
-            RegisterSemiAuto(sim, mgr);
-            RegisterAuto(sim, mgr);
-
             return mgr;
         }
 
@@ -112,113 +109,6 @@ namespace Tcd.Simulator
                     var product = new Material(Guid.NewGuid(), MaterialKind.BondedProduct, MaterialState.Completed, MaterialLocation.LowerChamber);
                     sim.Materials.Place(product, MaterialLocation.LowerChamber);
                     return Task.CompletedTask;
-                }));
-        }
-
-        private static void RegisterSemiAuto(TcdSimulation sim, SequenceManager mgr)
-        {
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.SEMI_LoadUpperFilm,
-                "SEMI: Load upper film to upper chamber",
-                async (ctx, p, ct) =>
-                {
-                    if (sim.Materials.Get(MaterialLocation.UpperChamber) != null)
-                        throw new InvalidOperationException("Upper chamber is not empty.");
-
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_Stage, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_Stage, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Pick_Stage1, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_UpperLoad, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_UpperLoad, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Place_UpperChamber, ctx, null, ct).ConfigureAwait(false);
-                }));
-
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.SEMI_LoadLowerFilm,
-                "SEMI: Load lower film to lower chamber",
-                async (ctx, p, ct) =>
-                {
-                    if (sim.Materials.Get(MaterialLocation.LowerChamber) != null)
-                        throw new InvalidOperationException("Lower chamber is not empty.");
-
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_Stage, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_Stage, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Pick_Stage2, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_LowerLoad, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_LowerLoad, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Place_LowerChamber, ctx, null, ct).ConfigureAwait(false);
-                }));
-
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.SEMI_AlignUVW,
-                "SEMI: Align UVW (fork/join)",
-                async (ctx, p, ct) =>
-                {
-                    // 인터락: UVW 얼라인 전 로봇이 홈 위치에 있어야 함
-                    if (sim.Robot.CurrentPosition != RobotPosition.Home)
-                    {
-                        ctx.Alarms.Raise(new Alarm("ROBOT_NOT_AT_HOME", "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, ctx.Time.Now));
-                        throw new InvalidOperationException("Robot must be at home before UVW align.");
-                    }
-
-                    // fork: command all three simultaneously
-                    await Task.WhenAll(
-                        mgr.RunAsync(TcdSequenceKeys.AxisU_Command_Zero, ctx, null, ct),
-                        mgr.RunAsync(TcdSequenceKeys.AxisV_Command_Zero, ctx, null, ct),
-                        mgr.RunAsync(TcdSequenceKeys.AxisW_Command_Zero, ctx, null, ct)
-                    ).ConfigureAwait(false);
-
-                    // join: wait all three in-position
-                    await Task.WhenAll(
-                        mgr.RunAsync(TcdSequenceKeys.AxisU_Wait_Zero, ctx, TimeSpan.FromSeconds(2), ct),
-                        mgr.RunAsync(TcdSequenceKeys.AxisV_Wait_Zero, ctx, TimeSpan.FromSeconds(2), ct),
-                        mgr.RunAsync(TcdSequenceKeys.AxisW_Wait_Zero, ctx, TimeSpan.FromSeconds(2), ct)
-                    ).ConfigureAwait(false);
-                }));
-
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.SEMI_Bond,
-                "SEMI: Bond (Z up, dwell, Z down, create product)",
-                async (ctx, p, ct) =>
-                {
-                    await mgr.RunAsync(TcdSequenceKeys.AxisZ_Command_Bond, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.AxisZ_Wait_Bond, ctx, TimeSpan.FromSeconds(3), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Delay_Bond_Dwell1s, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.AxisZ_Command_Load, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.AxisZ_Wait_Load, ctx, TimeSpan.FromSeconds(3), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Material_Create_Bonded, ctx, null, ct).ConfigureAwait(false);
-                }));
-
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.SEMI_UnloadProductToStage2,
-                "SEMI: Unload product to stage2",
-                async (ctx, p, ct) =>
-                {
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_LowerLoad, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_LowerLoad, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Pick_LowerChamber, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_Stage, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_Stage, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Place_Stage2, ctx, null, ct).ConfigureAwait(false);
-                }));
-        }
-
-        private static void RegisterAuto(TcdSimulation sim, SequenceManager mgr)
-        {
-            mgr.Register(new DelegateSequence(
-                TcdSequenceKeys.AUTO_Run,
-                "AUTO: Stage -> Load -> Align -> Bond -> Unload",
-                async (ctx, p, ct) =>
-                {
-                    await mgr.RunAsync(TcdSequenceKeys.Plc_Wait_StageLoaded, ctx, TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.SEMI_LoadUpperFilm, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.SEMI_LoadLowerFilm, ctx, null, ct).ConfigureAwait(false);
-                    // 로봇을 초기(홈) 위치로 이동 후 대기
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Move_Home, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.Robot_Wait_Home, ctx, TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.SEMI_AlignUVW, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.SEMI_Bond, ctx, null, ct).ConfigureAwait(false);
-                    await mgr.RunAsync(TcdSequenceKeys.SEMI_UnloadProductToStage2, ctx, null, ct).ConfigureAwait(false);
                 }));
         }
 

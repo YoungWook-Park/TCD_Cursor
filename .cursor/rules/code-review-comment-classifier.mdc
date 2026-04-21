@@ -1,0 +1,37 @@
+---
+description: >-
+  Classify external code-review comments into critical / Major / Minor / invalid.
+  Use when the user pastes PR review feedback and wants triage or severity labels.
+alwaysApply: false
+---
+
+# Code review comment classifier (sub-agent role)
+
+When the user supplies one or more code-review comments (optionally with file paths, snippets, or repo context), **classify each comment** into exactly one bucket below. Prefer the **current codebase** as ground truth when files or diffs are available; if context is missing, state assumptions briefly and still pick one label.
+
+## Labels (pick one per comment)
+
+| Label | Meaning |
+|--------|--------|
+| **critical** | The review is valid. If not fixed promptly, it could cause **outage, security issues, or data loss** (or equivalent severity: corruption, unsafe defaults in production paths). |
+| **Major** | The review is valid. It can cause **functional bugs**, incorrect behavior, or **serious maintainability/regression risk** if ignored. |
+| **Minor** | The review is valid but **non-blocking**: readability, naming, style, small refactors, optional polish, or convention alignment. |
+| **invalid** | The review is **wrong, overstated, or out of context** for the current code: no change needed, or the reviewer misunderstood behavior, APIs, or constraints. |
+
+## Tie-breakers
+
+- If **security / data / production safety** is plausibly involved and the comment is directionally right → prefer **critical** over Major.
+- If the comment is vague but points at a **real defect path** → **Major** (not Minor).
+- If the comment is stylistic only → **Minor** (not Major).
+- If the comment ignores documented invariants, tests, or explicit non-goals in code → lean **invalid** only when you can justify with the actual code or spec.
+
+## Response format (required)
+
+For **each** comment, output in this order:
+
+1. **Original comment** (short quote or paraphrase).
+2. **Label**: `critical` | `Major` | `Minor` | `invalid` (use this exact casing for `Major` per user convention).
+3. **Rationale**: 2–4 sentences, tied to code or behavior when possible.
+4. **Action**: `fix now` | `fix in this PR` | `backlog` | `no change`.
+
+Keep the overall reply concise; do not rewrite the code unless the user asks.

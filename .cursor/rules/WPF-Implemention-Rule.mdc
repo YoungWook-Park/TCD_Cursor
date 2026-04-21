@@ -1,0 +1,50 @@
+---
+description: 
+alwaysApply: true
+---
+
+# TCD C# Project Conventions
+
+When adding or refactoring **sequence** or **ViewModel (UI)** code in this project, follow these conventions.
+
+## Sequence classes
+
+- **Parameter storage**: Do not pass the `ExecuteAsync(..., object parameter, ...)` argument through method parameters. Store it in a **class-level field** at the start of execution and use that field inside the class.
+  - In `#region Variables`: define a property or field, e.g. `public object Param { get; set; }`.
+  - At the beginning of `ExecuteAsync`: set `Param = parameter`. Use `Param` (or the chosen name) in helpers within the same class only.
+- **Regions**: Use exactly two regions:
+  - `#region Variables`: constants (e.g. axis name), `Key`, `DisplayName`, and the parameter field (`Param`).
+  - `#region Function`: `ExecuteAsync` and all private static/instance helper methods.
+
+## ViewModel (UI) classes
+
+- **Regions** (in this order):
+  1. `#region Variable` – private fields only (backing fields, core reference, timers, etc.).
+  2. `#region Constructor` – constructor only.
+  3. `#region Property` – all public properties (including command exposure if it is a simple property).
+  4. `#region Function` – non-command methods (e.g. load from recipe, refresh, run async helpers). No UI command handlers here.
+  5. `#region UI Function` – command pattern: private command field, public `ICommand` property, and a `PerformCmd_XXX(object? commandParameter)` method that contains the logic. Use try/catch/finally in command handlers; set status or log as appropriate.
+- **Command pattern**: Prefer a single pattern for commands:
+  - Private field: e.g. `private BiRelayCommand? cmd_LoadStageCommand;`
+  - Public property: e.g. `public ICommand Cmd_LoadStageCommand => cmd_LoadStageCommand ??= new BiRelayCommand(PerformCmd_LoadStage, _ => !IsRunning);`
+  - Handler: `private void PerformCmd_LoadStage(object? commandParameter) { try { ... } catch (Exception ex) { ... } finally { } }`
+- **Naming**: Command methods that are invoked from UI are named `PerformCmd_<Name>` and take one argument (e.g. `object? commandParameter`).
+
+## General
+
+- **Sequence parameter**: Never rely on a global “current sequence parameter” on MainCore for sequence logic. Each sequence stores its own parameter in its class (e.g. `Param`) and uses it only within that class.
+- **LogContext**: When starting a sequence, set `MainCore.Instance.LogContext` with at least `SequenceKey`, `RunId = Guid.NewGuid()`, and `AxisName` (if applicable). Use this for logging; do not pass LogContext through every method—read from MainCore where needed.
+- **Constants**: Use `const` or static readonly values from a central place (e.g. `Define.cs` / `SpiiDefine`) for device/variable names and default motion values instead of hard-coded strings or numbers in sequence or device code.
+
+
+Folder structure
+
+Organize code by top-level project areas:
+View: UI and ViewModels. Use subfolders by feature, e.g. View/Manual, View/Recipe, View/Teach.
+Sequence: All sequence implementations. Use subfolders by level/feature, e.g. Sequence/Manual. Place each sequence in a file under the appropriate folder (e.g. Sequence/Manual/Manual_Axis1_V_Stop.cs).
+Keep View and Sequence as separate top-level groupings; under each, use subfolders that match the feature or level (Manual, Recipe, Teach, etc.).
+Sequence naming
+
+Give sequence classes and files a prefix that indicates the sequence level or domain, consistent with the folder structure.
+Examples: Manual_Axis0_U_AbsMove, Manual_Axis1_V_Stop, Manual_Axis0_U_Stop → level prefix Manual_; auto/recipe/teach sequences would use their own prefixes (e.g. Auto_, Recipe_, Teach_).
+Prefer this pattern: {LevelOrDomain}_{Feature}_{Detail} (e.g. Manual_Axis1_V_Stop = Manual → Axis1 → V → Stop).

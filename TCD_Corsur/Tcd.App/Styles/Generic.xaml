@@ -8,6 +8,7 @@
         <ResourceDictionary Source="Controls/GroupBox.xaml"/>
         <ResourceDictionary Source="Controls/TextBox.xaml"/>
         <ResourceDictionary Source="Controls/TabControl.xaml"/>
+        <ResourceDictionary Source="Controls/ComboBox.xaml"/>
         <ResourceDictionary Source="Controls/DataGrid.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

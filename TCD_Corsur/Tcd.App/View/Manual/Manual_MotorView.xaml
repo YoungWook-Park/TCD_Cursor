@@ -6,12 +6,24 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="450" d:DesignWidth="900"
              d:DataContext="{d:DesignInstance Type=local:Manual_MotorViewModel}">
   <UserControl.Resources>
-    <SolidColorBrush x:Key="MotorStateFaultBrush" Color="#44CC2222"/>
-    <SolidColorBrush x:Key="MotorStateMovingBrush" Color="#44CC8800"/>
-    <SolidColorBrush x:Key="MotorStateHomeBrush" Color="#44228822"/>
+    <!-- 셀 상태 색상 (배경 틴트 + 텍스트) -->
+    <Color x:Key="CellGreenBg">#2522AA44</Color>
+    <Color x:Key="CellGreenFg">#FF44CC66</Color>
+    <Color x:Key="CellOrangeBg">#33CC8800</Color>
+    <Color x:Key="CellOrangeFg">#FFCC9900</Color>
+    <Color x:Key="CellRedBg">#33CC2222</Color>
+    <Color x:Key="CellRedFg">#FFEE4444</Color>
+    <Color x:Key="CellOffFg">#FF555555</Color>
+    <SolidColorBrush x:Key="CellGreenBgBrush" Color="{StaticResource CellGreenBg}"/>
+    <SolidColorBrush x:Key="CellGreenFgBrush" Color="{StaticResource CellGreenFg}"/>
+    <SolidColorBrush x:Key="CellOrangeBgBrush" Color="{StaticResource CellOrangeBg}"/>
+    <SolidColorBrush x:Key="CellOrangeFgBrush" Color="{StaticResource CellOrangeFg}"/>
+    <SolidColorBrush x:Key="CellRedBgBrush" Color="{StaticResource CellRedBg}"/>
+    <SolidColorBrush x:Key="CellRedFgBrush" Color="{StaticResource CellRedFg}"/>
+    <SolidColorBrush x:Key="CellOffFgBrush" Color="{StaticResource CellOffFg}"/>
   </UserControl.Resources>
   <Grid Margin="8">
     <Grid.RowDefinitions>
@@ -122,37 +134,209 @@
       </Grid>
     </GroupBox>
 
-    <!-- Motor status grid (WPF DataGrid): row background by state for readability -->
+    <!-- Motor status grid: 개별 셀별 색상 표시 -->
     <GroupBox Grid.Row="1" Header="Motor Status">
-      <Grid Margin="10">
-        <DataGrid ItemsSource="{Binding AxisStatuses}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  RowHeight="28">
-          <DataGrid.RowStyle>
-            <Style TargetType="DataGridRow">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding IsFault}" Value="True">
-                  <Setter Property="Background" Value="{StaticResource MotorStateFaultBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsMoving}" Value="True">
-                  <Setter Property="Background" Value="{StaticResource MotorStateMovingBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsHome}" Value="True">
-                  <Setter Property="Background" Value="{StaticResource MotorStateHomeBrush}"/>
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </DataGrid.RowStyle>
-          <DataGrid.Columns>
-            <DataGridTextColumn Header="Axis" Binding="{Binding AxisName}" Width="*" />
-            <DataGridTextColumn Header="Position" Binding="{Binding Position, StringFormat=N3}" Width="*" />
-            <DataGridTextColumn Header="Is Home" Binding="{Binding IsHome}" Width="*" />
-            <DataGridTextColumn Header="Is Moving" Binding="{Binding IsMoving}" Width="*" />
-            <DataGridTextColumn Header="Fault" Binding="{Binding IsFault}" Width="*" />
-          </DataGrid.Columns>
-        </DataGrid>
-      </Grid>
+      <DataGrid ItemsSource="{Binding AxisStatuses}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                RowHeight="26"
+                Margin="4">
+        <DataGrid.Columns>
+
+          <!-- Axis 이름 -->
+          <DataGridTextColumn Header="Axis" Binding="{Binding AxisName}" Width="70"/>
+
+          <!-- Position -->
+          <DataGridTextColumn Header="Position" Binding="{Binding Position, StringFormat=N3}" Width="90"/>
+
+          <!-- Servo On: 초록=ON, 회색=OFF -->
+          <DataGridTemplateColumn Header="Servo" Width="60">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsServoOn}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="OFF"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsServoOn}" Value="True">
+                          <Setter Property="Text" Value="ON"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <!-- Home: 초록=HOME, 회색=- -->
+          <DataGridTemplateColumn Header="Home" Width="60">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsHome}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="—"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsHome}" Value="True">
+                          <Setter Property="Text" Value="HOME"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <!-- Moving: 주황=MOVING, 회색=- -->
+          <DataGridTemplateColumn Header="Moving" Width="70">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsMoving}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellOrangeBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="—"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMoving}" Value="True">
+                          <Setter Property="Text" Value="MOVING"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellOrangeFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <!-- Fault: 빨강=FAULT, 회색=- -->
+          <DataGridTemplateColumn Header="Fault" Width="60">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsFault}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="—"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFault}" Value="True">
+                          <Setter Property="Text" Value="FAULT"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <!-- +Limit: 빨강=+LMT, 회색=- -->
+          <DataGridTemplateColumn Header="+Limit" Width="60">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="—"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
+                          <Setter Property="Text" Value="+LMT"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <!-- -Limit: 빨강=-LMT, 회색=- -->
+          <DataGridTemplateColumn Header="-Limit" Width="60">
+            <DataGridTemplateColumn.CellStyle>
+              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTemplateColumn.CellStyle>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="—"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
+                          <Setter Property="Text" Value="-LMT"/>
+                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+        </DataGrid.Columns>
+      </DataGrid>
     </GroupBox>
 
     <!-- Stop button -->

@@ -2,43 +2,40 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.Core;
-using Tcd.Devices;
 
 namespace Tcd.Simulator
 {
-    public sealed class SimLowerChamberMotion : ILowerChamberMotion
+    /// <summary>시뮬레이터 하부 챔버 모션 (U/V/W/Z 4축). ILowerChamberMotion 인터페이스 없이 직접 구현.</summary>
+    public sealed class SimLowerChamberMotion
     {
-        private readonly ITimeProvider _time;
-
-        // Simple, configurable target positions (simulation)
         private readonly double _bondZ;
         private readonly double _loadZ;
 
         public SimLowerChamberMotion(ITimeProvider time, double bondZ = 100, double loadZ = 0)
         {
-            _time = time ?? throw new ArgumentNullException(nameof(time));
+            if (time == null) throw new ArgumentNullException(nameof(time));
             _bondZ = bondZ;
             _loadZ = loadZ;
 
-            U = new SimAxis("U", _time, unitsPerSecond: 80);
-            V = new SimAxis("V", _time, unitsPerSecond: 80);
-            W = new SimAxis("W", _time, unitsPerSecond: 80);
-            Z = new SimAxis("Z", _time, unitsPerSecond: 60);
+            U = new SimAxis("U", time, unitsPerSecond: 80);
+            V = new SimAxis("V", time, unitsPerSecond: 80);
+            W = new SimAxis("W", time, unitsPerSecond: 80);
+            Z = new SimAxis("Z", time, unitsPerSecond: 60);
         }
 
-        public IAxis U { get; }
-        public IAxis V { get; }
-        public IAxis W { get; }
-        public IAxis Z { get; }
+        public SimAxis U { get; }
+        public SimAxis V { get; }
+        public SimAxis W { get; }
+        public SimAxis Z { get; }
 
-        public async Task CommandMoveToBondingPositionAsync(CancellationToken cancellationToken)
+        public Task CommandMoveToBondingPositionAsync(CancellationToken cancellationToken)
         {
-            await Task.WhenAll(
+            return Task.WhenAll(
                 U.CommandMoveToAsync(0, cancellationToken),
                 V.CommandMoveToAsync(0, cancellationToken),
                 W.CommandMoveToAsync(0, cancellationToken),
                 Z.CommandMoveToAsync(_bondZ, cancellationToken)
-            ).ConfigureAwait(false);
+            );
         }
 
         public Task WaitForBondingPositionAsync(TimeSpan timeout, CancellationToken cancellationToken)
@@ -64,4 +61,3 @@ namespace Tcd.Simulator
         }
     }
 }
-
