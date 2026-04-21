@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Tcd.App.Define;
 using Tcd.Devices;
 
 namespace Tcd.App.Core;
@@ -38,6 +39,29 @@ public sealed class TcdRecipe
         ["UpperLoad"] = RobotPosition.UpperChamberLoad,
         ["LowerLoad"] = RobotPosition.LowerChamberLoad,
     };
+
+    /// <summary>
+    /// 포지션별 로봇 이동 속도 (1-100 %).
+    /// 키는 RobotPositionName 상수. 사용자가 레시피에서 자유롭게 변경 가능.
+    /// </summary>
+    public Dictionary<string, int> RobotVelocity { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase)
+    {
+        [RobotPositionName.Home]                    = RobotVelocityDefault.Home,
+        [RobotPositionName.Ready]                   = RobotVelocityDefault.Ready,
+        [RobotPositionName.S1_PickupWait]           = RobotVelocityDefault.S1_PickupWait,
+        [RobotPositionName.S1_Pick]                 = RobotVelocityDefault.S1_Pick,
+        [RobotPositionName.S2_PickupWait]           = RobotVelocityDefault.S2_PickupWait,
+        [RobotPositionName.S2_Pick]                 = RobotVelocityDefault.S2_Pick,
+        [RobotPositionName.UpperChamber_PickupWait] = RobotVelocityDefault.UpperChamber_PickupWait,
+        [RobotPositionName.UpperChamber_Pick]       = RobotVelocityDefault.UpperChamber_Pick,
+        [RobotPositionName.LowerChamber_PickupWait] = RobotVelocityDefault.LowerChamber_PickupWait,
+        [RobotPositionName.LowerChamber_Pick]       = RobotVelocityDefault.LowerChamber_Pick,
+        [RobotPositionName.Peel]                    = RobotVelocityDefault.Peel,
+    };
+
+    public int GetRobotVelocity(string positionName) =>
+        RobotVelocity.TryGetValue(positionName, out var v) ? v : 50;
 
     /// <summary>모터 기본 속도. 레시피에서 설정, 시퀀스 Init 또는 모션 서비스에서 참조.</summary>
     public double MotionVelocity { get; set; } = 100;

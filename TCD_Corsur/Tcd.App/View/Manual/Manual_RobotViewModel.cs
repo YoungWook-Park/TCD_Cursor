@@ -143,6 +143,19 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     #region Move Helper
 
     /// <summary>
+    /// 현재 레시피에서 포지션 속도를 읽어 반환.
+    /// 레시피 미설정 시 RobotVelocityDefault 폴백.
+    /// </summary>
+    private int GetVelocity(RobotPosition pos)
+    {
+        var key    = RobotPositionName.FromPosition(pos);
+        var recipe = _core.Recipes.Current;
+        if (recipe?.RobotVelocity?.TryGetValue(key, out var v) == true)
+            return Math.Clamp(v, 1, 100);
+        return RobotVelocityDefault.ForPosition(pos);
+    }
+
+    /// <summary>
     /// SetVelocity → Move → 완료 대기 공통 처리.
     /// _activeCts 로 이전 대기 취소 후 새 작업 시작.
     /// </summary>
@@ -260,14 +273,16 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveHome => cmd_MoveHome ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.Home,
-                             RobotVelocity.Home, RobotPositionName.Home),
+                             GetVelocity(RobotPosition.Home),
+                             RobotPositionName.Home),
             _ => IsConnected && !IsRunning);
 
     private RelayCommand? cmd_MoveReady;
     public ICommand Cmd_MoveReady => cmd_MoveReady ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.Ready,
-                             RobotVelocity.Ready, RobotPositionName.Ready),
+                             GetVelocity(RobotPosition.Ready),
+                             RobotPositionName.Ready),
             _ => IsConnected && !IsRunning);
 
     // ── S1 (CGO / 상부 필름) ───────────────────────────────────────────────
@@ -275,14 +290,16 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveS1Wait => cmd_MoveS1Wait ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.S1_PickupWait,
-                             RobotVelocity.S1_PickupWait, RobotPositionName.S1_PickupWait),
+                             GetVelocity(RobotPosition.S1_PickupWait),
+                             RobotPositionName.S1_PickupWait),
             _ => IsConnected && !IsRunning);
 
     private RelayCommand? cmd_MoveS1Pick;
     public ICommand Cmd_MoveS1Pick => cmd_MoveS1Pick ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.S1_Pick,
-                             RobotVelocity.S1_Pick, RobotPositionName.S1_Pick),
+                             GetVelocity(RobotPosition.S1_Pick),
+                             RobotPositionName.S1_Pick),
             _ => IsConnected && !IsRunning);
 
     // ── S2 / LowStage (OCA / 하부 필름) ───────────────────────────────────
@@ -290,14 +307,16 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveS2Wait => cmd_MoveS2Wait ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.S2_PickupWait,
-                             RobotVelocity.S2_PickupWait, RobotPositionName.S2_PickupWait),
+                             GetVelocity(RobotPosition.S2_PickupWait),
+                             RobotPositionName.S2_PickupWait),
             _ => IsConnected && !IsRunning);
 
     private RelayCommand? cmd_MoveS2Pick;
     public ICommand Cmd_MoveS2Pick => cmd_MoveS2Pick ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.S2_Pick,
-                             RobotVelocity.S2_Pick, RobotPositionName.S2_Pick),
+                             GetVelocity(RobotPosition.S2_Pick),
+                             RobotPositionName.S2_Pick),
             _ => IsConnected && !IsRunning);
 
     // ── Upper Chamber ──────────────────────────────────────────────────────
@@ -305,7 +324,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveUcWait => cmd_MoveUcWait ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.UpperChamber_PickupWait,
-                             RobotVelocity.UpperChamber_PickupWait,
+                             GetVelocity(RobotPosition.UpperChamber_PickupWait),
                              RobotPositionName.UpperChamber_PickupWait),
             _ => IsConnected && !IsRunning);
 
@@ -313,7 +332,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveUcPick => cmd_MoveUcPick ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.UpperChamber_Pick,
-                             RobotVelocity.UpperChamber_Pick,
+                             GetVelocity(RobotPosition.UpperChamber_Pick),
                              RobotPositionName.UpperChamber_Pick),
             _ => IsConnected && !IsRunning);
 
@@ -322,7 +341,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveLcWait => cmd_MoveLcWait ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.LowerChamber_PickupWait,
-                             RobotVelocity.LowerChamber_PickupWait,
+                             GetVelocity(RobotPosition.LowerChamber_PickupWait),
                              RobotPositionName.LowerChamber_PickupWait),
             _ => IsConnected && !IsRunning);
 
@@ -330,7 +349,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MoveLcPick => cmd_MoveLcPick ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.LowerChamber_Pick,
-                             RobotVelocity.LowerChamber_Pick,
+                             GetVelocity(RobotPosition.LowerChamber_Pick),
                              RobotPositionName.LowerChamber_Pick),
             _ => IsConnected && !IsRunning);
 
@@ -339,7 +358,8 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public ICommand Cmd_MovePeel => cmd_MovePeel ??=
         new RelayCommand(
             _ => ExecuteMove(RobotPosition.Peel,
-                             RobotVelocity.Peel, RobotPositionName.Peel),
+                             GetVelocity(RobotPosition.Peel),
+                             RobotPositionName.Peel),
             _ => IsConnected && !IsRunning);
 
     #endregion
