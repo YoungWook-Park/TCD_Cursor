@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using Tcd.App.Devices;
 using Tcd.App.Sequences.Auto;
 using Tcd.App.Sequences.Manual;
 using Tcd.App.Sequences.SemiAuto;
@@ -39,6 +40,8 @@ public sealed class MainCore
     public ILogWriter Log { get; private set; } = null!;
     /// <summary>현재 시퀀스 실행용 로그 컨텍스트. 시퀀스 시작 시 설정.</summary>
     public LogContext LogContext { get; set; }
+    /// <summary>TCP 로봇 시뮬레이터 클라이언트. ConnectAsync 호출 전까지 연결 안 됨.</summary>
+    public IRobotDevice RobotDevice { get; private set; } = null!;
 
     private LogWriter? _logWriter;
 
@@ -66,7 +69,10 @@ public sealed class MainCore
         _logWriter.Start();
         Log = _logWriter;
 
-        // 5) 시퀀스 등록 (시뮬레이터 원자 시퀀스 + 수동/반자동/자동)
+        // 5) TCP 로봇 디바이스 인스턴스 생성 (연결은 ViewModel에서 수행)
+        RobotDevice = new RobotTcpClient();
+
+        // 6) 시퀀스 등록 (시뮬레이터 원자 시퀀스 + 수동/반자동/자동)
         Sequences = TcdSequenceRegistry.Build(Simulation, Motion);
         RegisterManualMotorSequences();
         RegisterSemiAutoAndAutoSequences();
@@ -109,9 +115,17 @@ public sealed class AppSettings
 {
     public TimeSpan StageLoadTimeout { get; set; } = TimeSpan.FromSeconds(5);
     public TimeSpan RobotMoveTimeout { get; set; } = TimeSpan.FromSeconds(2);
-    public TimeSpan AxisMoveTimeout { get; set; } = TimeSpan.FromSeconds(3);
-    public bool UseSpiiPlus { get; set; } = true;
+    public TimeSpan AxisMoveTimeout  { get; set; } = TimeSpan.FromSeconds(3);
+
+    // ── SPiiPlus 모션 ──────────────────────────────────────────────────────
+    public bool UseSpiiPlus  { get; set; } = true;
     public string SpiiIpAddress { get; set; } = "10.0.0.100";
+
+    // ── TCP 로봇 시뮬레이터 ────────────────────────────────────────────────
+    /// <summary>로봇 시뮬레이터 서버 주소 (기본: localhost)</summary>
+    public string RobotSimHost { get; set; } = "127.0.0.1";
+    /// <summary>로봇 시뮬레이터 서버 포트 (기본: 7001)</summary>
+    public int    RobotSimPort { get; set; } = 7001;
 
     public static AppSettings CreateDefaults() => new();
 }

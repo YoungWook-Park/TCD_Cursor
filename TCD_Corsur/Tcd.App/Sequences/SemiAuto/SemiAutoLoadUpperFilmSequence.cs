@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
+using Tcd.App.Define;
 using Tcd.Core;
 using Tcd.Core.Logging;
 using Tcd.Materials;
@@ -36,7 +37,7 @@ public sealed class SemiAutoLoadUpperFilmSequence : ISequence
 
         if (sim.Materials.Get(MaterialLocation.UpperChamber) != null)
         {
-            context.Alarms.Raise(new Alarm("CHAMBER_NOT_EMPTY", "Upper chamber is not empty.", AlarmSeverity.Error, context.Time.Now));
+            context.Alarms.Raise(new Alarm(AlarmKeys.ChamberNotEmpty, "Upper chamber is not empty.", AlarmSeverity.Error, context.Time.Now));
             return SequenceResult.Fail("Upper chamber is not empty.");
         }
 

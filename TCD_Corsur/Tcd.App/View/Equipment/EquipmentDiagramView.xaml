@@ -12,7 +12,6 @@
     <!-- ── 색상 ── -->
     <SolidColorBrush x:Key="EquipBodyBrush"    Color="#FF2A2A2A"/>
     <SolidColorBrush x:Key="EquipBorderBrush"  Color="#FF565656"/>
-    <SolidColorBrush x:Key="EquipTrackBrush"   Color="#FF383838"/>
     <SolidColorBrush x:Key="EquipRobotBrush"   Color="#FF3C3C3C"/>
     <SolidColorBrush x:Key="MaterialFillBrush" Color="#263FA9F5"/>  <!-- 자재 있을 때 accent 틴트 -->
     <SolidColorBrush x:Key="PathGuideBrush"    Color="#28FFFFFF"/>  <!-- 이동 경로 가이드 (매우 희미) -->
@@ -23,14 +22,30 @@
     <SolidColorBrush x:Key="VacuumOnBrush"     Color="#FF22AA44"/>  <!-- 진공 ON -->
     <SolidColorBrush x:Key="VacuumOffBrush"    Color="#FF505050"/>  <!-- 진공 OFF -->
 
-    <!-- ── Lower Assembly (챔버 + UVW): 합착 시 위로 이동 ── -->
+    <!-- ── Upper Chamber: 합착 시 아래로 이동 (독립 모터 모듈) ── -->
+    <!-- Canvas.Left/Top은 Style에서만 제어 (로컬 값 없음) -->
+    <Style x:Key="UpperChamberStyle" TargetType="Border">
+      <Setter Property="Canvas.Left" Value="15"/>
+      <Setter Property="Canvas.Top"  Value="38"/>
+      <Setter Property="Background"  Value="{StaticResource EquipBodyBrush}"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding UpperChamberHasMaterial}" Value="True">
+          <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
+        </DataTrigger>
+        <DataTrigger Binding="{Binding IsBonding}" Value="True">
+          <Setter Property="Canvas.Top" Value="78"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ── Lower Assembly (챔버 + UVW): 합착 시 위로 이동 (독립 모터 모듈) ── -->
     <!-- Canvas.Top은 Style에서만 제어 (로컬 값 없음) -->
     <Style x:Key="LowerAssemblyStyle" TargetType="Border">
       <Setter Property="Canvas.Left" Value="15"/>
       <Setter Property="Canvas.Top"  Value="228"/>
       <Style.Triggers>
         <DataTrigger Binding="{Binding IsBonding}" Value="True">
-          <Setter Property="Canvas.Top" Value="148"/>
+          <Setter Property="Canvas.Top" Value="178"/>
         </DataTrigger>
       </Style.Triggers>
     </Style>
@@ -92,19 +107,10 @@
                Text="③  ESC 부착 / 합착" FontSize="9"
                Foreground="#55FFFFFF"/>
 
-    <!-- ── Upper Chamber ── -->
-    <Border Canvas.Left="15" Canvas.Top="38" Width="152" Height="72"
-            BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4">
-      <Border.Style>
-        <Style TargetType="Border">
-          <Setter Property="Background" Value="{StaticResource EquipBodyBrush}"/>
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding UpperChamberHasMaterial}" Value="True">
-              <Setter Property="Background" Value="{StaticResource MaterialFillBrush}"/>
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </Border.Style>
+    <!-- ── Upper Chamber (ZUpper 독립 모터 모듈) ── -->
+    <Border Width="152" Height="72"
+            BorderBrush="{StaticResource EquipBorderBrush}" BorderThickness="1.5" CornerRadius="4"
+            Style="{StaticResource UpperChamberStyle}">
       <Grid>
         <TextBlock Text="Upper Chamber" Foreground="{DynamicResource TextSubtleBrush}"
                    FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
@@ -118,11 +124,11 @@
       </Grid>
     </Border>
 
-    <!-- ── 합착 표시: 챔버 사이 주황 커넥터 ── -->
-    <Rectangle Canvas.Left="85" Canvas.Top="113" Width="20" Height="4"
+    <!-- ── 합착 표시: 챔버 사이 주황 커넥터 (합착 시 Upper bottom=150, Lower top=178 → 중앙 164) ── -->
+    <Rectangle Canvas.Left="85" Canvas.Top="162" Width="20" Height="4"
                Fill="{StaticResource BondingBrush}" RadiusX="1" RadiusY="1"
                Style="{StaticResource BondingVisibleStyle}"/>
-    <TextBlock Canvas.Left="108" Canvas.Top="108" Text="합착 중" FontSize="9" FontWeight="SemiBold"
+    <TextBlock Canvas.Left="108" Canvas.Top="157" Text="합착 중" FontSize="9" FontWeight="SemiBold"
                Foreground="{StaticResource BondingBrush}"
                Style="{StaticResource BondingVisibleStyle}"/>
 

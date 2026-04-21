@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
+using Tcd.App.Define;
 using Tcd.Core;
 using Tcd.Core.Logging;
 using Tcd.Devices;
@@ -36,7 +37,7 @@ public sealed class SemiAutoAlignUVWSequence : ISequence
 
         if (sim.Robot.CurrentPosition != RobotPosition.Home)
         {
-            context.Alarms.Raise(new Alarm("ROBOT_NOT_AT_HOME", "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, context.Time.Now));
+            context.Alarms.Raise(new Alarm(AlarmKeys.RobotNotAtHome, "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, context.Time.Now));
             return SequenceResult.Fail("Robot must be at home before UVW align.");
         }
 

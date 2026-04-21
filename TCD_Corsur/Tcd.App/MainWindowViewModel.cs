@@ -158,9 +158,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     #region UI Function
 
-    private BiRelayCommand? cmd_LoadStageCommand;
+    private RelayCommand? cmd_LoadStageCommand;
     public ICommand Cmd_LoadStageCommand =>
-        cmd_LoadStageCommand ??= new BiRelayCommand(PerformCmd_LoadStage, _ => !IsRunning);
+        cmd_LoadStageCommand ??= new RelayCommand(PerformCmd_LoadStage, _ => !IsRunning);
 
     private void PerformCmd_LoadStage(object? commandParameter)
     {
@@ -173,9 +173,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         finally { }
     }
 
-    private BiRelayCommand? cmd_StartAutoCommand;
+    private RelayCommand? cmd_StartAutoCommand;
     public ICommand Cmd_StartAutoCommand =>
-        cmd_StartAutoCommand ??= new BiRelayCommand(PerformCmd_StartAuto, _ => !IsRunning);
+        cmd_StartAutoCommand ??= new RelayCommand(PerformCmd_StartAuto, _ => !IsRunning);
 
     private void PerformCmd_StartAuto(object? commandParameter)
     {
@@ -217,9 +217,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         finally { }
     }
 
-    private BiRelayCommand? cmd_StopCommand;
+    private RelayCommand? cmd_StopCommand;
     public ICommand Cmd_StopCommand =>
-        cmd_StopCommand ??= new BiRelayCommand(PerformCmd_Stop, _ => IsRunning);
+        cmd_StopCommand ??= new RelayCommand(PerformCmd_Stop, _ => IsRunning);
 
     private void PerformCmd_Stop(object? commandParameter)
     {
@@ -228,9 +228,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         finally { }
     }
 
-    private BiRelayCommand? cmd_UnloadProductCommand;
+    private RelayCommand? cmd_UnloadProductCommand;
     public ICommand Cmd_UnloadProductCommand =>
-        cmd_UnloadProductCommand ??= new BiRelayCommand(PerformCmd_UnloadProduct, _ => !IsRunning);
+        cmd_UnloadProductCommand ??= new RelayCommand(PerformCmd_UnloadProduct, _ => !IsRunning);
 
     private void PerformCmd_UnloadProduct(object? commandParameter)
     {
@@ -272,9 +272,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         finally { }
     }
 
-    private BiRelayCommand? cmd_ClearCommand;
+    private RelayCommand? cmd_ClearCommand;
     public ICommand Cmd_ClearCommand =>
-        cmd_ClearCommand ??= new BiRelayCommand(PerformCmd_Clear, _ => !IsRunning);
+        cmd_ClearCommand ??= new RelayCommand(PerformCmd_Clear, _ => !IsRunning);
 
     private void PerformCmd_Clear(object? commandParameter)
     {
@@ -288,23 +288,23 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         finally { }
     }
 
-    private BiRelayCommand? cmd_ExitCommand;
+    private RelayCommand? cmd_ExitCommand;
     public ICommand Cmd_ExitCommand =>
-        cmd_ExitCommand ??= new BiRelayCommand(PerformCmd_Exit, _ => true);
+        cmd_ExitCommand ??= new RelayCommand(PerformCmd_Exit, _ => true);
 
     private void PerformCmd_Exit(object? commandParameter)
     {
         App.Current.Shutdown();
     }
 
-    private BiRelayCommand? cmd_ShowMainPage;
-    public ICommand Cmd_ShowMainPage => cmd_ShowMainPage ??= new BiRelayCommand(_ => CurrentContent = Main);
+    private RelayCommand? cmd_ShowMainPage;
+    public ICommand Cmd_ShowMainPage => cmd_ShowMainPage ??= new RelayCommand(_ => CurrentContent = Main);
 
-    private BiRelayCommand? cmd_ShowRecipePage;
-    public ICommand Cmd_ShowRecipePage => cmd_ShowRecipePage ??= new BiRelayCommand(_ => CurrentContent = Recipe);
+    private RelayCommand? cmd_ShowRecipePage;
+    public ICommand Cmd_ShowRecipePage => cmd_ShowRecipePage ??= new RelayCommand(_ => CurrentContent = Recipe);
 
-    private BiRelayCommand? cmd_ShowManualPage;
-    public ICommand Cmd_ShowManualPage => cmd_ShowManualPage ??= new BiRelayCommand(_ => CurrentContent = Manual);
+    private RelayCommand? cmd_ShowManualPage;
+    public ICommand Cmd_ShowManualPage => cmd_ShowManualPage ??= new RelayCommand(_ => CurrentContent = Manual);
 
     #endregion
 }

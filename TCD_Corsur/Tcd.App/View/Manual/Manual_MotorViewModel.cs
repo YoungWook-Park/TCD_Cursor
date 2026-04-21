@@ -224,115 +224,115 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     #region Commands
 
     // ── Move ──────────────────────────────────────────────────────────────────
-    private BiRelayCommand? cmd_MoveU;
-    public ICommand Cmd_MoveU => cmd_MoveU ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.U));
+    private RelayCommand? cmd_MoveU;
+    public ICommand Cmd_MoveU => cmd_MoveU ??= new RelayCommand(_ => MoveAxis(AxisDefine.U));
 
-    private BiRelayCommand? cmd_MoveV;
-    public ICommand Cmd_MoveV => cmd_MoveV ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.V));
+    private RelayCommand? cmd_MoveV;
+    public ICommand Cmd_MoveV => cmd_MoveV ??= new RelayCommand(_ => MoveAxis(AxisDefine.V));
 
-    private BiRelayCommand? cmd_MoveW;
-    public ICommand Cmd_MoveW => cmd_MoveW ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.W));
+    private RelayCommand? cmd_MoveW;
+    public ICommand Cmd_MoveW => cmd_MoveW ??= new RelayCommand(_ => MoveAxis(AxisDefine.W));
 
-    private BiRelayCommand? cmd_MoveZLoad;
-    public ICommand Cmd_MoveZLoad => cmd_MoveZLoad ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZLower));
+    private RelayCommand? cmd_MoveZLoad;
+    public ICommand Cmd_MoveZLoad => cmd_MoveZLoad ??= new RelayCommand(_ => MoveAxis(AxisDefine.ZLower));
 
-    private BiRelayCommand? cmd_MoveZBond;
-    public ICommand Cmd_MoveZBond => cmd_MoveZBond ??= new BiRelayCommand(_ => MoveAxis(AxisDefine.ZUpper));
+    private RelayCommand? cmd_MoveZBond;
+    public ICommand Cmd_MoveZBond => cmd_MoveZBond ??= new RelayCommand(_ => MoveAxis(AxisDefine.ZUpper));
 
     // ── Teach ─────────────────────────────────────────────────────────────────
-    private BiRelayCommand? cmd_TeachU;
-    public ICommand Cmd_TeachU => cmd_TeachU ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.U, CurrentPosition(AxisDefine.U)));
+    private RelayCommand? cmd_TeachU;
+    public ICommand Cmd_TeachU => cmd_TeachU ??= new RelayCommand(_ => TeachAxis(AxisDefine.U, CurrentPosition(AxisDefine.U)));
 
-    private BiRelayCommand? cmd_TeachV;
-    public ICommand Cmd_TeachV => cmd_TeachV ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.V, CurrentPosition(AxisDefine.V)));
+    private RelayCommand? cmd_TeachV;
+    public ICommand Cmd_TeachV => cmd_TeachV ??= new RelayCommand(_ => TeachAxis(AxisDefine.V, CurrentPosition(AxisDefine.V)));
 
-    private BiRelayCommand? cmd_TeachW;
-    public ICommand Cmd_TeachW => cmd_TeachW ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.W, CurrentPosition(AxisDefine.W)));
+    private RelayCommand? cmd_TeachW;
+    public ICommand Cmd_TeachW => cmd_TeachW ??= new RelayCommand(_ => TeachAxis(AxisDefine.W, CurrentPosition(AxisDefine.W)));
 
-    private BiRelayCommand? cmd_TeachZLoad;
-    public ICommand Cmd_TeachZLoad => cmd_TeachZLoad ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZLower, CurrentPosition(AxisDefine.ZLower)));
+    private RelayCommand? cmd_TeachZLoad;
+    public ICommand Cmd_TeachZLoad => cmd_TeachZLoad ??= new RelayCommand(_ => TeachAxis(AxisDefine.ZLower, CurrentPosition(AxisDefine.ZLower)));
 
-    private BiRelayCommand? cmd_TeachZBond;
-    public ICommand Cmd_TeachZBond => cmd_TeachZBond ??= new BiRelayCommand(_ => TeachAxis(AxisDefine.ZUpper, CurrentPosition(AxisDefine.ZUpper)));
+    private RelayCommand? cmd_TeachZBond;
+    public ICommand Cmd_TeachZBond => cmd_TeachZBond ??= new RelayCommand(_ => TeachAxis(AxisDefine.ZUpper, CurrentPosition(AxisDefine.ZUpper)));
 
     // ── Stop ──────────────────────────────────────────────────────────────────
-    private BiRelayCommand? cmd_StopU;
-    public ICommand Cmd_StopU => cmd_StopU ??= new BiRelayCommand(_ => StopAxis(AxisDefine.U));
+    private RelayCommand? cmd_StopU;
+    public ICommand Cmd_StopU => cmd_StopU ??= new RelayCommand(_ => StopAxis(AxisDefine.U));
 
-    private BiRelayCommand? cmd_StopV;
-    public ICommand Cmd_StopV => cmd_StopV ??= new BiRelayCommand(_ => StopAxis(AxisDefine.V));
+    private RelayCommand? cmd_StopV;
+    public ICommand Cmd_StopV => cmd_StopV ??= new RelayCommand(_ => StopAxis(AxisDefine.V));
 
-    private BiRelayCommand? cmd_StopW;
-    public ICommand Cmd_StopW => cmd_StopW ??= new BiRelayCommand(_ => StopAxis(AxisDefine.W));
+    private RelayCommand? cmd_StopW;
+    public ICommand Cmd_StopW => cmd_StopW ??= new RelayCommand(_ => StopAxis(AxisDefine.W));
 
-    private BiRelayCommand? cmd_StopZLoad;
-    public ICommand Cmd_StopZLoad => cmd_StopZLoad ??= new BiRelayCommand(_ => StopAxis(AxisDefine.ZLower));
+    private RelayCommand? cmd_StopZLoad;
+    public ICommand Cmd_StopZLoad => cmd_StopZLoad ??= new RelayCommand(_ => StopAxis(AxisDefine.ZLower));
 
-    private BiRelayCommand? cmd_StopZBond;
-    public ICommand Cmd_StopZBond => cmd_StopZBond ??= new BiRelayCommand(_ => StopAxis(AxisDefine.ZUpper));
+    private RelayCommand? cmd_StopZBond;
+    public ICommand Cmd_StopZBond => cmd_StopZBond ??= new RelayCommand(_ => StopAxis(AxisDefine.ZUpper));
 
     // ── Servo On / Servo Off / Home ───────────────────────────────────────────
-    private BiRelayCommand? cmd_ServoOnU;
-    public ICommand Cmd_ServoOnU => cmd_ServoOnU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOn, "U", "Servo On"));
+    private RelayCommand? cmd_ServoOnU;
+    public ICommand Cmd_ServoOnU => cmd_ServoOnU ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOn, "U", "Servo On"));
 
-    private BiRelayCommand? cmd_ServoOffU;
-    public ICommand Cmd_ServoOffU => cmd_ServoOffU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOff, "U", "Servo Off"));
+    private RelayCommand? cmd_ServoOffU;
+    public ICommand Cmd_ServoOffU => cmd_ServoOffU ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_ServoOff, "U", "Servo Off"));
 
-    private BiRelayCommand? cmd_HomeU;
-    public ICommand Cmd_HomeU => cmd_HomeU ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_Home, "U", "Home"));
+    private RelayCommand? cmd_HomeU;
+    public ICommand Cmd_HomeU => cmd_HomeU ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_U_Home, "U", "Home"));
 
-    private BiRelayCommand? cmd_ServoOnV;
-    public ICommand Cmd_ServoOnV => cmd_ServoOnV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOn, "V", "Servo On"));
+    private RelayCommand? cmd_ServoOnV;
+    public ICommand Cmd_ServoOnV => cmd_ServoOnV ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOn, "V", "Servo On"));
 
-    private BiRelayCommand? cmd_ServoOffV;
-    public ICommand Cmd_ServoOffV => cmd_ServoOffV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOff, "V", "Servo Off"));
+    private RelayCommand? cmd_ServoOffV;
+    public ICommand Cmd_ServoOffV => cmd_ServoOffV ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_ServoOff, "V", "Servo Off"));
 
-    private BiRelayCommand? cmd_HomeV;
-    public ICommand Cmd_HomeV => cmd_HomeV ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_Home, "V", "Home"));
+    private RelayCommand? cmd_HomeV;
+    public ICommand Cmd_HomeV => cmd_HomeV ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_V_Home, "V", "Home"));
 
-    private BiRelayCommand? cmd_ServoOnW;
-    public ICommand Cmd_ServoOnW => cmd_ServoOnW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOn, "W", "Servo On"));
+    private RelayCommand? cmd_ServoOnW;
+    public ICommand Cmd_ServoOnW => cmd_ServoOnW ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOn, "W", "Servo On"));
 
-    private BiRelayCommand? cmd_ServoOffW;
-    public ICommand Cmd_ServoOffW => cmd_ServoOffW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOff, "W", "Servo Off"));
+    private RelayCommand? cmd_ServoOffW;
+    public ICommand Cmd_ServoOffW => cmd_ServoOffW ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_ServoOff, "W", "Servo Off"));
 
-    private BiRelayCommand? cmd_HomeW;
-    public ICommand Cmd_HomeW => cmd_HomeW ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_Home, "W", "Home"));
+    private RelayCommand? cmd_HomeW;
+    public ICommand Cmd_HomeW => cmd_HomeW ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_W_Home, "W", "Home"));
 
-    private BiRelayCommand? cmd_ServoOnZLoad;
-    public ICommand Cmd_ServoOnZLoad => cmd_ServoOnZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOn, "ZLoad", "Servo On"));
+    private RelayCommand? cmd_ServoOnZLoad;
+    public ICommand Cmd_ServoOnZLoad => cmd_ServoOnZLoad ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOn, "ZLoad", "Servo On"));
 
-    private BiRelayCommand? cmd_ServoOffZLoad;
-    public ICommand Cmd_ServoOffZLoad => cmd_ServoOffZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOff, "ZLoad", "Servo Off"));
+    private RelayCommand? cmd_ServoOffZLoad;
+    public ICommand Cmd_ServoOffZLoad => cmd_ServoOffZLoad ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_ServoOff, "ZLoad", "Servo Off"));
 
-    private BiRelayCommand? cmd_HomeZLoad;
-    public ICommand Cmd_HomeZLoad => cmd_HomeZLoad ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_Home, "ZLoad", "Home"));
+    private RelayCommand? cmd_HomeZLoad;
+    public ICommand Cmd_HomeZLoad => cmd_HomeZLoad ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZLower_Home, "ZLoad", "Home"));
 
-    private BiRelayCommand? cmd_ServoOnZBond;
-    public ICommand Cmd_ServoOnZBond => cmd_ServoOnZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOn, "ZBond", "Servo On"));
+    private RelayCommand? cmd_ServoOnZBond;
+    public ICommand Cmd_ServoOnZBond => cmd_ServoOnZBond ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOn, "ZBond", "Servo On"));
 
-    private BiRelayCommand? cmd_ServoOffZBond;
-    public ICommand Cmd_ServoOffZBond => cmd_ServoOffZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOff, "ZBond", "Servo Off"));
+    private RelayCommand? cmd_ServoOffZBond;
+    public ICommand Cmd_ServoOffZBond => cmd_ServoOffZBond ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_ServoOff, "ZBond", "Servo Off"));
 
-    private BiRelayCommand? cmd_HomeZBond;
-    public ICommand Cmd_HomeZBond => cmd_HomeZBond ??= new BiRelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_Home, "ZBond", "Home"));
+    private RelayCommand? cmd_HomeZBond;
+    public ICommand Cmd_HomeZBond => cmd_HomeZBond ??= new RelayCommand(_ => RunOperation(TcdSequenceKeys.Manual_Motor_ZUpper_Home, "ZBond", "Home"));
 
     // ── Jog ───────────────────────────────────────────────────────────────────
-    private BiRelayCommand? cmd_JogPlusDown;
-    public ICommand Cmd_JogPlusDown => cmd_JogPlusDown ??= new BiRelayCommand(_ => StartJog(+1));
+    private RelayCommand? cmd_JogPlusDown;
+    public ICommand Cmd_JogPlusDown => cmd_JogPlusDown ??= new RelayCommand(_ => StartJog(+1));
 
-    private BiRelayCommand? cmd_JogPlusUp;
-    public ICommand Cmd_JogPlusUp => cmd_JogPlusUp ??= new BiRelayCommand(_ => StopJog());
+    private RelayCommand? cmd_JogPlusUp;
+    public ICommand Cmd_JogPlusUp => cmd_JogPlusUp ??= new RelayCommand(_ => StopJog());
 
-    private BiRelayCommand? cmd_JogMinusDown;
-    public ICommand Cmd_JogMinusDown => cmd_JogMinusDown ??= new BiRelayCommand(_ => StartJog(-1));
+    private RelayCommand? cmd_JogMinusDown;
+    public ICommand Cmd_JogMinusDown => cmd_JogMinusDown ??= new RelayCommand(_ => StartJog(-1));
 
-    private BiRelayCommand? cmd_JogMinusUp;
-    public ICommand Cmd_JogMinusUp => cmd_JogMinusUp ??= new BiRelayCommand(_ => StopJog());
+    private RelayCommand? cmd_JogMinusUp;
+    public ICommand Cmd_JogMinusUp => cmd_JogMinusUp ??= new RelayCommand(_ => StopJog());
 
     // ── Stop All ──────────────────────────────────────────────────────────────
-    private BiRelayCommand? cmd_StopAllMotors;
-    public ICommand Cmd_StopAllMotors => cmd_StopAllMotors ??= new BiRelayCommand(_ => StopAllMotors());
+    private RelayCommand? cmd_StopAllMotors;
+    public ICommand Cmd_StopAllMotors => cmd_StopAllMotors ??= new RelayCommand(_ => StopAllMotors());
 
     #endregion
 
