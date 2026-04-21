@@ -1,11 +1,11 @@
 <UserControl x:Class="Tcd.App.View.RecipeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             mc:Ignorable="d"
+             d:DesignHeight="560" d:DesignWidth="860"
              d:DataContext="{d:DesignInstance Type=local:RecipeViewModel}">
     <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
         <Grid.ColumnDefinitions>
@@ -18,83 +18,155 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- 좌측: 레시피 목록 -->
         <GroupBox Header="Recipes">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top" Margin="8,8,8,4" FontSize="11"
                            Text="{Binding RecipesDirectory}"/>
-                <ListBox Margin="8" ItemsSource="{Binding RecipeNames}" SelectedItem="{Binding SelectedRecipeName}" Background="{StaticResource PanelBackgroundBrush}" />
+                <ListBox Margin="8"
+                         ItemsSource="{Binding RecipeNames}"
+                         SelectedItem="{Binding SelectedRecipeName}"
+                         Background="{StaticResource PanelBackgroundBrush}"/>
             </DockPanel>
         </GroupBox>
 
+        <!-- 우측: 편집 에디터 (TabControl) -->
         <GroupBox Grid.Column="2" Header="Editor">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 레시피 이름 (탭 공통) -->
+                <Grid Margin="10,10,10,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,10,6" Text="Name"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,6" Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,10,6" Text="U"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding U, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,10,6" Text="V"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding V, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,10,6" Text="W"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" Text="{Binding W, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,10,6" Text="Z Load"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ZLoad, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,10,6" Text="Z Bond"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ZBond, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,10,6" Text="Motion Velocity"/>
-                    <TextBox Grid.Row="6" Grid.Column="1" Margin="0,0,0,6" Text="{Binding MotionVelocity, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,10,6" Text="Motion Acc"/>
-                    <TextBox Grid.Row="7" Grid.Column="1" Margin="0,0,0,6" Text="{Binding MotionAcc, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,0,10,6" Text="Motion Dec"/>
-                    <TextBox Grid.Row="8" Grid.Column="1" Margin="0,0,0,6" Text="{Binding MotionDec, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="9" Grid.Column="0" Margin="0,0,10,6" Text="Motion Jerk"/>
-                    <TextBox Grid.Row="9" Grid.Column="1" Margin="0,0,0,6" Text="{Binding MotionJerk, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBlock Grid.Row="10" Grid.Column="0" Margin="0,0,10,6" Text="Robot Stage/Upper/Lower"/>
-                    <TextBlock Grid.Row="10" Grid.Column="1" Margin="0,0,0,6" Text="Fixed (Stage / UpperLoad / LowerLoad)"/>
-
-                    <TextBlock Grid.Row="11" Grid.Column="0" Margin="0,0,10,0" Text="Notes"/>
-                    <TextBlock Grid.Row="11" Grid.Column="1" TextWrapping="Wrap"
-                               Text="축(U/V/W/Z) 티칭, 모터 Velocity/Acc/Dec/Jerk는 JSON으로 저장됩니다."/>
+                    <TextBlock Text="Name" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
-            </ScrollViewer>
+
+                <!-- 탭: Motor / Robot -->
+                <TabControl Grid.Row="1" Margin="8,4,8,8">
+
+                    <!-- ── Motor 탭 ───────────────────────────────────────── -->
+                    <TabItem Header="Motor">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      Margin="4">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="16"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 축 티칭 -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4,10,4" Text="U  (mm)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="0" Grid.Column="1" Margin="0,4,0,4" Text="{Binding U, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4,10,4" Text="V  (mm)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="1" Grid.Column="1" Margin="0,4,0,4" Text="{Binding V, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4,10,4" Text="W  (mm)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="2" Grid.Column="1" Margin="0,4,0,4" Text="{Binding W, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4,10,4" Text="Z Load  (mm)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="3" Grid.Column="1" Margin="0,4,0,4" Text="{Binding ZLoad, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4,10,4" Text="Z Bond  (mm)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="4" Grid.Column="1" Margin="0,4,0,4" Text="{Binding ZBond, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <!-- 구분선 -->
+                                <Separator Grid.Row="5" Grid.ColumnSpan="3" Margin="0,4"/>
+
+                                <!-- 모션 파라미터 -->
+                                <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4,10,4" Text="Velocity  (mm/s)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="6" Grid.Column="1" Margin="0,4,0,4" Text="{Binding MotionVelocity, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,4,10,4" Text="Acc  (mm/s²)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="7" Grid.Column="1" Margin="0,4,0,4" Text="{Binding MotionAcc, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,4,10,4" Text="Dec  (mm/s²)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="8" Grid.Column="1" Margin="0,4,0,4" Text="{Binding MotionDec, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <TextBlock Grid.Row="9" Grid.Column="0" Margin="0,4,10,4" Text="Jerk  (mm/s³)" VerticalAlignment="Center"/>
+                                <TextBox   Grid.Row="9" Grid.Column="1" Margin="0,4,0,4" Text="{Binding MotionJerk, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- ── Robot 탭 ───────────────────────────────────────── -->
+                    <TabItem Header="Robot">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      Margin="4">
+                            <StackPanel>
+                                <TextBlock Margin="0,4,0,10" FontSize="11"
+                                           Foreground="{StaticResource TextSubtleBrush}"
+                                           Text="포지션별 이동 속도 (1 – 100 %). Save 후 반영."/>
+
+                                <ItemsControl ItemsSource="{Binding RobotVelocityRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding PositionName}"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBox   Grid.Column="1"
+                                                           Text="{Binding Velocity, UpdateSourceTrigger=PropertyChanged}"
+                                                           TextAlignment="Right"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text=" %"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                </TabControl>
+            </Grid>
         </GroupBox>
 
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,12,0,0">
-            <Button Width="110" Margin="0,0,8,0" Content="Reload" Command="{Binding Cmd_Reload}" Style="{StaticResource PrimaryButtonStyle}"/>
-            <Button Width="110" Margin="0,0,8,0" Content="New" Command="{Binding Cmd_New}" Style="{StaticResource PrimaryButtonStyle}" />
-            <Button Width="110" Margin="0,0,8,0" Content="Save" Command="{Binding Cmd_Save}"  Style="{StaticResource PrimaryButtonStyle}"/>
-            <Button Width="110" Margin="0,0,8,0" Content="Save As..." Command="{Binding Cmd_SaveAs}"  Style="{StaticResource PrimaryButtonStyle}"/>
-            <TextBlock VerticalAlignment="Center" Margin="12,0,0,0" Text="{Binding Status}" Style="{StaticResource HighlightTextBlockStyle}"/>
+        <!-- 하단 버튼 -->
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="3"
+                    Orientation="Horizontal" Margin="0,12,0,0">
+            <Button Width="110" Margin="0,0,8,0" Content="Reload"
+                    Command="{Binding Cmd_Reload}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+            <Button Width="110" Margin="0,0,8,0" Content="New"
+                    Command="{Binding Cmd_New}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+            <Button Width="110" Margin="0,0,8,0" Content="Save"
+                    Command="{Binding Cmd_Save}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+            <Button Width="110" Margin="0,0,8,0" Content="Save As..."
+                    Command="{Binding Cmd_SaveAs}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+            <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"
+                       Text="{Binding Status}"
+                       Style="{StaticResource HighlightTextBlockStyle}"/>
         </StackPanel>
     </Grid>
 </UserControl>
-
