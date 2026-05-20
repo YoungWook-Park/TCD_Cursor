@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
-using Tcd.Core;
 using Tcd.Core.Logging;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -14,9 +13,12 @@ public sealed class AutoRunSequence : ISequence
 {
     #region Variables
 
+    private readonly SequenceManager _mgr;
+
+    public AutoRunSequence(SequenceManager mgr) => _mgr = mgr;
+
     public string Key => TcdSequenceKeys.AUTO_Run;
     public string DisplayName => "AUTO: Stage -> Load -> Align -> Bond -> Unload";
-    public object Param { get; set; } = null!;
 
     private static readonly TimeSpan PlcStageLoadTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan RobotWaitHomeTimeout = TimeSpan.FromSeconds(2);
@@ -27,11 +29,9 @@ public sealed class AutoRunSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        Param = parameter;
-        var core = MainCore.Instance;
-        core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
+        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
 
-        var mgr = core.Sequences;
+        var mgr = _mgr;
 
         var result = await mgr.RunAsync(TcdSequenceKeys.Plc_Wait_StageLoaded, context, PlcStageLoadTimeout, cancellationToken).ConfigureAwait(false);
         if (result.Status != SequenceStatus.Succeeded) return result;

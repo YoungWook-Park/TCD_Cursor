@@ -1,50 +1,38 @@
-# SPEC: CSV 로그·보관
+# SPEC: CSV 로그
 
-| 항목 | 내용 |
-|------|------|
-| 관련 PRD | [PRD_Lamination_Simulator.md](PRD_Lamination_Simulator.md) |
+현재 구현: `Tcd.Engine/Logging/LogWriter.cs` (비동기 배치, 4096 용량, 100개/500ms)
 
 ---
 
-## 1. 경로
+## 경로
 
-- 기본 레시피 루트: `D:\VCD_Recipe` (설정으로 오버라이드).
-- 로그 폴더: **`{RecipeRoot}\Logs`** (예: `D:\VCD_Recipe\Logs`).
-- 일별 파일: `yyyy-MM-dd.csv` 또는 `log_yyyyMMdd.csv`.
+- 로그 폴더: `%TEMP%\Tcd\Logs\` (현재 구현)
+- 일별 파일: `tcd_yyyyMMdd.csv`
 
----
-
-## 2. CSV 형식
-
-헤더:
-
-`Timestamp,Level,BlockName,Message`
-
-- **Timestamp**: UTC 권장(ISO 8601) 또는 로컬(문서·구현 일치).
-- **Level**: `Critical`, `Error`, `Warning`, `Information`, …
-- **BlockName**: 함수명, 시퀀스 스텝 ID, `nameof` 등.
-- **Message**: 예외 메시지·설명. CSV 이스케이프(RFC 4180).
+> 확장 계획: `{RecipeRoot}\Logs\` 경로로 변경 (레시피 폴더 하위)
 
 ---
 
-## 3. 보관 정책
+## CSV 형식
 
-- 설정 키: `LogRetentionDays` (기본 14).
-- **상한 14일** 클램프(요구사항).
-- 정리 시점: 앱 시작, 로그 기록 후(선택), 일 1회 타이머.
-- 삭제 기준: 파일 **이름 날짜** 또는 **LastWriteTime** < `UtcNow - RetentionDays`.
+헤더: `Timestamp,Level,BlockName,Message`
 
----
-
-## 4. UI
-
-- **메인 화면 로그 버튼** → 별도 창/페이지에서 파일 목록 + 내용 표시.
-- 메인 UI에 **실시간 로그 스트림 바인딩 없음**(요구사항).
+- **Timestamp**: 로컬 시각 (ISO 8601)
+- **Level**: `Debug`, `Info`, `Warn`, `Error`
+- **BlockName**: 시퀀스 키, 함수명 등 (`LogContext.SequenceKey`)
+- **Message**: 내용 (RFC 4180 이스케이프)
 
 ---
 
-## 5. 변경 이력
+## 보관 정책 (계획)
 
-| 일자 | 내용 |
-|------|------|
-| 2026-03-31 | 초안 |
+- 기본 14일 보관 (`LogRetentionDays`)
+- 정리 시점: 앱 시작 또는 1일 1회 타이머
+- 기준: 파일명 날짜 < `UtcNow - RetentionDays`
+
+---
+
+## UI
+
+- 메인 화면 **Logs** 버튼 → 파일 목록 + 내용 표시 창
+- 메인 UI에 실시간 로그 스트림 바인딩 없음

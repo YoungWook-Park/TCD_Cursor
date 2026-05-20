@@ -1,117 +1,43 @@
-# Implementation Roadmap
+# Roadmap
 
-Phased order by **dependency** (not calendar). See [TECH_STACK.md](TECH_STACK.md) and [PRD_Lamination_Simulator.md](PRD_Lamination_Simulator.md).
-
----
-
-## Phase 0 — Baseline
-
-**Goals:** reproducible build and shared settings.
-
-- Confirm `src/Vcd.slnx` builds and WPF starts.
-- Centralize paths: recipe root (`D:\VCD_Recipe`), log folder, PLC IP/port (config or constants).
-- Optional: agree **Fluent + XAML resource layout** in [DEVELOPMENT_GUIDELINES.md](DEVELOPMENT_GUIDELINES.md) / UI SPEC.
-
-**Refs:** [SPEC_Architecture_Solution.md](SPEC_Architecture_Solution.md), [SPEC_UI_Hmi.md](SPEC_UI_Hmi.md)
+현재 구현 완료 상태와 다음 작업 순서.
 
 ---
 
-## Phase 1 — PLC map and simulator
+## 현재 완료
 
-**Goals:** I/O truth in map; wire protocol works.
-
-- Define map **frame** (endian, layout) per [SPEC_Control_IO.md](SPEC_Control_IO.md).
-- Implement `Vcd.Plc.Map`: read/write snapshot (in-memory then socket).
-- PLC sim (same or separate process): DO to DI/AI (vacuum, kPa, vent, bond bits).
-- Unit tests for serialization / round-trip.
-
-**Refs:** [SPEC_Control_IO.md](SPEC_Control_IO.md)
-
----
-
-## Phase 2 — Snapshot and interlocks
-
-**Goals:** PC-side guards before commands.
-
-- Build **EquipmentSnapshot** from map.
-- **InterlockService** + `IInterlockRule`; start with a few rules (pump+bond, atmospheric+motion, upper/lower clash).
-- Unit tests with fixed snapshots.
-
-**Refs:** [SPEC_Interlocks.md](SPEC_Interlocks.md)
+- WPF HMI (메인 화면, 매뉴얼, 레시피 탭)
+- 시퀀스 엔진: Atomic → Manual → SemiAuto → Auto 4계층
+- IMotionService 추상화 (SPiiPlus 하드웨어 / 인프로세스 시뮬레이터 전환)
+- 로봇 TCP 시뮬레이터 서버 (Line-delimited JSON, Heartbeat)
+- 레시피 JSON 저장/불러오기
+- 비동기 CSV 로그 (배치 기록, %TEMP%\Tcd\Logs\)
+- 인프로세스 자재 추적 (Pick/Place 시뮬레이션)
 
 ---
 
-## Phase 3 — Sequence engine (core)
+## 다음 작업 (우선순위 순)
 
-**Goals:** Manual / semi / auto graphs; preflight.
+### 1단계 — UI 개선
 
-- `SequenceContext`, `StepResult`, `ISequenceStep`, step registry.
-- Graph runner: `sequence`, `parallel`, `ref` — [SPEC_Sequence_Engine.md](SPEC_Sequence_Engine.md).
-- `Step_PreFlightChecks` (PLC link, Ready, stage vacuum).
-- `IModelFlowDescriptor` injection — [SPEC_Model_Flow.md](SPEC_Model_Flow.md).
-- Sample JSON under `sequences/` (auto main).
+- 알람 리스트와 시퀀스 트레이스 로그 분리 (현재 혼용)
+- MainWindowViewModel: 현재 레시피·축 상태 표시 개선
+- 장비 개략도 애니메이션 (ZUpper↓ / ZLower↑ 본딩 표시)
 
-**Refs:** [SPEC_Sequence.md](SPEC_Sequence.md), [SPEC_Sequence_Engine.md](SPEC_Sequence_Engine.md), [SPEC_Model_Flow.md](SPEC_Model_Flow.md)
+### 2단계 — 품질
 
----
+- SequenceManager 단위 테스트
+- ManualMotorViewModel 상태 갱신 테스트
+- MainCore 의존성 최종 정리 (`LogContext` 제거)
 
-## Phase 4 — Motion (SPiiPlus)
+### 3단계 — 기능 확장
 
-**Goals:** queue + timeout; real or stub.
+- PLC TCP 시뮬레이터 (Bit/Word 맵 교환, [SPEC_Control_IO.md](SPEC_Control_IO.md))
+- 인터락 서비스 (`InterlockService`, [SPEC_Interlocks.md](SPEC_Interlocks.md))
+- CSV 14일 보관 정책 ([SPEC_Logging_Csv.md](SPEC_Logging_Csv.md))
+- 합착 2초 공정 데이터 MongoDB 저장
 
-- `IMotionGateway`, **single-worker JobQueue** — [SPEC_Motion_SpiiPlus.md](SPEC_Motion_SpiiPlus.md).
-- Stub for dev without ACS SDK.
-- Integrate: connect, `ON_MONITORING_FLAG`, buffer 9, variable pulse API.
+### 4단계 — 분석 (장기)
 
-**Refs:** [SPEC_Motion_SpiiPlus.md](SPEC_Motion_SpiiPlus.md)
-
----
-
-## Phase 5 — CSV logging
-
-**Goals:** file log + retention; viewer shell.
-
-- CSV writer `Timestamp,Level,BlockName,Message` — [SPEC_Logging_Csv.md](SPEC_Logging_Csv.md).
-- Cleanup: max **14 days** (app start / timer).
-- Main window **Log** button opens viewer (file list + read; no live stream on main).
-
-**Refs:** [SPEC_Logging_Csv.md](SPEC_Logging_Csv.md)
-
----
-
-## Phase 6 — WPF HMI
-
-**Goals:** operator UI and module wiring.
-
-- Fluent dark shell, `WindowStyle=None`, bottom nav (Device / Recipe / Teach / Manual), min/exit.
-- **Device:** PLC IP, sim flag, timeouts; motion timeout.
-- **Manual:** DO/DI grid, kPa / regulator / ESC, stage vacuum buttons (green/red states).
-- **Recipe:** JSON list, apply / copy / delete, save-load, `No Recipe`.
-- **Teach:** table, Jog/Inc/**Stop (red)**, recipe save-load on pane, axis status.
-- `IDialogService`.
-- Bind **Start/Stop** to sequence engine.
-
-**Refs:** [SPEC_UI_Hmi.md](SPEC_UI_Hmi.md), [SPEC_Layout_Recipe.md](SPEC_Layout_Recipe.md)
-
-**HMI/시퀀스 실행 계획·규약:** [PLAN_Hmi_Sequence_Execution.md](PLAN_Hmi_Sequence_Execution.md), [CONVENTIONS_Hmi_Sequences.md](CONVENTIONS_Hmi_Sequences.md)
-
----
-
-## Phase 7 — History, 3D, analytics
-
-**Goals:** end-to-end portfolio story.
-
-- Lamination **2 s** sampling to **MongoDB** (or interim file store).
-- **Helix** 3D (optional) after UI stable.
-- **Python + React** dashboard for run/trend views (local).
-
-**Refs:** PRD 6.3, [SPEC_Layout_Recipe.md](SPEC_Layout_Recipe.md)
-
----
-
-## Change History
-
-| Date | Summary |
-|------|---------|
-| 2026-04-01 | Link PLAN/CONVENTIONS for HMI·sequence execution and naming. |
-| 2026-03-31 | Initial ROADMAP |
+- Python + React 로컬 대시보드 (공정 이력·트렌드)
+- Helix Toolkit 3D 설비 뷰 (선택)

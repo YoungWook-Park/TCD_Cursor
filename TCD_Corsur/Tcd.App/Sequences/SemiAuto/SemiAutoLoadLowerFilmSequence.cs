@@ -16,9 +16,17 @@ public sealed class SemiAutoLoadLowerFilmSequence : ISequence
 {
     #region Variables
 
+    private readonly SequenceManager _mgr;
+    private readonly TcdSimulation _sim;
+
+    public SemiAutoLoadLowerFilmSequence(SequenceManager mgr, TcdSimulation sim)
+    {
+        _mgr = mgr;
+        _sim = sim;
+    }
+
     public string Key => TcdSequenceKeys.SEMI_LoadLowerFilm;
     public string DisplayName => "SEMI: Load lower film to lower chamber";
-    public object Param { get; set; } = null!;
 
     private static readonly TimeSpan RobotWaitTimeout = TimeSpan.FromSeconds(2);
 
@@ -28,12 +36,10 @@ public sealed class SemiAutoLoadLowerFilmSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        Param = parameter;
-        var core = MainCore.Instance;
-        core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
+        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
 
-        var sim = core.Simulation;
-        var mgr = core.Sequences;
+        var sim = _sim;
+        var mgr = _mgr;
 
         if (sim.Materials.Get(MaterialLocation.LowerChamber) != null)
         {

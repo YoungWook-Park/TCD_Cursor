@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
-using Tcd.Core;
 using Tcd.Core.Logging;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -14,9 +13,12 @@ public sealed class SemiAutoUnloadProductToStage2Sequence : ISequence
 {
     #region Variables
 
+    private readonly SequenceManager _mgr;
+
+    public SemiAutoUnloadProductToStage2Sequence(SequenceManager mgr) => _mgr = mgr;
+
     public string Key => TcdSequenceKeys.SEMI_UnloadProductToStage2;
     public string DisplayName => "SEMI: Unload product to stage2";
-    public object Param { get; set; } = null!;
 
     private static readonly TimeSpan RobotWaitTimeout = TimeSpan.FromSeconds(2);
 
@@ -26,11 +28,9 @@ public sealed class SemiAutoUnloadProductToStage2Sequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        Param = parameter;
-        var core = MainCore.Instance;
-        core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
+        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
 
-        var mgr = core.Sequences;
+        var mgr = _mgr;
 
         var result = await mgr.RunAsync(TcdSequenceKeys.Robot_Move_LowerLoad, context, null, cancellationToken).ConfigureAwait(false);
         if (result.Status != SequenceStatus.Succeeded) return result;

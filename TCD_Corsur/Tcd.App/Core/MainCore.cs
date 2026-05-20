@@ -93,12 +93,12 @@ public sealed class MainCore
 
     private void RegisterSemiAutoAndAutoSequences()
     {
-        Sequences.Register(new SemiAutoLoadUpperFilmSequence());
-        Sequences.Register(new SemiAutoLoadLowerFilmSequence());
-        Sequences.Register(new SemiAutoAlignUVWSequence());
-        Sequences.Register(new SemiAutoBondSequence());
-        Sequences.Register(new SemiAutoUnloadProductToStage2Sequence());
-        Sequences.Register(new AutoRunSequence());
+        Sequences.Register(new SemiAutoLoadUpperFilmSequence(Sequences, Simulation));
+        Sequences.Register(new SemiAutoLoadLowerFilmSequence(Sequences, Simulation));
+        Sequences.Register(new SemiAutoAlignUVWSequence(Sequences, Simulation));
+        Sequences.Register(new SemiAutoBondSequence(Sequences));
+        Sequences.Register(new SemiAutoUnloadProductToStage2Sequence(Sequences));
+        Sequences.Register(new AutoRunSequence(Sequences));
     }
 
     private IMotionService CreateMotionService()
@@ -118,7 +118,7 @@ public sealed class AppSettings
     public TimeSpan AxisMoveTimeout  { get; set; } = TimeSpan.FromSeconds(3);
 
     // ── SPiiPlus 모션 ──────────────────────────────────────────────────────
-    public bool UseSpiiPlus  { get; set; } = true;
+    public bool UseSpiiPlus  { get; set; } = false;
     public string SpiiIpAddress { get; set; } = "10.0.0.100";
 
     // ── TCP 로봇 시뮬레이터 ────────────────────────────────────────────────

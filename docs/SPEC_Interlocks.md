@@ -1,54 +1,41 @@
-# SPEC: 인터락 (PC 선검사 + PLC 최종)
+# SPEC: 인터락
 
-| 항목 | 내용 |
-|------|------|
-| I/O | [SPEC_Control_IO.md](SPEC_Control_IO.md) |
+> 현재 일부 구현 (시퀀스 내 인터락 조건). PC 전체 `InterlockService`는 미구현.
 
 ---
 
-## 1. 원칙
+## 원칙
 
-- **PLC 맵**이 최종 허용/차단.
-- **PC** `InterlockService`는 명령 전 **동일 규칙**으로 선검사 → 불필요한 Fault·UX 개선.
-
----
-
-## 2. `EquipmentSnapshot`
-
-PLC 맵에서 읽은 읽기 전용 스냅샷 (주기 갱신):
-
-- 챔버 압력(kPa 스케일), `DI_*AtBond`, `DI_*AtReady`, `DO_VentValveOpen` / `DI_AtAtmospheric`
-- 상·하 챔버 위치(mm, 시뮬이 제공 시)
-- 펌프 Run, E-Stop, 도어 등
+- **PLC 맵**이 최종 허용/차단
+- **PC** `InterlockService`는 명령 전 동일 규칙으로 선검사 → 불필요한 Fault 방지
 
 ---
 
-## 3. `IInterlockRule`
+## 현재 구현된 인터락 (시퀀스 내)
 
-- `string RuleId { get; }`
-- `InterlockResult Evaluate(MotionIntent intent, EquipmentSnapshot s);`
-- `MotionIntent`: 축/명령 종류(PumpOn, MoveLowerZ, VentOpen, …), 목표값
-
----
-
-## 4. 규칙 예 (문서·코드 동기)
-
-| RuleId | 조건(개략) |
-|--------|------------|
-| `PumpRequiresBothBond` | `DO_VacPumpRequest` 허용 → `UpperAtBond && LowerAtBond` |
-| `LowerBlockedIfUpperPastBond` | 상부 위치 > 레시피 한계 → 하부 이동 명령 거부 |
-| `MoveRequiresAtmosphericOrSafe` | 벤트·대기압 미달 시 챔버 Z 이동 등 금지 (`DI_AtAtmospheric` 또는 압력 임계) |
+| 시퀀스 | 조건 | 위반 시 |
+|--------|------|---------|
+| `SEMI_LoadUpperFilm` | UpperChamber 비어있어야 함 | `Alarm(ChamberNotEmpty)` + Fail |
+| `SEMI_LoadLowerFilm` | LowerChamber 비어있어야 함 | `Alarm(ChamberNotEmpty)` + Fail |
+| `SEMI_AlignUVW` | Robot @ Home | `Alarm(RobotNotAtHome)` + Fail |
 
 ---
 
-## 5. 시퀀스·병렬
+## 추가 예정 규칙
 
-- `Task.WhenAll` 전 각 축 `AssertMove`; 장시간 이동 중에는 주기적 스냅샷 재검사 권장.
+| RuleId | 조건 |
+|--------|------|
+| `PumpRequiresBothBond` | 진공펌프 On → 양 챔버 합착 위치 모두 도달 |
+| `LowerBlockedIfUpperPastBond` | 상부 위치 > 한계 → 하부 이동 거부 |
+| `MoveRequiresAtmosphericOrSafe` | 벤트·대기압 미달 → 챔버 Z 이동 금지 |
 
 ---
 
-## 6. 변경 이력
+## `IInterlockRule` 인터페이스 (계획)
 
-| 일자 | 내용 |
-|------|------|
-| 2026-03-31 | 초안 |
+```csharp
+interface IInterlockRule {
+    string RuleId { get; }
+    InterlockResult Evaluate(MotionIntent intent, EquipmentSnapshot snapshot);
+}
+```

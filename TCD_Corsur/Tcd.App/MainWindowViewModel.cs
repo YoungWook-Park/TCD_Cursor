@@ -158,6 +158,38 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     #region UI Function
 
+    private void RunSequenceAsync(string key, object? param, string runningStatus, string doneStatus)
+    {
+        IsRunning = true;
+        Status = runningStatus;
+        _runCts = new CancellationTokenSource();
+        _sim.BindStopToken(_runCts.Token);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var result = await _seq.RunAsync(key, _sim, param, _runCts.Token).ConfigureAwait(false);
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    Status = result.Status == SequenceStatus.Succeeded
+                        ? doneStatus
+                        : $"Stopped/Failed: {result.Status}";
+                    IsRunning = false;
+                    RefreshSnapshot();
+                });
+            }
+            catch (Exception ex)
+            {
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    Alarms.Insert(0, $"[VM] {ex.Message}");
+                    Status = "Failed";
+                    IsRunning = false;
+                });
+            }
+        });
+    }
+
     private RelayCommand? cmd_LoadStageCommand;
     public ICommand Cmd_LoadStageCommand =>
         cmd_LoadStageCommand ??= new RelayCommand(PerformCmd_LoadStage, _ => !IsRunning);
@@ -170,107 +202,19 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
             RefreshSnapshot();
         }
         catch (Exception ex) { Alarms.Insert(0, $"[VM] {ex.Message}"); }
-        finally { }
     }
 
     private RelayCommand? cmd_StartAutoCommand;
     public ICommand Cmd_StartAutoCommand =>
-        cmd_StartAutoCommand ??= new RelayCommand(PerformCmd_StartAuto, _ => !IsRunning);
-
-    private void PerformCmd_StartAuto(object? commandParameter)
-    {
-        try
-        {
-            IsRunning = true;
-            Status = "Running...";
-            _runCts = new CancellationTokenSource();
-            _sim.BindStopToken(_runCts.Token);
-
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var result = await _seq.RunAsync(TcdSequenceKeys.AUTO_Run, _sim, null, _runCts.Token).ConfigureAwait(false);
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Status = result.Status == SequenceStatus.Succeeded ? "Done" : $"Stopped/Failed: {result.Status}";
-                        IsRunning = false;
-                    });
-                }
-                catch (Exception ex)
-                {
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Alarms.Insert(0, $"[VM] Exception: {ex.Message}");
-                        Status = "Failed";
-                        IsRunning = false;
-                    });
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Alarms.Insert(0, $"[VM] {ex.Message}");
-            Status = "Failed";
-            IsRunning = false;
-        }
-        finally { }
-    }
+        cmd_StartAutoCommand ??= new RelayCommand(_ => RunSequenceAsync(TcdSequenceKeys.AUTO_Run, null, "Running...", "Done"), _ => !IsRunning);
 
     private RelayCommand? cmd_StopCommand;
     public ICommand Cmd_StopCommand =>
-        cmd_StopCommand ??= new RelayCommand(PerformCmd_Stop, _ => IsRunning);
-
-    private void PerformCmd_Stop(object? commandParameter)
-    {
-        try { _runCts?.Cancel(); }
-        catch (Exception ex) { Alarms.Insert(0, $"[VM] {ex.Message}"); }
-        finally { }
-    }
+        cmd_StopCommand ??= new RelayCommand(_ => _runCts?.Cancel(), _ => IsRunning);
 
     private RelayCommand? cmd_UnloadProductCommand;
     public ICommand Cmd_UnloadProductCommand =>
-        cmd_UnloadProductCommand ??= new RelayCommand(PerformCmd_UnloadProduct, _ => !IsRunning);
-
-    private void PerformCmd_UnloadProduct(object? commandParameter)
-    {
-        try
-        {
-            IsRunning = true;
-            Status = "Unload product...";
-            _runCts = new CancellationTokenSource();
-            _sim.BindStopToken(_runCts.Token);
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var result = await _seq.RunAsync(TcdSequenceKeys.SEMI_UnloadProductToStage2, _sim, null, _runCts.Token).ConfigureAwait(false);
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Status = result.Status == SequenceStatus.Succeeded ? "Unload done" : $"Unload: {result.Status}";
-                        IsRunning = false;
-                        RefreshSnapshot();
-                    });
-                }
-                catch (Exception ex)
-                {
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Alarms.Insert(0, $"[VM] Unload: {ex.Message}");
-                        Status = "Unload failed";
-                        IsRunning = false;
-                    });
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            Alarms.Insert(0, $"[VM] {ex.Message}");
-            Status = "Failed";
-            IsRunning = false;
-        }
-        finally { }
-    }
+        cmd_UnloadProductCommand ??= new RelayCommand(_ => RunSequenceAsync(TcdSequenceKeys.SEMI_UnloadProductToStage2, null, "Unload product...", "Unload done"), _ => !IsRunning);
 
     private RelayCommand? cmd_ClearCommand;
     public ICommand Cmd_ClearCommand =>
