@@ -184,5 +184,13 @@
     }
   },
   "active": "136916c4762fca23",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "External/progbuffer.prg",
+    "docs/TECH_STACK.md",
+    "docs/SPEC_Sequence_Engine.md",
+    "docs/SPEC_Model_Flow.md",
+    "docs/SPEC_Architecture_Solution.md",
+    "docs/PLAN_Hmi_Sequence_Execution.md",
+    "docs/CONVENTIONS_Hmi_Sequences.md"
+  ]
 }
