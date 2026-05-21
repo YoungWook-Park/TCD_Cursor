@@ -8,17 +8,6 @@
              d:DesignHeight="580" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=local:Manual_RobotViewModel}">
   <UserControl.Resources>
-    <!-- Connection indicator: Green=connected, Gray=disconnected -->
-    <Style x:Key="ConnLedStyle" TargetType="Ellipse">
-      <Setter Property="Width"  Value="12"/>
-      <Setter Property="Height" Value="12"/>
-      <Setter Property="Fill"   Value="#555"/>
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsConnected}" Value="True">
-          <Setter Property="Fill" Value="#44DD66"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
     <!-- Running indicator: Yellow=running -->
     <Style x:Key="RunLedStyle" TargetType="Ellipse">
       <Setter Property="Width"  Value="12"/>
@@ -46,57 +35,11 @@
   <Grid Margin="8">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
-    <!-- ── Connection ─────────────────────────────────────────────────── -->
-    <GroupBox Grid.Row="0" Header="Connection" Margin="0,0,0,6">
-      <Grid Margin="8,4,8,8">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="100"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="70"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="*"/>
-          <!-- status indicators -->
-          <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-
-        <TextBlock Grid.Column="0" Text="Host:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-        <TextBox   Grid.Column="1" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
-                   VerticalContentAlignment="Center" Padding="4,2"/>
-
-        <TextBlock Grid.Column="2" Text="Port:" VerticalAlignment="Center" Margin="8,0,4,0"/>
-        <TextBox   Grid.Column="3" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
-                   VerticalContentAlignment="Center" Padding="4,2"/>
-
-        <Button Grid.Column="4" Content="Connect"
-                Style="{StaticResource PrimaryButtonStyle}"
-                Command="{Binding Cmd_Connect}"
-                Width="80" Margin="8,0,4,0"/>
-        <Button Grid.Column="5" Content="Disconnect"
-                Style="{StaticResource PrimaryButtonStyle}"
-                Command="{Binding Cmd_Disconnect}"
-                Width="85"/>
-
-        <!-- LED indicators -->
-        <StackPanel Grid.Column="7" Orientation="Horizontal"
-                    VerticalAlignment="Center" Margin="8,0,0,0">
-          <Ellipse Style="{StaticResource ConnLedStyle}" Margin="0,0,2,0"/>
-          <TextBlock Text="Conn" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
-          <Ellipse Style="{StaticResource RunLedStyle}" Margin="0,0,2,0"/>
-          <TextBlock Text="Run"  VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
-          <Ellipse Style="{StaticResource ErrLedStyle}" Margin="0,0,2,0"/>
-          <TextBlock Text="Err"  VerticalAlignment="Center" FontSize="11"/>
-        </StackPanel>
-      </Grid>
-    </GroupBox>
-
     <!-- ── Move Buttons ───────────────────────────────────────────────── -->
-    <GroupBox Grid.Row="1" Header="Teach Positions" Margin="0,0,0,6">
+    <GroupBox Grid.Row="0" Header="Teach Positions" Margin="0,0,0,6">
       <StackPanel Margin="8,4,8,8">
 
         <!-- Safe positions row -->
@@ -171,7 +114,7 @@
     </GroupBox>
 
     <!-- ── Status Log ──────────────────────────────────────────────────── -->
-    <GroupBox Grid.Row="2" Header="Status">
+    <GroupBox Grid.Row="1" Header="Status">
       <Grid Margin="8,4,8,8">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>

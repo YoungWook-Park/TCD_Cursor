@@ -31,6 +31,9 @@
         <DataTemplate DataType="{x:Type local:ManualViewModel}">
             <view:ManualView DataContext="{Binding}" />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:SettingsViewModel}">
+            <view:SettingsView DataContext="{Binding}" />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -94,6 +97,10 @@
                         Content="Manual"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowManualPage}" />
+                <Button Width="100" Margin="4"
+                        Content="Settings"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding Cmd_ShowSettingsPage}" />
             </StackPanel>
 
             <Button Grid.Column="1"
