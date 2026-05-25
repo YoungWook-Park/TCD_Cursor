@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
              xmlns:man="clr-namespace:Tcd.App.View"
+             xmlns:plc="clr-namespace:Tcd.App.View"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1600"
              d:DataContext="{d:DesignInstance Type=local:ManualViewModel}">
@@ -21,6 +22,10 @@
 
             <TabItem Header="Motor" Height="30" Width="100" >
                 <man:Manual_MotorView DataContext="{Binding Motor}"/>
+            </TabItem>
+
+            <TabItem Header="PLC" Height="30" Width="100">
+                <plc:PlcView DataContext="{Binding Plc}"/>
             </TabItem>
         </TabControl>
       </Grid>

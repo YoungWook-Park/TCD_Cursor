@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tcd.Simulator", "Tcd.Simula
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tcd.Robot.Simulator", "Tcd.Robot.Simulator\Tcd.Robot.Simulator.csproj", "{C1D2E3F4-A5B6-7890-CDEF-012345678901}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tcd.Plc.Simulator", "Tcd.Plc.Simulator\Tcd.Plc.Simulator.csproj", "{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,18 @@ Global
 		{C1D2E3F4-A5B6-7890-CDEF-012345678901}.Release|x64.Build.0 = Release|Any CPU
 		{C1D2E3F4-A5B6-7890-CDEF-012345678901}.Release|x86.ActiveCfg = Release|Any CPU
 		{C1D2E3F4-A5B6-7890-CDEF-012345678901}.Release|x86.Build.0 = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|ARM32.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|ARM32.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|x64.ActiveCfg = Release|Any CPU
+		{D2E3F4A5-B6C7-8901-DEFA-234567890BCD}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

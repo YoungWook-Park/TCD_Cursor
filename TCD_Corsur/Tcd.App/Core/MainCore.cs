@@ -42,6 +42,8 @@ public sealed class MainCore
     public LogContext LogContext { get; set; }
     /// <summary>TCP 로봇 시뮬레이터 클라이언트. ConnectAsync 호출 전까지 연결 안 됨.</summary>
     public IRobotDevice RobotDevice { get; private set; } = null!;
+    /// <summary>TCP PLC 클라이언트. ConnectAsync 호출 전까지 연결 안 됨.</summary>
+    public PlcTcpClient PlcDevice { get; private set; } = null!;
 
     private LogWriter? _logWriter;
 
@@ -69,8 +71,9 @@ public sealed class MainCore
         _logWriter.Start();
         Log = _logWriter;
 
-        // 5) TCP 로봇 디바이스 인스턴스 생성 (연결은 ViewModel에서 수행)
+        // 5) TCP 디바이스 인스턴스 생성 (연결은 ViewModel에서 수행)
         RobotDevice = new RobotTcpClient();
+        PlcDevice   = new PlcTcpClient();
 
         // 6) 시퀀스 등록 (시뮬레이터 원자 시퀀스 + 수동/반자동/자동)
         Sequences = TcdSequenceRegistry.Build(Simulation, Motion);
@@ -126,6 +129,12 @@ public sealed class AppSettings
     public string RobotSimHost { get; set; } = "127.0.0.1";
     /// <summary>로봇 시뮬레이터 서버 포트 (기본: 7001)</summary>
     public int    RobotSimPort { get; set; } = 7001;
+
+    // ── TCP PLC 시뮬레이터 ─────────────────────────────────────────────────
+    /// <summary>PLC 시뮬레이터 서버 주소 (기본: localhost)</summary>
+    public string PlcSimHost { get; set; } = "127.0.0.1";
+    /// <summary>PLC 시뮬레이터 서버 포트 (기본: 7002)</summary>
+    public int    PlcSimPort { get; set; } = 7002;
 
     public static AppSettings CreateDefaults() => new();
 }

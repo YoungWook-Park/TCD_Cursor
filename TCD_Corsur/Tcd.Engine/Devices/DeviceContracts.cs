@@ -40,6 +40,34 @@ namespace Tcd.Devices
 
     public interface IPlc
     {
-        Task<bool> WaitForStageLoadedAsync(TimeSpan timeout, CancellationToken cancellationToken);
+        // ── 기존 ──────────────────────────────────────────────────────────
+        Task<bool> WaitForStageLoadedAsync(
+            TimeSpan timeout, CancellationToken cancellationToken);
+
+        // ── 개별 Read / Write ──────────────────────────────────────────────
+        Task<bool>  ReadBitAsync(DiBit address, CancellationToken ct);
+        Task        WriteBitAsync(DoBit address, bool value, CancellationToken ct);
+        Task<short> ReadWordAsync(AiWord address, CancellationToken ct);
+        Task        WriteWordAsync(AoWord address, short value, CancellationToken ct);
+
+        // ── IO맵 전체 주기 폴링 ────────────────────────────────────────────
+        void StartMonitoring(TimeSpan interval);
+        void StopMonitoring();
+        event EventHandler<PlcSnapshotArgs> SnapshotUpdated;
+    }
+
+    /// <summary>IO맵 전체 스냅샷 이벤트 인자.</summary>
+    public sealed class PlcSnapshotArgs : EventArgs
+    {
+        /// <summary>비트 바이트 배열 (B0~B7, 64비트).</summary>
+        public byte[] Bits { get; set; }
+        /// <summary>워드 배열 (W0~W31).</summary>
+        public short[] Words { get; set; }
+
+        public PlcSnapshotArgs(byte[] bits, short[] words)
+        {
+            Bits  = bits;
+            Words = words;
+        }
     }
 }
