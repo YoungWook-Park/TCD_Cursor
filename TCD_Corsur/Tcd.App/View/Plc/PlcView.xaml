@@ -126,7 +126,7 @@
         <StackPanel Grid.Column="9" Orientation="Horizontal"
                     VerticalAlignment="Center" Margin="8,0,0,0">
           <Ellipse Style="{StaticResource ConnLedStyle}" Margin="0,0,3,0"/>
-          <TextBlock Text="Conn" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="11"/>
+          <TextBlock Text="Conn" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="11" Cursor=""/>
           <Ellipse Style="{StaticResource MonLedStyle}"  Margin="0,0,3,0"/>
           <TextBlock Text="Mon"  VerticalAlignment="Center" FontSize="11"/>
         </StackPanel>

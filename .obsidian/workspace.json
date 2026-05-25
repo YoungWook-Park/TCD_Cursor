@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/DEVELOPMENT_GUIDELINES.md",
+                "file": "docs/CLASS_DESIGN.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DEVELOPMENT_GUIDELINES"
+              "title": "CLASS_DESIGN"
             }
           }
         ]
@@ -185,7 +185,18 @@
   },
   "active": "136916c4762fca23",
   "lastOpenFiles": [
-    "External/progbuffer.prg",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/Tcd.App.dll",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Recipe/RecipeView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Plc/PlcView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Manual/Manual_RobotView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Manual/Manual_MotorView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Manual/ManualView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/View/Equipment/EquipmentDiagramView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/MainWindow.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/MainView.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/App.baml",
+    "TCD_Corsur/Tcd.App/obj/Debug/net8.0-windows/Tcd.App_s5onywip_wpftmp.csproj.BuildWithSkipAnalyzers",
+    "docs/DEVELOPMENT_GUIDELINES.md",
     "docs/TECH_STACK.md",
     "docs/SPEC_Sequence_Engine.md",
     "docs/SPEC_Model_Flow.md",
