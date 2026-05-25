@@ -6,7 +6,7 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="900"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:Manual_MotorViewModel}">
   <UserControl.Resources>
     <!-- 셀 상태 색상 (배경 틴트 + 텍스트) -->
@@ -134,8 +134,15 @@
       </Grid>
     </GroupBox>
 
-    <!-- Motor status grid: 개별 셀별 색상 표시 -->
-    <GroupBox Grid.Row="1" Header="Motor Status">
+    <!-- Motor Status + Teach Positions (좌우 분할) -->
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- 좌: Motor Status -->
+      <GroupBox Grid.Column="0" Header="Motor Status">
       <DataGrid ItemsSource="{Binding AxisStatuses}"
                 AutoGenerateColumns="False"
                 IsReadOnly="True"
@@ -338,6 +345,74 @@
         </DataGrid.Columns>
       </DataGrid>
     </GroupBox>
+
+      <!-- 우: Teach Positions -->
+      <GroupBox Grid.Column="1" Margin="8,0,0,0" Header="Teach Positions">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+
+          <!-- 툴바 -->
+          <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,4,4,4">
+            <Button Content="Add" Width="60" Margin="0,0,4,0"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_AddTeachRow}"/>
+            <Button Content="Remove" Width="70" Margin="0,0,12,0"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_RemoveTeachRow}"/>
+            <Button Content="Load from Recipe" Width="120" Margin="0,0,4,0"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LoadTeachPositions}"/>
+            <Button Content="Save to Recipe" Width="110"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_SaveTeachPositions}"/>
+          </StackPanel>
+
+          <!-- DataGrid -->
+          <DataGrid Grid.Row="1"
+                    ItemsSource="{Binding TeachPositions}"
+                    SelectedItem="{Binding SelectedTeachPosition}"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    RowHeight="26"
+                    Margin="4,0,4,4">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Name"   Width="100"
+                  Binding="{Binding Name, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="U"      Width="60"
+                  Binding="{Binding U, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="V"      Width="60"
+                  Binding="{Binding V, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="W"      Width="60"
+                  Binding="{Binding W, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="ZLower" Width="70"
+                  Binding="{Binding ZLower, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="ZUpper" Width="70"
+                  Binding="{Binding ZUpper, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="Vel"    Width="60"
+                  Binding="{Binding Velocity, StringFormat=N0, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTextColumn Header="Acc"    Width="60"
+                  Binding="{Binding Acc, StringFormat=N0, UpdateSourceTrigger=LostFocus}"/>
+              <DataGridTemplateColumn Header="Action" Width="70">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Content="Move To"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Margin="2,1"
+                            CommandParameter="{Binding}"
+                            Command="{Binding DataContext.Cmd_MoveToPosition,
+                                RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </GroupBox>
+
+    </Grid><!-- end Motor Status + Teach Positions -->
 
     <!-- Stop button -->
     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">

@@ -1,0 +1,4 @@
+# Memory Index — work-commit-pusher Agent
+
+- [User Role](user_role.md) — TCD_Cursor WPF HMI 프로젝트 개발자 프로필
+- [Session 2026-05-21](session_2026-05-21.md) — .claude 폴더 구조 정리, 커스텀 커맨드 추가, GitHub CLI 설정

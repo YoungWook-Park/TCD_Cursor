@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="580" d:DesignWidth="800"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:Manual_RobotViewModel}">
   <UserControl.Resources>
     <!-- Running indicator: Yellow=running -->

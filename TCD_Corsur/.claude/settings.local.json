@@ -13,7 +13,9 @@
       "PowerShell(gh label *)",
       "Bash(rm \"D:/project/TCD_Cursor/.claude/settings.local.json\")",
       "Bash(rmdir \"D:/project/TCD_Cursor/.claude\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "Bash(Select-Object Name)"
     ]
   }
 }
