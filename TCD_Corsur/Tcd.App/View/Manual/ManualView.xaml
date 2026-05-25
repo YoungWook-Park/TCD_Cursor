@@ -7,7 +7,7 @@
              xmlns:man="clr-namespace:Tcd.App.View"
              xmlns:plc="clr-namespace:Tcd.App.View"
              mc:Ignorable="d"
-             d:DesignHeight="800" d:DesignWidth="1600"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:ManualViewModel}">
       <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
           <Grid.RowDefinitions>

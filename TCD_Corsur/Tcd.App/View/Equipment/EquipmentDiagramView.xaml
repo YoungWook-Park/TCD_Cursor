@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="380" d:DesignWidth="540"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}">
   <UserControl.Resources>
 

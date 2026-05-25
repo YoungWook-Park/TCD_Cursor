@@ -30,12 +30,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     private readonly IRobotDevice _robot;
     private CancellationTokenSource? _activeCts;
 
-    private string _logStatus      = "";
-    private bool   _isConnecting   = false;
-
-    // ── 편집 가능 연결 설정 ───────────────────────────────────────────────
-    private string _host;
-    private int    _port;
+    private string _logStatus = "";
 
     #endregion
 
@@ -44,37 +39,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public Manual_RobotViewModel()
     {
         _robot = _core.RobotDevice;
-        _host  = _core.Settings.RobotSimHost;
-        _port  = _core.Settings.RobotSimPort;
-
         _robot.StateChanged += OnRobotStateChanged;
-    }
-
-    #endregion
-
-    #region Connection Properties
-
-    public string Host
-    {
-        get => _host;
-        set => Set(ref _host, value);
-    }
-
-    public int Port
-    {
-        get => _port;
-        set => Set(ref _port, value);
-    }
-
-    public bool IsConnecting
-    {
-        get => _isConnecting;
-        private set
-        {
-            if (!Set(ref _isConnecting, value)) return;
-            cmd_Connect?.RaiseCanExecuteChanged();
-            cmd_Disconnect?.RaiseCanExecuteChanged();
-        }
     }
 
     #endregion
@@ -122,8 +87,6 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
     private void RaiseMoveCommandsCanExecute()
     {
-        cmd_Connect?.RaiseCanExecuteChanged();
-        cmd_Disconnect?.RaiseCanExecuteChanged();
         cmd_Stop?.RaiseCanExecuteChanged();
         cmd_MoveHome?.RaiseCanExecuteChanged();
         cmd_MoveReady?.RaiseCanExecuteChanged();
@@ -204,48 +167,6 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
     private void SetLog(string msg) =>
         Application.Current?.Dispatcher.Invoke(() => LogStatus = msg);
-
-    #endregion
-
-    #region Commands — Connection
-
-    private RelayCommand? cmd_Connect;
-    public ICommand Cmd_Connect => cmd_Connect ??=
-        new RelayCommand(
-            _ => ConnectAsync(),
-            _ => !IsConnected && !IsConnecting);
-
-    private RelayCommand? cmd_Disconnect;
-    public ICommand Cmd_Disconnect => cmd_Disconnect ??=
-        new RelayCommand(
-            _ => _robot.Disconnect(),
-            _ => IsConnected);
-
-    private void ConnectAsync()
-    {
-        IsConnecting = true;
-        LogStatus = $"Connecting to {Host}:{Port}...";
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await _robot.ConnectAsync(Host, Port).ConfigureAwait(false);
-                SetLog($"Connected to {Host}:{Port}");
-            }
-            catch (Exception ex)
-            {
-                SetLog($"Connect failed: {ex.Message}");
-            }
-            finally
-            {
-                Application.Current?.Dispatcher.Invoke(() =>
-                {
-                    IsConnecting = false;
-                    RaiseMoveCommandsCanExecute();
-                });
-            }
-        });
-    }
 
     #endregion
 

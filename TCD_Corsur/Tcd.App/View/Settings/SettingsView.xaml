@@ -1,0 +1,33 @@
+<UserControl x:Class="Tcd.App.View.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             xmlns:s="clr-namespace:Tcd.App.View"
+             mc:Ignorable="d"
+             d:DesignHeight="850" d:DesignWidth="1800"
+             d:DataContext="{d:DesignInstance Type=local:SettingsViewModel}">
+
+  <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
+    <!-- 외부 탭: Device / (향후 확장 가능) -->
+    <TabControl>
+      <TabItem Header="Device" Height="30" Width="100">
+
+        <!-- 내부 탭: SPiiPlus / Robot / PLC -->
+        <TabControl>
+          <TabItem Header="SPiiPlus" Height="30" Width="100">
+            <s:Device_SpiiPlusView DataContext="{Binding SpiiPlus}"/>
+          </TabItem>
+          <TabItem Header="Robot" Height="30" Width="100">
+            <s:Device_RobotView DataContext="{Binding Robot}"/>
+          </TabItem>
+          <TabItem Header="PLC" Height="30" Width="100">
+            <s:Device_PlcView DataContext="{Binding Plc}"/>
+          </TabItem>
+        </TabControl>
+
+      </TabItem>
+    </TabControl>
+  </Grid>
+</UserControl>

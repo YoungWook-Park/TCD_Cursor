@@ -19,7 +19,7 @@ namespace Tcd.Sequence
         Failed = 1,
         Stopped = 2,
     }
-
+    
     public sealed class NodeRunResult
     {
         private NodeRunResult(NodeRunStatus status, string error)

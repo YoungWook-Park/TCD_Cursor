@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="560" d:DesignWidth="860"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:RecipeViewModel}">
     <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
         <Grid.ColumnDefinitions>

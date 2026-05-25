@@ -32,7 +32,9 @@ public static class Manual_AxisV
             CheckMotionInterlock(ctx);
             var core = MainCore.Instance;
             core.LogContext = new LogContext { SequenceKey = TcdSequenceKeys.Manual_Motor_V_AbsMove, RunId = Guid.NewGuid(), AxisName = Axis };
-            var target = core.Recipes.Current?.GetAxis(Axis, 0) ?? 0;
+            var target = p is double d ? d
+                : (p is IConvertible c ? c.ToDouble(null)
+                : (core.Recipes.Current?.GetAxis(Axis, 0) ?? 0));
             core.Log.Info(core.LogContext, "Start", $"AbsMove target={target}");
             await core.Motion.AbsMoveAsync(Axis, target, ct).ConfigureAwait(false);
             core.Log.Info(core.LogContext, "End", "AbsMove 완료");
