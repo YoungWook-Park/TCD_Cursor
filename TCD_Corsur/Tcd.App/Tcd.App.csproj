@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Reference Include="ACS.SPiiPlusNET">
-      <HintPath>..\Dll\ACS.SPiiPlusNET.dll</HintPath>
+      <HintPath>..\..\External\ACS.SPiiPlusNET.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -50,9 +50,10 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         _sim = _core.Simulation;
         _seq = _core.Sequences;
 
-        Recipe = new RecipeViewModel();
-        Manual = new ManualViewModel();
         Plc    = new PlcViewModel();
+        Recipe   = new RecipeViewModel();
+        Manual   = new ManualViewModel();
+        Settings = new SettingsViewModel();
         CurrentContent = Main;
 
         _core.Recipes.CurrentChanged += (_, _) => Raise(nameof(CurrentRecipeName));
@@ -81,7 +82,6 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     public MainWindowViewModel Main => this;
     public RecipeViewModel Recipe { get; }
     public ManualViewModel Manual { get; }
-    public PlcViewModel Plc { get; }
 
     public object CurrentContent
     {
@@ -251,9 +251,6 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     private RelayCommand? cmd_ShowManualPage;
     public ICommand Cmd_ShowManualPage => cmd_ShowManualPage ??= new RelayCommand(_ => CurrentContent = Manual);
-
-    private RelayCommand? cmd_ShowPlcPage;
-    public ICommand Cmd_ShowPlcPage => cmd_ShowPlcPage ??= new RelayCommand(_ => CurrentContent = Plc);
 
     #endregion
 }

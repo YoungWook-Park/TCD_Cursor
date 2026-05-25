@@ -13,7 +13,7 @@
                  WindowState="Maximized"
                  d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
                  
-                 d:DesignHeight="830" d:DesignWidth="1600" x:Name="uc"
+                 d:DesignHeight="850" d:DesignWidth="1800" x:Name="uc"
                  Background="{StaticResource WindowBackgroundBrush}">
     <behavior:Interaction.Triggers>
         <behavior:PropertyChangedTrigger Binding="{Binding IsVisible, ElementName=uc}">
@@ -33,6 +33,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:PlcViewModel}">
             <view:PlcView DataContext="{Binding}" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:SettingsViewModel}">
+            <view:SettingsView DataContext="{Binding}" />
         </DataTemplate>
     </Window.Resources>
 
@@ -97,10 +100,6 @@
                         Content="Manual"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowManualPage}" />
-                <Button Width="100" Margin="4"
-                        Content="PLC"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding Cmd_ShowPlcPage}" />
             </StackPanel>
 
             <Button Grid.Column="1"

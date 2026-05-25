@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -40,6 +41,19 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
         [AxisDefine.ZUpper] = TcdSequenceKeys.Manual_Motor_ZUpper_AbsMove,
     };
 
+    // 축 이름 → TextBox 바인딩 프로퍼티 매핑
+    private static readonly IReadOnlyDictionary<string, Func<Manual_MotorViewModel, string>>
+        AxisTextBoxGetters = new Dictionary<string, Func<Manual_MotorViewModel, string>>
+        {
+            [AxisDefine.U]      = vm => vm.U,
+            [AxisDefine.V]      = vm => vm.V,
+            [AxisDefine.W]      = vm => vm.W,
+            [AxisDefine.ZLower] = vm => vm.ZLoad,
+            [AxisDefine.ZUpper] = vm => vm.ZBond,
+        };
+
+    private TeachPosition? _selectedTeachPosition;
+
     // 축별 Stop 시퀀스 키 테이블
     private static readonly IReadOnlyDictionary<string, string> StopSeqKeys = new Dictionary<string, string>
     {
@@ -57,6 +71,7 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     public Manual_MotorViewModel()
     {
         PullFromRecipe();
+        LoadTeachPositions();
 
         foreach (var axisName in AxisDefine.InOrder)
             AxisStatuses.Add(new AxisStatusItem { AxisName = axisName });
@@ -85,8 +100,15 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     public string SelectedAxis { get => _selectedAxis; set => Set(ref _selectedAxis, value); }
     public string JogSpeed   { get => _jogSpeed;      set => Set(ref _jogSpeed, value); }
 
+    public TeachPosition? SelectedTeachPosition
+    {
+        get => _selectedTeachPosition;
+        set => Set(ref _selectedTeachPosition, value);
+    }
+
     public ObservableCollection<string> Axes { get; } = new(AxisDefine.InOrder);
     public ObservableCollection<AxisStatusItem> AxisStatuses { get; } = new();
+    public ObservableCollection<TeachPosition> TeachPositions { get; } = new();
 
     #endregion
 
@@ -124,7 +146,12 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     private void MoveAxis(string axis)
     {
         if (!AbsMoveSeqKeys.TryGetValue(axis, out var seqKey)) return;
-        RunOperation(seqKey, axis, "Move");
+        if (!AxisTextBoxGetters.TryGetValue(axis, out var getter)) return;
+        if (!double.TryParse(getter(this),
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var target)) return;
+        RunOperation(seqKey, axis, "Move", target);
     }
 
     private void StopAxis(string axis)
@@ -172,6 +199,56 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
 
     private double CurrentPosition(string axis) => _core.AxisStateProvider.GetAxisState(axis).Position;
 
+    private void AddTeachRow()
+        => TeachPositions.Add(new TeachPosition { Name = $"Pos {TeachPositions.Count + 1}" });
+
+    private void RemoveTeachRow()
+    {
+        if (SelectedTeachPosition != null)
+            TeachPositions.Remove(SelectedTeachPosition);
+    }
+
+    private void MoveToPosition(TeachPosition? pos)
+    {
+        if (pos == null) return;
+        _activeCts?.Cancel();
+        _activeCts?.Dispose();
+        var cts = _activeCts = new CancellationTokenSource();
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var tasks = AxisDefine.InOrder
+                    .Where(a => AbsMoveSeqKeys.ContainsKey(a))
+                    .Select(a => (Task)_core.Sequences.RunAsync(
+                        AbsMoveSeqKeys[a], _core.Simulation, pos.GetAxis(a), cts.Token))
+                    .ToArray();
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+                LogStatus = $"Move to '{pos.Name}' completed";
+            }
+            catch (OperationCanceledException) { LogStatus = "Move to position cancelled"; }
+            catch (Exception ex) { LogStatus = ex.Message; }
+        });
+    }
+
+    private void SaveTeachPositions()
+    {
+        var recipe = _core.Recipes.Current ?? new TcdRecipe();
+        recipe.TeachPositions = TeachPositions.ToList();
+        _core.RecipeRepository.Save(recipe);
+        _core.Recipes.Current = recipe;
+        LogStatus = $"Teach positions saved ({TeachPositions.Count} rows)";
+    }
+
+    private void LoadTeachPositions()
+    {
+        TeachPositions.Clear();
+        var positions = _core.Recipes.Current?.TeachPositions;
+        if (positions == null) return;
+        foreach (var p in positions) TeachPositions.Add(p);
+        LogStatus = $"Teach positions loaded ({TeachPositions.Count} rows)";
+    }
+
     private void RefreshAxisStatus()
     {
         try
@@ -198,7 +275,8 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     /// 시퀀스를 비동기 실행. 이전 동작이 진행 중이면 취소 후 새 동작 시작.
     /// 같은 버튼을 다시 누르면 이전 시퀀스가 취소되고 재시작됨.
     /// </summary>
-    private void RunOperation(string seqKey, string axisLabel, string actionLabel)
+    private void RunOperation(
+        string seqKey, string axisLabel, string actionLabel, object? param = null)
     {
         _activeCts?.Cancel();
         _activeCts?.Dispose();
@@ -209,7 +287,7 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
         {
             try
             {
-                var result = await _core.Sequences.RunAsync(seqKey, _core.Simulation, null, cts.Token).ConfigureAwait(false);
+                var result = await _core.Sequences.RunAsync(seqKey, _core.Simulation, param, cts.Token).ConfigureAwait(false);
                 LogStatus = result.Status == SequenceStatus.Succeeded
                     ? $"{axisLabel} {actionLabel} completed"
                     : result.Error ?? $"{axisLabel} {actionLabel} failed";
@@ -333,6 +411,27 @@ public sealed class Manual_MotorViewModel : NotifyPropertyChangedBase
     // ── Stop All ──────────────────────────────────────────────────────────────
     private RelayCommand? cmd_StopAllMotors;
     public ICommand Cmd_StopAllMotors => cmd_StopAllMotors ??= new RelayCommand(_ => StopAllMotors());
+
+    // ── Teach Positions ───────────────────────────────────────────────────────
+    private RelayCommand? cmd_AddTeachRow;
+    public ICommand Cmd_AddTeachRow =>
+        cmd_AddTeachRow ??= new RelayCommand(_ => AddTeachRow());
+
+    private RelayCommand? cmd_RemoveTeachRow;
+    public ICommand Cmd_RemoveTeachRow =>
+        cmd_RemoveTeachRow ??= new RelayCommand(_ => RemoveTeachRow());
+
+    private RelayCommand? cmd_MoveToPosition;
+    public ICommand Cmd_MoveToPosition =>
+        cmd_MoveToPosition ??= new RelayCommand(p => MoveToPosition(p as TeachPosition));
+
+    private RelayCommand? cmd_SaveTeachPositions;
+    public ICommand Cmd_SaveTeachPositions =>
+        cmd_SaveTeachPositions ??= new RelayCommand(_ => SaveTeachPositions());
+
+    private RelayCommand? cmd_LoadTeachPositions;
+    public ICommand Cmd_LoadTeachPositions =>
+        cmd_LoadTeachPositions ??= new RelayCommand(_ => LoadTeachPositions());
 
     #endregion
 

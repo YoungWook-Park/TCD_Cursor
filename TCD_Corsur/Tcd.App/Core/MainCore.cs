@@ -104,6 +104,24 @@ public sealed class MainCore
         Sequences.Register(new AutoRunSequence(Sequences));
     }
 
+    public void SwitchToSpiiPlus(string ipAddress)
+    {
+        if (Motion is IDisposable d) d.Dispose();
+        Settings.SpiiIpAddress = ipAddress;
+        Settings.UseSpiiPlus = true;
+        Motion = new Spii.SpiiPlusMotionService(ipAddress);
+        AxisStateProvider = (IAxisStateProvider)Motion;
+    }
+
+    public void SwitchToSimulation()
+    {
+        if (Motion is IDisposable d) d.Dispose();
+        Settings.UseSpiiPlus = false;
+        var proxy = new AppSettingsProxy(Settings.AxisMoveTimeout);
+        Motion = new SimMotionService(Simulation, proxy);
+        AxisStateProvider = (IAxisStateProvider)Motion;
+    }
+
     private IMotionService CreateMotionService()
     {
         if (Settings.UseSpiiPlus)
@@ -121,7 +139,7 @@ public sealed class AppSettings
     public TimeSpan AxisMoveTimeout  { get; set; } = TimeSpan.FromSeconds(3);
 
     // ── SPiiPlus 모션 ──────────────────────────────────────────────────────
-    public bool UseSpiiPlus  { get; set; } = false;
+    public bool UseSpiiPlus  { get; set; } = true;
     public string SpiiIpAddress { get; set; } = "10.0.0.100";
 
     // ── TCP 로봇 시뮬레이터 ────────────────────────────────────────────────

@@ -53,3 +53,6 @@ artifacts/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Obsidian
+.obsidian/

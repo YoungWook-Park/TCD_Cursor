@@ -79,5 +79,7 @@ public sealed class TcdRecipe
     }
 
     public void SetAxis(string key, double value) => AxisTeach[key] = value;
+
+    public List<TeachPosition> TeachPositions { get; set; } = new();
 }
 

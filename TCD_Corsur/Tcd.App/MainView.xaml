@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Tcd.App"
              xmlns:equip="clr-namespace:Tcd.App.View"
              mc:Ignorable="d"
-             d:DesignHeight="850" d:DesignWidth="1600"
+             d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}">
     <Grid>
         <Grid.RowDefinitions>

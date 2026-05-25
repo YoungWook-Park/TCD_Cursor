@@ -1,0 +1,98 @@
+<UserControl x:Class="Tcd.App.View.Device_RobotView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             mc:Ignorable="d"
+             d:DesignHeight="850" d:DesignWidth="1800"
+             d:DataContext="{d:DesignInstance Type=local:Device_RobotViewModel}">
+
+  <UserControl.Resources>
+    <Style x:Key="ConnLedStyle" TargetType="Ellipse">
+      <Setter Property="Width"  Value="12"/>
+      <Setter Property="Height" Value="12"/>
+      <Setter Property="Fill"   Value="#555"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsConnected}" Value="True">
+          <Setter Property="Fill" Value="#44DD66"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <!-- ── Connection ──────────────────────────────────────────────── -->
+    <GroupBox Grid.Row="0" Header="Robot TCP Client" Margin="0,0,0,8">
+      <Grid Margin="8,6,8,8">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Host + Port -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="70"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0"
+                     Text="Host:"
+                     VerticalAlignment="Center"
+                     Margin="0,0,6,0"/>
+          <TextBox Grid.Column="1"
+                   Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
+                   VerticalContentAlignment="Center"
+                   Padding="4,2"/>
+          <TextBlock Grid.Column="2"
+                     Text="Port:"
+                     VerticalAlignment="Center"
+                     Margin="12,0,6,0"/>
+          <TextBox Grid.Column="3"
+                   Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                   VerticalContentAlignment="Center"
+                   Padding="4,2"/>
+        </Grid>
+
+        <!-- Row 1: Connect / Disconnect + LED -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+          <Button Content="Connect"
+                  Width="85"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_Connect}"
+                  Margin="0,0,6,0"/>
+          <Button Content="Disconnect"
+                  Width="90"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_Disconnect}"
+                  Margin="0,0,16,0"/>
+          <Ellipse Style="{StaticResource ConnLedStyle}"
+                   VerticalAlignment="Center"
+                   Margin="0,0,4,0"/>
+          <TextBlock Text="Connected"
+                     VerticalAlignment="Center"
+                     FontSize="11"
+                     Foreground="#AAA"/>
+        </StackPanel>
+      </Grid>
+    </GroupBox>
+
+    <!-- ── Status ───────────────────────────────────────────────────── -->
+    <GroupBox Grid.Row="1" Header="Status">
+      <TextBlock Margin="8,6"
+                 Text="{Binding StatusMessage}"
+                 FontFamily="Consolas"
+                 FontSize="12"
+                 TextWrapping="Wrap"/>
+    </GroupBox>
+
+  </Grid>
+</UserControl>
