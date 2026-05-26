@@ -21,6 +21,6 @@
 
 ### 브랜치 / 커밋
 - Branch: develop/SettingUI
-- Commit: (아래 커밋 후 갱신)
+- Commit: 5b79770 — feat(app): Robot 뷰 추가 및 Recipe 파사드 패턴 적용
 
 ---
