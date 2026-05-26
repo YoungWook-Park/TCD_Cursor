@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="../Controls/Button.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- Connection status LED (green=connected) -->
+  <Style x:Key="ConnLedStyle" TargetType="Ellipse">
+    <Setter Property="Width"  Value="12"/>
+    <Setter Property="Height" Value="12"/>
+    <Setter Property="Fill"   Value="#555"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsConnected}" Value="True">
+        <Setter Property="Fill" Value="#44DD66"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Monitor status LED (yellow=monitoring active) -->
+  <Style x:Key="MonLedStyle" TargetType="Ellipse">
+    <Setter Property="Width"  Value="12"/>
+    <Setter Property="Height" Value="12"/>
+    <Setter Property="Fill"   Value="#555"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsMonitoring}" Value="True">
+        <Setter Property="Fill" Value="#FFDD44"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- DO output toggle button -->
+  <Style x:Key="DoToggleStyle" TargetType="Button"
+         BasedOn="{StaticResource PrimaryButtonStyle}">
+    <Setter Property="Width"  Value="130"/>
+    <Setter Property="Height" Value="26"/>
+    <Setter Property="Margin" Value="0,3,0,0"/>
+  </Style>
+
+  <!-- AI channel large numeric readout -->
+  <Style x:Key="AiValueStyle" TargetType="TextBlock">
+    <Setter Property="FontFamily"         Value="Consolas"/>
+    <Setter Property="FontSize"           Value="22"/>
+    <Setter Property="Foreground"         Value="#3FA9F5"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+  </Style>
+
+  <!-- AI channel label (small caption below value) -->
+  <Style x:Key="AiLabelStyle" TargetType="TextBlock">
+    <Setter Property="FontSize"           Value="11"/>
+    <Setter Property="Foreground"         Value="#AAA"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Setter Property="Margin"             Value="0,2,0,0"/>
+  </Style>
+
+</ResourceDictionary>

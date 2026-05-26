@@ -148,8 +148,7 @@ public sealed class RecipeViewModel : NotifyPropertyChangedBase
     private void LoadSelected()
     {
         if (string.IsNullOrWhiteSpace(SelectedRecipeName)) return;
-        _loaded = _core.RecipeRepository.Load(SelectedRecipeName);
-        _core.Recipes.Current = _loaded;
+        _loaded = _core.LoadRecipe(SelectedRecipeName);
 
         // Motor 탭
         EditName      = _loaded.Name;
@@ -201,14 +200,24 @@ public sealed class RecipeViewModel : NotifyPropertyChangedBase
     #region Commands
 
     private RelayCommand? cmd_Reload;
-    public ICommand Cmd_Reload => cmd_Reload ??= new RelayCommand(_ =>
+    public ICommand Cmd_Reload => cmd_Reload ??= new RelayCommand(OnCmd_Reload);
+
+    private RelayCommand? cmd_New;
+    public ICommand Cmd_New => cmd_New ??= new RelayCommand(OnCmd_New);
+
+    private RelayCommand? cmd_Save;
+    public ICommand Cmd_Save => cmd_Save ??= new RelayCommand(OnCmd_Save);
+
+    private RelayCommand? cmd_SaveAs;
+    public ICommand Cmd_SaveAs => cmd_SaveAs ??= new RelayCommand(OnCmd_SaveAs);
+
+    private void OnCmd_Reload(object? _)
     {
         try { Reload(); }
         catch (Exception ex) { Status = ex.Message; }
-    });
+    }
 
-    private RelayCommand? cmd_New;
-    public ICommand Cmd_New => cmd_New ??= new RelayCommand(_ =>
+    private void OnCmd_New(object? _)
     {
         try
         {
@@ -220,33 +229,29 @@ public sealed class RecipeViewModel : NotifyPropertyChangedBase
             MotionVelocity = "100"; MotionAcc = "1000";
             MotionDec = "1000"; MotionJerk = "1000";
 
-            // Robot 탭 — 신규 레시피 기본값으로 초기화
             foreach (var row in RobotVelocityRows)
                 row.Velocity = _loaded.GetRobotVelocity(row.PositionName).ToString();
 
             Status = "New recipe (not saved).";
         }
         catch (Exception ex) { Status = ex.Message; }
-    });
+    }
 
-    private RelayCommand? cmd_Save;
-    public ICommand Cmd_Save => cmd_Save ??= new RelayCommand(_ =>
+    private void OnCmd_Save(object? _)
     {
         try
         {
             var r = BuildFromEditor();
-            _core.RecipeRepository.Save(r);
+            _core.SaveRecipe(r);
             _loaded = r;
-            _core.Recipes.Current = _loaded;
             Reload();
             SelectedRecipeName = r.Name;
             Status = $"Saved: {r.Name}";
         }
         catch (Exception ex) { Status = ex.Message; }
-    });
+    }
 
-    private RelayCommand? cmd_SaveAs;
-    public ICommand Cmd_SaveAs => cmd_SaveAs ??= new RelayCommand(_ =>
+    private void OnCmd_SaveAs(object? _)
     {
         try
         {
@@ -254,15 +259,14 @@ public sealed class RecipeViewModel : NotifyPropertyChangedBase
             if (string.IsNullOrWhiteSpace(r.Name) ||
                 r.Name.Equals(_loaded?.Name, StringComparison.OrdinalIgnoreCase))
                 r.Name = $"{r.Name}_Copy";
-            _core.RecipeRepository.Save(r);
+            _core.SaveRecipe(r);
             _loaded = r;
-            _core.Recipes.Current = _loaded;
             Reload();
             SelectedRecipeName = r.Name;
             Status = $"Saved As: {r.Name}";
         }
         catch (Exception ex) { Status = ex.Message; }
-    });
+    }
 
     #endregion
 }

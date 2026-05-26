@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="../Controls/Button.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- Connection LED (green = connected) -->
+  <Style x:Key="RobotConnLedStyle" TargetType="Ellipse">
+    <Setter Property="Width"  Value="12"/>
+    <Setter Property="Height" Value="12"/>
+    <Setter Property="Fill"   Value="#555"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsConnected}" Value="True">
+        <Setter Property="Fill" Value="#44DD66"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Running LED (yellow = moving) -->
+  <Style x:Key="RobotRunLedStyle" TargetType="Ellipse">
+    <Setter Property="Width"  Value="12"/>
+    <Setter Property="Height" Value="12"/>
+    <Setter Property="Fill"   Value="#555"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsRunning}" Value="True">
+        <Setter Property="Fill" Value="#FFDD44"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Error LED (red = error) -->
+  <Style x:Key="RobotErrorLedStyle" TargetType="Ellipse">
+    <Setter Property="Width"  Value="12"/>
+    <Setter Property="Height" Value="12"/>
+    <Setter Property="Fill"   Value="#555"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsError}" Value="True">
+        <Setter Property="Fill" Value="#FF4444"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Position move button -->
+  <Style x:Key="RobotPosButtonStyle" TargetType="Button"
+         BasedOn="{StaticResource PrimaryButtonStyle}">
+    <Setter Property="Height" Value="34"/>
+    <Setter Property="Margin" Value="4,4,4,0"/>
+    <Setter Property="FontFamily" Value="Consolas"/>
+  </Style>
+
+</ResourceDictionary>

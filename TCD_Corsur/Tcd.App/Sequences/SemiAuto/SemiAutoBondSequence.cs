@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tcd.App.Core;
-using Tcd.Core.Logging;
 using Tcd.Sequence;
 using Tcd.Simulator;
 
@@ -28,8 +26,6 @@ public sealed class SemiAutoBondSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
-
         var mgr = _mgr;
 
         var result = await mgr.RunAsync(TcdSequenceKeys.AxisZ_Command_Bond, context, null, cancellationToken).ConfigureAwait(false);

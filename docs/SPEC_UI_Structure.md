@@ -197,3 +197,32 @@ sequenceDiagram
 | `Tcd.App/Core/RecipeRepository.cs` | JSON 파일 저장/불러오기 구현 |
 | `Tcd.App/Core/TeachPosition.cs` | 다축 이름 포지션 모델 |
 | `Tcd.App/Core/MainCore.cs` | 컴포지션 루트, 초기화 순서 |
+
+---
+
+## 8. 시각 디자인 (산업용 HMI 다크)
+
+- 셸: `WindowStyle="None"`, `WindowChrome` 커스텀 제목줄
+- 레이아웃: 상단 바 40px · 중앙 콘텐츠 `*` · 하단 내비 56px
+- 색상: 남색 계열 베이스 / 가동 상태 **녹색** / 위험 동작 **빨강** / 정지 **무채**
+- 모서리: 직각 유지 (둥근 모서리 사용 안 함)
+
+### 버튼 스타일
+
+| 스타일 | 용도 |
+|--------|------|
+| 기본 | 일반 동작·내비 |
+| `AccentButton` | Start auto, Connect 등 주요 긍정 |
+| `SequenceStopButton` | 시퀀스 Stop |
+| `StopButton` | 모터 Stop, 창 종료 등 강한 중단 |
+
+### 화면별 구성 요약
+
+| 탭 | 주요 컨트롤 |
+|----|------------|
+| 레시피 | 목록 ListBox / Motor·Robot 탭 편집 / 저장·불러오기 버튼 |
+| 티칭 | 축 포지션 표 / Jog·IncMove·Stop 버튼 / 축 상태 패널 |
+| 매뉴얼 | DO 토글·펄스 / DI 표시 / 진공도·ESC 모니터링 |
+| 디바이스 | PLC IP/Port / SPiiPlus IP / 시뮬 모드 체크 |
+
+공유 리소스: 브러시·타이포 → `App.xaml`, 다이얼로그 → `IDialogService`

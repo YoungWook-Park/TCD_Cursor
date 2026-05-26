@@ -8,23 +8,6 @@
              mc:Ignorable="d"
              d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:Manual_MotorViewModel}">
-  <UserControl.Resources>
-    <!-- 셀 상태 색상 (배경 틴트 + 텍스트) -->
-    <Color x:Key="CellGreenBg">#2522AA44</Color>
-    <Color x:Key="CellGreenFg">#FF44CC66</Color>
-    <Color x:Key="CellOrangeBg">#33CC8800</Color>
-    <Color x:Key="CellOrangeFg">#FFCC9900</Color>
-    <Color x:Key="CellRedBg">#33CC2222</Color>
-    <Color x:Key="CellRedFg">#FFEE4444</Color>
-    <Color x:Key="CellOffFg">#FF555555</Color>
-    <SolidColorBrush x:Key="CellGreenBgBrush" Color="{StaticResource CellGreenBg}"/>
-    <SolidColorBrush x:Key="CellGreenFgBrush" Color="{StaticResource CellGreenFg}"/>
-    <SolidColorBrush x:Key="CellOrangeBgBrush" Color="{StaticResource CellOrangeBg}"/>
-    <SolidColorBrush x:Key="CellOrangeFgBrush" Color="{StaticResource CellOrangeFg}"/>
-    <SolidColorBrush x:Key="CellRedBgBrush" Color="{StaticResource CellRedBg}"/>
-    <SolidColorBrush x:Key="CellRedFgBrush" Color="{StaticResource CellRedFg}"/>
-    <SolidColorBrush x:Key="CellOffFgBrush" Color="{StaticResource CellOffFg}"/>
-  </UserControl.Resources>
   <Grid Margin="8">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>

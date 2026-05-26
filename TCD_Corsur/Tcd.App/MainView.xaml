@@ -49,7 +49,7 @@
             </GroupBox>
             <GroupBox Grid.Row="1" Header="Devices" Margin="0,0,0,0">
                 <StackPanel Margin="10">
-                    <TextBlock Text="{Binding Robot}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding RobotStatus}" Margin="0,0,0,8" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding Axes}" TextWrapping="Wrap"/>
                 </StackPanel>
             </GroupBox>

@@ -1,0 +1,235 @@
+<UserControl x:Class="Tcd.App.View.RobotView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="920"
+             d:DataContext="{d:DesignInstance Type=local:RobotViewModel}">
+  <Grid Margin="8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- Connection -->
+      <RowDefinition Height="*"/>     <!-- Status + Positions -->
+      <RowDefinition Height="Auto"/>  <!-- Log -->
+    </Grid.RowDefinitions>
+
+    <!-- ══ Row 0: Connection ════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="0" Header="Connection" Margin="0,0,0,6">
+      <Grid Margin="8,4,8,8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="110"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="60"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" Text="Host:" VerticalAlignment="Center"
+                   Margin="0,0,4,0"/>
+        <TextBox Grid.Column="1"
+                 Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalContentAlignment="Center" Padding="4,2"/>
+
+        <TextBlock Grid.Column="2" Text="Port:" VerticalAlignment="Center"
+                   Margin="8,0,4,0"/>
+        <TextBox Grid.Column="3"
+                 Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalContentAlignment="Center" Padding="4,2"/>
+
+        <Button Grid.Column="4" Content="Connect"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding Cmd_Connect}"
+                Width="80" Margin="8,0,4,0"/>
+        <Button Grid.Column="5" Content="Disconnect"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding Cmd_Disconnect}"
+                Width="85" Margin="0,0,12,0"/>
+
+        <!-- Status LEDs -->
+        <StackPanel Grid.Column="7" Orientation="Horizontal"
+                    VerticalAlignment="Center" Margin="8,0,0,0">
+          <Ellipse Style="{StaticResource RobotConnLedStyle}" Margin="0,0,3,0"/>
+          <TextBlock Text="Conn" VerticalAlignment="Center"
+                     Margin="0,0,10,0" FontSize="11"/>
+          <Ellipse Style="{StaticResource RobotRunLedStyle}" Margin="0,0,3,0"/>
+          <TextBlock Text="Run" VerticalAlignment="Center"
+                     Margin="0,0,10,0" FontSize="11"/>
+          <Ellipse Style="{StaticResource RobotErrorLedStyle}" Margin="0,0,3,0"/>
+          <TextBlock Text="Error" VerticalAlignment="Center" FontSize="11"/>
+        </StackPanel>
+      </Grid>
+    </GroupBox>
+
+    <!-- ══ Row 1: Status | Positions ════════════════════════════════════ -->
+    <Grid Grid.Row="1" Margin="0,0,0,6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="220"/>  <!-- Status -->
+        <ColumnDefinition Width="*"/>    <!-- Positions -->
+      </Grid.ColumnDefinitions>
+
+      <!-- ── Status ──────────────────────────────────────────────────── -->
+      <GroupBox Grid.Column="0" Header="Status" Margin="0,0,4,0">
+        <StackPanel Margin="8,8,8,8">
+
+          <TextBlock Text="Current Position"
+                     FontSize="11" Foreground="#AAA" Margin="0,0,0,2"/>
+          <TextBlock Text="{Binding CurrentPosition}"
+                     FontFamily="Consolas" FontSize="16"
+                     Foreground="#3FA9F5" Margin="0,0,0,12"/>
+
+          <!-- Flag rows -->
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsHome}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Home" FontFamily="Consolas" FontSize="12"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                      <Setter Property="Fill" Value="#FFDD44"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Running" FontFamily="Consolas" FontSize="12"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                      <Setter Property="Fill" Value="#FF4444"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Error" FontFamily="Consolas" FontSize="12"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <Separator Margin="0,0,0,8"/>
+
+          <TextBlock Text="Error Message" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,2"/>
+          <TextBlock Text="{Binding ErrorMessage}"
+                     FontFamily="Consolas" FontSize="11"
+                     Foreground="#FF6666" TextWrapping="Wrap"/>
+        </StackPanel>
+      </GroupBox>
+
+      <!-- ── Position Control ─────────────────────────────────────────── -->
+      <GroupBox Grid.Column="1" Header="Position Control">
+        <Grid Margin="8,4,8,8">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Velocity + Stop -->
+            <RowDefinition Height="Auto"/>  <!-- Separator -->
+            <RowDefinition Height="*"/>     <!-- Position buttons -->
+          </Grid.RowDefinitions>
+
+          <!-- Velocity + Stop -->
+          <StackPanel Grid.Row="0" Orientation="Horizontal"
+                      Margin="0,0,0,4" VerticalAlignment="Center">
+            <TextBlock Text="Velocity (%):" VerticalAlignment="Center"
+                       Margin="0,0,6,0"/>
+            <TextBox Width="50"
+                     Text="{Binding Velocity, UpdateSourceTrigger=PropertyChanged}"
+                     VerticalContentAlignment="Center" Padding="4,2"
+                     Margin="0,0,16,0"/>
+            <Button Content="■ Stop"
+                    Style="{StaticResource DangerButtonStyle}"
+                    Command="{Binding Cmd_Stop}"
+                    Width="70"/>
+          </StackPanel>
+
+          <Separator Grid.Row="1" Margin="0,4,0,8"/>
+
+          <!-- Position Buttons (UniformGrid 2-col) -->
+          <UniformGrid Grid.Row="2" Columns="2" VerticalAlignment="Top">
+
+            <!-- Safe positions -->
+            <Button Content="Home"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveHome}"/>
+            <Button Content="Ready"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveReady}"/>
+
+            <!-- S1 -->
+            <Button Content="S1  PickupWait"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveS1PickupWait}"/>
+            <Button Content="S1  Pick"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveS1Pick}"/>
+
+            <!-- S2 -->
+            <Button Content="S2  PickupWait"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveS2PickupWait}"/>
+            <Button Content="S2  Pick"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveS2Pick}"/>
+
+            <!-- Upper Chamber -->
+            <Button Content="UC  PickupWait"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveUCPickupWait}"/>
+            <Button Content="UC  Pick"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveUCPick}"/>
+
+            <!-- Lower Chamber -->
+            <Button Content="LC  PickupWait"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveLCPickupWait}"/>
+            <Button Content="LC  Pick"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MoveLCPick}"/>
+
+            <!-- Peel -->
+            <Button Content="Peel"
+                    Style="{StaticResource RobotPosButtonStyle}"
+                    Command="{Binding Cmd_MovePeel}"/>
+
+          </UniformGrid>
+        </Grid>
+      </GroupBox>
+    </Grid>
+
+    <!-- ══ Row 2: Log ═══════════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="2" Header="Status">
+      <TextBlock Margin="8,4,8,8"
+                 Text="{Binding LogStatus}"
+                 FontFamily="Consolas" FontSize="12"
+                 Foreground="{StaticResource TextBrush}"
+                 TextWrapping="Wrap"/>
+    </GroupBox>
+
+  </Grid>
+</UserControl>

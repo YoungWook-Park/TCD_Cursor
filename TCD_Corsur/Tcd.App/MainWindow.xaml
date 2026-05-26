@@ -34,6 +34,9 @@
         <DataTemplate DataType="{x:Type local:PlcViewModel}">
             <view:PlcView DataContext="{Binding}" />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:RobotViewModel}">
+            <view:RobotView DataContext="{Binding}" />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type local:SettingsViewModel}">
             <view:SettingsView DataContext="{Binding}" />
         </DataTemplate>
@@ -100,6 +103,10 @@
                         Content="Manual"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowManualPage}" />
+                <Button Width="100" Margin="4"
+                        Content="Robot"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding Cmd_ShowRobotPage}" />
             </StackPanel>
 
             <Button Grid.Column="1"

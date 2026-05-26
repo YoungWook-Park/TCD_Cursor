@@ -1,0 +1,7 @@
+cd D:\project\TCD_Cursor\TCD_Corsur
+  
+PLC 시뮬레이터
+  dotnet run --project Tcd.Plc.Simulator/Tcd.Plc.Simulator.csproj
+
+  로봇 시뮬레이터
+  dotnet run --project Tcd.Robot.Simulator/Tcd.Robot.Simulator.csproj

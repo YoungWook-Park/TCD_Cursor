@@ -104,6 +104,26 @@ public sealed class MainCore
         Sequences.Register(new AutoRunSequence(Sequences));
     }
 
+    /// <summary>
+    /// 레시피 저장 파사드. 파일 쓰기와 메모리 상태(RecipeStore)를 항상 함께 갱신.
+    /// ViewModel은 RecipeRepository를 직접 호출하지 않고 여기를 사용.
+    /// </summary>
+    public void SaveRecipe(TcdRecipe recipe)
+    {
+        RecipeRepository.Save(recipe);
+        Recipes.Current = recipe;
+    }
+
+    /// <summary>
+    /// 레시피 불러오기 파사드. 파일 읽기와 RecipeStore.Current 갱신을 함께 처리.
+    /// </summary>
+    public TcdRecipe LoadRecipe(string name)
+    {
+        var recipe = RecipeRepository.Load(name);
+        Recipes.Current = recipe;
+        return recipe;
+    }
+
     public void SwitchToSpiiPlus(string ipAddress)
     {
         if (Motion is IDisposable d) d.Dispose();

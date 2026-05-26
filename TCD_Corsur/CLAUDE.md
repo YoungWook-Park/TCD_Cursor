@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - PRD: `../docs/PRD_Lamination_Simulator.md`
 - Roadmap: `../docs/ROADMAP.md`
-- Architecture SPEC: `../docs/SPEC_Architecture_Solution.md`
+- Class Design: `../docs/CLASS_DESIGN.md`
 
 ---
 
@@ -27,13 +27,17 @@ dotnet build Tcd.App/Tcd.App.csproj
 dotnet run --project Tcd.App/Tcd.App.csproj
 ```
 
-There are no automated tests yet. The Simulator project provides in-process hardware simulation for manual testing.
+```bash
+# Run unit tests
+dotnet test Tcd.Engine.Tests/Tcd.Engine.Tests.csproj
+dotnet test Tcd.Simulator.Tests/Tcd.Simulator.Tests.csproj
+```
 
 ---
 
 ## Solution Structure
 
-Three projects with strict one-way dependency:
+Production: three projects with strict one-way dependency:
 
 ```
 Tcd.App  (net8.0-windows, WPF EXE)
@@ -42,9 +46,18 @@ Tcd.App  (net8.0-windows, WPF EXE)
        └── Tcd.Engine
 ```
 
+Test projects (no WPF dependency):
+
+```
+Tcd.Tests.Shared  (netstandard2.0, shared fakes)
+  ├── Tcd.Engine.Tests  (net8.0, xUnit — 103 tests)
+  └── Tcd.Simulator.Tests  (net8.0, xUnit — 69 tests)
+```
+
 **Tcd.Engine** — pure domain, no external deps
 **Tcd.Simulator** — wraps Engine for in-process hardware sim
 **Tcd.App** — WPF UI + composition root; references both
+**Tcd.Tests.Shared** — `FakeTimeProvider`, `FakeAlarmSink`, `FakeSequenceContext`, `BlockingFakeTimeProvider`
 
 External SDK: `ACS.SPiiPlusNET.dll` in `/Dll/` (motion hardware)
 
@@ -134,6 +147,8 @@ Bonding animation: Upper Chamber moves ↓ and Lower Chamber moves ↑ independe
 - **Cancellation**: Use `_activeCts?.Cancel(); _activeCts?.Dispose()` pattern — cancel previous before starting new
 - **Thread safety**: UI updates via `App.Current.Dispatcher.Invoke()`; `volatile bool` for cross-thread flags in SimAxis
 - **Interlocks**: Throw `InvalidOperationException` with alarm code string; `DelegateSequence` converts to `Alarm` + `Fail` result
+- **Testing**: New behavior should have unit tests. Sequence engine tests do not need real device I/O — use `TcdSimulation` for in-process verification
+- **Git**: Use feature branches; `main` must always build. Commit messages should focus on *why*, not *what*
 
 ### Constants Convention (NO hardcoded ID strings)
 
@@ -161,15 +176,15 @@ Tcd.App/Define/
 
 | File | Topic |
 |------|-------|
-| `SPEC_Architecture_Solution.md` | Project/namespace layout |
-| `SPEC_Sequence.md` | Full sequence state machine |
-| `SPEC_Sequence_Engine.md` | Engine graph: `sequence`/`parallel`/`ref`, preflight |
-| `SPEC_UI_Hmi.md` | Dark shell, layout, ISA-101 HMI style |
-| `SPEC_Layout_Recipe.md` | Recipe structure, teaching positions |
-| `SPEC_Motion_SpiiPlus.md` | ACS SPiiPlus buffer contract, variable naming |
-| `SPEC_Control_IO.md` | PLC socket protocol, Bit/Word map |
-| `SPEC_Interlocks.md` | Interlock rules |
-| `SPEC_Model_Flow.md` | `IModelFlowDescriptor` injection |
+| `CLASS_DESIGN.md` | Full class design: all namespaces, interfaces, and data flows |
+| `PRD_Lamination_Simulator.md` | Product requirements, scope, non-functional requirements |
+| `ROADMAP.md` | Implementation status and next priorities |
+| `SPEC_Sequence.md` | Sequence hierarchy, AUTO flow steps, atomic sequence list |
+| `SPEC_UI_Structure.md` | View hierarchy, navigation, layout diagrams, recipe save/load |
+| `SPEC_Layout_Recipe.md` | Equipment layout coordinates, teaching positions |
+| `SPEC_Motion_SpiiPlus.md` | ACS SPiiPlus variable contract, command flow |
+| `SPEC_Robot_Interface.md` | Robot TCP protocol, IRobotDevice, message frames |
+| `SPEC_Control_IO.md` | PLC Bit/Word map |
+| `SPEC_Interlocks.md` | Interlock rules (implemented + planned) |
 | `SPEC_Logging_Csv.md` | CSV log format, 14-day retention |
-| `CONVENTIONS_Hmi_Sequences.md` | Sequence naming/coding conventions |
-| `PLAN_Hmi_Sequence_Execution.md` | HMI sequence execution plan |
+| `TEST_COVERAGE.md` | Unit test list, fake infrastructure, coverage gaps |

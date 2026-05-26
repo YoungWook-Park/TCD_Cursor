@@ -1,10 +1,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tcd.App.Core;
 using Tcd.App.Define;
 using Tcd.Core;
-using Tcd.Core.Logging;
 using Tcd.Devices;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -36,8 +34,6 @@ public sealed class SemiAutoAlignUVWSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
-
         if (_sim.Robot.CurrentPosition != RobotPosition.Home)
         {
             context.Alarms.Raise(new Alarm(AlarmKeys.RobotNotAtHome, "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, context.Time.Now));

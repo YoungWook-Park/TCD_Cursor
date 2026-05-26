@@ -1,10 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tcd.App.Core;
 using Tcd.App.Define;
 using Tcd.Core;
-using Tcd.Core.Logging;
 using Tcd.Materials;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -36,8 +34,6 @@ public sealed class SemiAutoLoadUpperFilmSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
-
         var sim = _sim;
         var mgr = _mgr;
 

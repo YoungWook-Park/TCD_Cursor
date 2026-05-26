@@ -10,5 +10,8 @@
         <ResourceDictionary Source="Controls/TabControl.xaml"/>
         <ResourceDictionary Source="Controls/ComboBox.xaml"/>
         <ResourceDictionary Source="Controls/DataGrid.xaml"/>
+        <ResourceDictionary Source="Views/MotorStyles.xaml"/>
+        <ResourceDictionary Source="Views/PlcStyles.xaml"/>
+        <ResourceDictionary Source="Views/RobotStyles.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

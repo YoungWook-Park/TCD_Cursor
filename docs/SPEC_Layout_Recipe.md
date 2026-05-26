@@ -21,42 +21,29 @@
 
 ## 레시피 데이터 모델 (`TcdRecipe`)
 
-### 축 티칭
+> 클래스 전체 정의는 `CLASS_DESIGN.md` Section 5-2 참고.
+> 실제 구현: `Tcd.App/Core/Recipes.cs`
 
-| 필드 | 단위 | 설명 |
-|------|------|------|
-| `Motor_*_Ready` | mm | 공통 Ready 위치 |
-| `Motor_UpperChamber_Bond` | mm | 상부 챔버 합착 위치 |
-| `Motor_LowerChamber_Bond` | mm | 하부 챔버 합착 위치 |
+### 축 티칭 (`AxisTeach: Dictionary<string, double>`)
 
-### 로봇 티칭 포즈 (X_mm, Y_mm, Theta_deg)
+키: `"U"`, `"V"`, `"W"`, `"ZLower"`, `"ZUpper"` (단위: mm)
 
-| 포즈 | 용도 |
-|------|------|
-| `Robot_Ready` | 경유 대기 위치 |
-| `S1_Pick` | Stage1 픽업 |
-| `S2_Pick` | Stage2 픽업 |
-| `UpperChamber_Place` | 상부 챔버 안착 |
-| `LowerChamber_Place` | 하부 챔버 안착 |
-| `LowerChamber_Pick` | 합착체 픽업 |
-| `Stage_Place` | Stage2 배치 |
+| 논리 용도 | 키 예시 | 의미 |
+|---------|---------|------|
+| Load 위치 | 티칭 후 저장 | 챔버 개방(대기) 위치 |
+| Bond 위치 | 티칭 후 저장 | 합착 이동 위치 |
+
+### 로봇 티칭 (`RobotTeach: Dictionary<string, RobotPosition>`)
+
+포지션명(키)은 `RobotPositionName` 상수 참고 (`Tcd.App/Define/Robot/RobotDefine.cs`).
 
 ### 속도 설정
 
 | 필드 | 단위 | 설명 |
 |------|------|------|
-| `RobotVelocity_*` | % | 포지션별 이동 속도 (기본값: `RobotVelocityDefault`) |
-| `AxisVelocity` | mm/s | SPiiPlus 축 이동 속도 |
-| `AxisAcc/Dec/Jerk` | mm/s² | 가감속 프로파일 |
-
-### 기타
-
-| 필드 | 설명 |
-|------|------|
-| `SkipPeel` | true 시 박리 스텝 생략 |
-| `ESC_VoltageSet` | ESC 설정 전압 (V) |
-| `Thickness_CGO_um` | 상부 필름 두께 (μm) |
-| `Thickness_OCA_um` | 하부 필름 두께 (μm) |
+| `RobotVelocity` | % | 포지션별 이동 속도 (`RobotVelocityDefault` 기본값) |
+| `MotionVelocity` | mm/s | SPiiPlus 축 이동 속도 |
+| `MotionAcc/Dec/Jerk` | mm/s² | 가감속 프로파일 |
 
 ---
 

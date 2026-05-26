@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tcd.App.Core;
-using Tcd.Core.Logging;
 using Tcd.Sequence;
 using Tcd.Simulator;
 
@@ -29,8 +27,6 @@ public sealed class AutoRunSequence : ISequence
 
     public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
     {
-        MainCore.Instance.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid() };
-
         var mgr = _mgr;
 
         var result = await mgr.RunAsync(TcdSequenceKeys.Plc_Wait_StageLoaded, context, PlcStageLoadTimeout, cancellationToken).ConfigureAwait(false);

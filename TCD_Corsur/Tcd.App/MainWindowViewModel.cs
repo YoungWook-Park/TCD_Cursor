@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Tcd.App.Core;
 using Tcd.App.Mvvm;
+using Tcd.Core.Logging;
 using Tcd.Core;
 using Tcd.Devices;
 using Tcd.Materials;
@@ -30,7 +31,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     private string _stage2 = "(empty)";
     private string _upperChamber = "(empty)";
     private string _lowerChamber = "(empty)";
-    private string _robot = "";
+    private string _robotStatus = "";
     private string _axes = "";
     private bool _stage1HasMaterial;
     private bool _stage2HasMaterial;
@@ -50,7 +51,8 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         _sim = _core.Simulation;
         _seq = _core.Sequences;
 
-        Plc    = new PlcViewModel();
+        Plc      = new PlcViewModel();
+        Robot    = new RobotViewModel();
         Recipe   = new RecipeViewModel();
         Manual   = new ManualViewModel();
         Settings = new SettingsViewModel();
@@ -81,6 +83,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     public MainWindowViewModel Main => this;
     public PlcViewModel Plc { get; }
+    public RobotViewModel Robot { get; }
     public RecipeViewModel Recipe { get; }
     public ManualViewModel Manual { get; }
     public SettingsViewModel Settings { get; }
@@ -115,7 +118,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     public string Stage2 { get => _stage2; private set => Set(ref _stage2, value); }
     public string UpperChamber { get => _upperChamber; private set => Set(ref _upperChamber, value); }
     public string LowerChamber { get => _lowerChamber; private set => Set(ref _lowerChamber, value); }
-    public string Robot { get => _robot; private set => Set(ref _robot, value); }
+    public string RobotStatus { get => _robotStatus; private set => Set(ref _robotStatus, value); }
     public string Axes { get => _axes; private set => Set(ref _axes, value); }
     public bool Stage1HasMaterial { get => _stage1HasMaterial; private set => Set(ref _stage1HasMaterial, value); }
     public bool Stage2HasMaterial { get => _stage2HasMaterial; private set => Set(ref _stage2HasMaterial, value); }
@@ -154,7 +157,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         RobotHasVacuum        = _sim.Robot.HasVacuum;
         IsBonding             = IsRunning && UpperChamberHasMaterial && LowerChamberHasMaterial;
 
-        Robot = $"{_sim.Robot.CurrentPosition} | Vacuum={_sim.Robot.HasVacuum}";
+        RobotStatus = $"{_sim.Robot.CurrentPosition} | Vacuum={_sim.Robot.HasVacuum}";
         Axes  = $"U={_sim.LowerMotion.U.Position:0.0}, V={_sim.LowerMotion.V.Position:0.0}, W={_sim.LowerMotion.W.Position:0.0}, Z={_sim.LowerMotion.Z.Position:0.0}";
     }
 
@@ -172,6 +175,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         {
             try
             {
+                MainCore.Instance.LogContext = new LogContext { SequenceKey = key, RunId = Guid.NewGuid() };
                 var result = await _seq.RunAsync(key, _sim, param, _runCts.Token).ConfigureAwait(false);
                 App.Current.Dispatcher.Invoke(() =>
                 {
@@ -253,6 +257,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     private RelayCommand? cmd_ShowManualPage;
     public ICommand Cmd_ShowManualPage => cmd_ShowManualPage ??= new RelayCommand(_ => CurrentContent = Manual);
+
+    private RelayCommand? cmd_ShowRobotPage;
+    public ICommand Cmd_ShowRobotPage => cmd_ShowRobotPage ??= new RelayCommand(_ => CurrentContent = Robot);
 
     #endregion
 }
