@@ -21,8 +21,8 @@ public sealed class Device_SpiiPlusViewModel : NotifyPropertyChangedBase
 
   public Device_SpiiPlusViewModel()
   {
-    _ipAddress    = _core.Settings.SpiiIpAddress;
-    _useSimulator = !_core.Settings.UseSpiiPlus;
+    _ipAddress     = _core.Devices.SpiiIpAddress;
+    _useSimulator  = !_core.Devices.UseSpiiPlus;
     _statusMessage = IsConnected ? "Connected" : "Simulation mode";
   }
 
@@ -86,6 +86,7 @@ public sealed class Device_SpiiPlusViewModel : NotifyPropertyChangedBase
       try
       {
         _core.SwitchToSpiiPlus(IpAddress);
+        _core.Devices.Save();
         SetStatus("Connected");
       }
       catch (Exception ex)
@@ -109,6 +110,7 @@ public sealed class Device_SpiiPlusViewModel : NotifyPropertyChangedBase
   private void ApplySwitchToSim()
   {
     _core.SwitchToSimulation();
+    _core.Devices.Save();
     Raise(nameof(IsConnected));
     StatusMessage = "Simulation mode";
     cmd_Connect?.RaiseCanExecuteChanged();

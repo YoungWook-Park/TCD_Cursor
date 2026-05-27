@@ -35,8 +35,8 @@ public sealed class RobotViewModel : NotifyPropertyChangedBase
   public RobotViewModel()
   {
     _robot = _core.RobotDevice;
-    _host  = _core.Settings.RobotSimHost;
-    _port  = _core.Settings.RobotSimPort;
+    _host  = _core.Devices.RobotHost;
+    _port  = _core.Devices.RobotPort;
 
     _robot.StateChanged += OnStateChanged;
   }

@@ -5,29 +5,101 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
              xmlns:man="clr-namespace:Tcd.App.View"
-             xmlns:plc="clr-namespace:Tcd.App.View"
              mc:Ignorable="d"
              d:DesignHeight="850" d:DesignWidth="1800"
              d:DataContext="{d:DesignInstance Type=local:ManualViewModel}">
-      <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
-          <Grid.RowDefinitions>
-              <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
 
-            <!-- Robot / Motor 매뉴얼 탭 -->
-        <TabControl>
-            <TabItem Header="Robot" Height="30" Width="100">
-                <man:Manual_RobotView  DataContext="{Binding Robot}"/>
-            </TabItem>
+  <UserControl.Resources>
+    <!-- 연결 LED 공통 스타일 (bool → Fill) -->
+    <Style x:Key="LedStyle" TargetType="Ellipse">
+      <Setter Property="Width"  Value="10"/>
+      <Setter Property="Height" Value="10"/>
+      <Setter Property="Fill"   Value="#555"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="LedOnStyle" BasedOn="{StaticResource LedStyle}"
+           TargetType="Ellipse">
+      <Setter Property="Fill" Value="#44DD66"/>
+    </Style>
+  </UserControl.Resources>
 
-            <TabItem Header="Motor" Height="30" Width="100" >
-                <man:Manual_MotorView DataContext="{Binding Motor}"/>
-            </TabItem>
+  <Grid Margin="12" Background="{StaticResource PanelBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
 
-            <TabItem Header="PLC" Height="30" Width="100">
-                <plc:PlcView DataContext="{Binding Plc}"/>
-            </TabItem>
-        </TabControl>
-      </Grid>
+    <!-- ── 통신 상태 바 ─────────────────────────────────────────────── -->
+    <Border Grid.Row="0"
+            Background="#1A1A2A"
+            CornerRadius="4"
+            Padding="12,6"
+            Margin="0,0,0,8">
+      <StackPanel Orientation="Horizontal">
+
+        <!-- SPiiPlus -->
+        <Ellipse Margin="0,0,5,0">
+          <Ellipse.Style>
+            <Style TargetType="Ellipse" BasedOn="{StaticResource LedStyle}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding SpiiConnected}" Value="True">
+                  <Setter Property="Fill" Value="#44DD66"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Ellipse.Style>
+        </Ellipse>
+        <TextBlock Text="SPiiPlus:" VerticalAlignment="Center"
+                   Foreground="#AAA" FontSize="11" Margin="0,0,4,0"/>
+        <TextBlock Text="{Binding SpiiStatus}" VerticalAlignment="Center"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,24,0"
+                   Foreground="{DynamicResource TextBrush}"/>
+
+        <!-- Robot -->
+        <Ellipse Margin="0,0,5,0">
+          <Ellipse.Style>
+            <Style TargetType="Ellipse" BasedOn="{StaticResource LedStyle}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding RobotConnected}" Value="True">
+                  <Setter Property="Fill" Value="#44DD66"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Ellipse.Style>
+        </Ellipse>
+        <TextBlock Text="Robot:" VerticalAlignment="Center"
+                   Foreground="#AAA" FontSize="11" Margin="0,0,4,0"/>
+        <TextBlock Text="{Binding RobotStatus}" VerticalAlignment="Center"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,24,0"
+                   Foreground="{DynamicResource TextBrush}"/>
+
+        <!-- PLC -->
+        <Ellipse Margin="0,0,5,0">
+          <Ellipse.Style>
+            <Style TargetType="Ellipse" BasedOn="{StaticResource LedStyle}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding PlcConnected}" Value="True">
+                  <Setter Property="Fill" Value="#44DD66"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Ellipse.Style>
+        </Ellipse>
+        <TextBlock Text="PLC:" VerticalAlignment="Center"
+                   Foreground="#AAA" FontSize="11" Margin="0,0,4,0"/>
+        <TextBlock Text="{Binding PlcStatus}" VerticalAlignment="Center"
+                   FontSize="11" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextBrush}"/>
+
+      </StackPanel>
+    </Border>
+
+    <!-- ── Motor 제어 탭 ──────────────────────────────────────────── -->
+    <TabControl Grid.Row="1">
+      <TabItem Header="Motor" Height="30" Width="100">
+        <man:Manual_MotorView DataContext="{Binding Motor}"/>
+      </TabItem>
+    </TabControl>
+
+  </Grid>
 </UserControl>
-

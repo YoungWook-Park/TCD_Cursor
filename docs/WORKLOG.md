@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-05-27
+
+### 변경 내용
+- [Core] DeviceSettings.cs 신규 — 하드웨어 연결 설정(SPiiPlus·Robot·PLC) device.json 영속화 분리
+- [Core] MainCore — Devices 프로퍼티 추가, AppSettings에서 하드웨어 항목 제거, 로그경로 필드 추가
+- [App/UI] View/Device/ 신규 — DeviceViewModel + DeviceView (SPiiPlus·Robot·PLC 탭 통합 연결 관리 페이지)
+- [App/UI] SettingsViewModel/View 재작성 — 타임아웃·로그경로 환경설정 전용으로 변경
+- [App/UI] ManualViewModel/View — Robot·PLC 탭 제거, 상단 통신상태 바 + Motor 탭만 유지
+- [App/UI] Device_PlcViewModel/View 전면 구현 — Host·Port·Connect·Disconnect + device.json 연동
+- [App/UI] Device_Spii/Robot/PlcViewModel — Settings.* → Devices.* 전환, 저장 시 Save() 호출
+- [App/UI] MainWindowViewModel — DeviceViewModel 프로퍼티, Cmd_ShowDevicePage·Cmd_ShowSettingsPage 추가
+- [App/UI] MainWindow.xaml — Device·Settings 네비게이션 버튼 및 DeviceViewModel DataTemplate 등록
+
+### 브랜치 / 커밋
+- Branch: refactor/device-nav-separation
+- Commit: (이번 커밋)
+
+---
+
 ## 2026-05-26
 
 ### 변경 내용
