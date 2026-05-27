@@ -19,7 +19,7 @@
 
 ### 브랜치 / 커밋
 - Branch: refactor/device-nav-separation
-- Commit: (이번 커밋)
+- Commit: 6ba8442 — refactor(core,ui): DeviceSettings 분리 및 Device 네비게이션 페이지 추가
 
 ---
 
