@@ -23,8 +23,8 @@ public sealed class Device_RobotViewModel : NotifyPropertyChangedBase
   public Device_RobotViewModel()
   {
     _robot = _core.RobotDevice;
-    _host  = _core.Settings.RobotSimHost;
-    _port  = _core.Settings.RobotSimPort;
+    _host  = _core.Devices.RobotHost;
+    _port  = _core.Devices.RobotPort;
     _statusMessage = _robot.IsConnected ? "Connected" : "Disconnected";
     _robot.StateChanged += OnRobotStateChanged;
   }
@@ -77,6 +77,9 @@ public sealed class Device_RobotViewModel : NotifyPropertyChangedBase
       try
       {
         await _robot.ConnectAsync(Host, Port).ConfigureAwait(false);
+        _core.Devices.RobotHost = Host;
+        _core.Devices.RobotPort = Port;
+        _core.Devices.Save();
         SetStatus($"Connected to {Host}:{Port}");
       }
       catch (Exception ex)

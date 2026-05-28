@@ -28,6 +28,7 @@ public sealed class MainCore
     public bool IsInitialized { get; private set; }
 
     public AppSettings Settings { get; private set; } = new();
+    public DeviceSettings Devices { get; private set; } = new();
     public RecipeStore Recipes { get; private set; } = new();
     public IRecipeRepository RecipeRepository { get; private set; } = null!;
 
@@ -53,6 +54,7 @@ public sealed class MainCore
 
         // 1) 설정/레시피 로드
         Settings = AppSettings.CreateDefaults();
+        Devices = DeviceSettings.Load();
         RecipeRepository = new JsonRecipeRepository(RecipePaths.DefaultRecipesDirectory());
         Recipes = RecipeStore.LoadOrCreateDefaults(RecipeRepository);
 
@@ -127,8 +129,8 @@ public sealed class MainCore
     public void SwitchToSpiiPlus(string ipAddress)
     {
         if (Motion is IDisposable d) d.Dispose();
-        Settings.SpiiIpAddress = ipAddress;
-        Settings.UseSpiiPlus = true;
+        Devices.SpiiIpAddress = ipAddress;
+        Devices.UseSpiiPlus = true;
         Motion = new Spii.SpiiPlusMotionService(ipAddress);
         AxisStateProvider = (IAxisStateProvider)Motion;
     }
@@ -136,7 +138,7 @@ public sealed class MainCore
     public void SwitchToSimulation()
     {
         if (Motion is IDisposable d) d.Dispose();
-        Settings.UseSpiiPlus = false;
+        Devices.UseSpiiPlus = false;
         var proxy = new AppSettingsProxy(Settings.AxisMoveTimeout);
         Motion = new SimMotionService(Simulation, proxy);
         AxisStateProvider = (IAxisStateProvider)Motion;
@@ -144,8 +146,8 @@ public sealed class MainCore
 
     private IMotionService CreateMotionService()
     {
-        if (Settings.UseSpiiPlus)
-            return new Spii.SpiiPlusMotionService(Settings.SpiiIpAddress);
+        if (Devices.UseSpiiPlus)
+            return new Spii.SpiiPlusMotionService(Devices.SpiiIpAddress);
 
         var proxy = new AppSettingsProxy(Settings.AxisMoveTimeout);
         return new SimMotionService(Simulation, proxy);
@@ -154,25 +156,14 @@ public sealed class MainCore
 
 public sealed class AppSettings
 {
+    // ── 시퀀스 타임아웃 ────────────────────────────────────────────────────
     public TimeSpan StageLoadTimeout { get; set; } = TimeSpan.FromSeconds(5);
     public TimeSpan RobotMoveTimeout { get; set; } = TimeSpan.FromSeconds(2);
     public TimeSpan AxisMoveTimeout  { get; set; } = TimeSpan.FromSeconds(3);
 
-    // ── SPiiPlus 모션 ──────────────────────────────────────────────────────
-    public bool UseSpiiPlus  { get; set; } = true;
-    public string SpiiIpAddress { get; set; } = "10.0.0.100";
-
-    // ── TCP 로봇 시뮬레이터 ────────────────────────────────────────────────
-    /// <summary>로봇 시뮬레이터 서버 주소 (기본: localhost)</summary>
-    public string RobotSimHost { get; set; } = "127.0.0.1";
-    /// <summary>로봇 시뮬레이터 서버 포트 (기본: 7001)</summary>
-    public int    RobotSimPort { get; set; } = 7001;
-
-    // ── TCP PLC 시뮬레이터 ─────────────────────────────────────────────────
-    /// <summary>PLC 시뮬레이터 서버 주소 (기본: localhost)</summary>
-    public string PlcSimHost { get; set; } = "127.0.0.1";
-    /// <summary>PLC 시뮬레이터 서버 포트 (기본: 7002)</summary>
-    public int    PlcSimPort { get; set; } = 7002;
+    // ── 로그 ──────────────────────────────────────────────────────────────
+    /// <summary>로그 파일 저장 경로. 비어있으면 %TEMP%/Tcd/Logs 사용.</summary>
+    public string LogDirectory { get; set; } = "";
 
     public static AppSettings CreateDefaults() => new();
 }

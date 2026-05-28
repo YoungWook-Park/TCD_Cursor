@@ -71,8 +71,8 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
   public PlcViewModel()
   {
     _plc  = _core.PlcDevice;
-    _host = _core.Settings.PlcSimHost;
-    _port = _core.Settings.PlcSimPort;
+    _host = _core.Devices.PlcHost;
+    _port = _core.Devices.PlcPort;
 
     _plc.SnapshotUpdated += OnSnapshotUpdated;
   }
