@@ -37,26 +37,31 @@ dotnet test Tcd.Simulator.Tests/Tcd.Simulator.Tests.csproj
 
 ## Solution Structure
 
-Production: three projects with strict one-way dependency:
+Production: five projects with strict one-way dependency:
 
 ```
 Tcd.App  (net8.0-windows, WPF EXE)
   ├── Tcd.Engine  (netstandard2.0, domain library)
   └── Tcd.Simulator  (netstandard2.0, in-process device simulation)
        └── Tcd.Engine
+
+Tcd.Robot.Simulator  (net8.0, standalone TCP robot simulator server)
+Tcd.Plc.Simulator    (net8.0, standalone TCP PLC simulator server)
 ```
 
 Test projects (no WPF dependency):
 
 ```
 Tcd.Tests.Shared  (netstandard2.0, shared fakes)
-  ├── Tcd.Engine.Tests  (net8.0, xUnit — 103 tests)
-  └── Tcd.Simulator.Tests  (net8.0, xUnit — 69 tests)
+  ├── Tcd.Engine.Tests  (net8.0, xUnit)
+  └── Tcd.Simulator.Tests  (net8.0, xUnit)
 ```
 
 **Tcd.Engine** — pure domain, no external deps
 **Tcd.Simulator** — wraps Engine for in-process hardware sim
 **Tcd.App** — WPF UI + composition root; references both
+**Tcd.Robot.Simulator** — independent TCP server process simulating robot hardware
+**Tcd.Plc.Simulator** — independent TCP server process simulating PLC hardware
 **Tcd.Tests.Shared** — `FakeTimeProvider`, `FakeAlarmSink`, `FakeSequenceContext`, `BlockingFakeTimeProvider`
 
 External SDK: `ACS.SPiiPlusNET.dll` in `/Dll/` (motion hardware)
