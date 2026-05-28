@@ -51,8 +51,8 @@
 AI 코드 역설계 기반 아키텍처 분석 시리즈.
 
 | # | 항목 | 상태 |
-| --- | --- | --- |
-| 1 | [UI 화면 구성 — 레시피·세팅·디바이스](https://www.notion.so/docs/analysis/01_ui_components.md) | 작성 중 |
-| 2 | [프로그램 아키텍처 및 테스트 구조](https://www.notion.so/docs/analysis/02_architecture_and_tests.md) | 예정 |
-| 3 | [시퀀스 제어 구조](https://www.notion.so/docs/analysis/03_sequence_control.md) | 예정 |
-| 4 | [하드웨어 구성](https://www.notion.so/docs/analysis/04_hardware.md) | 예정 |
+|---|------|------|
+| 1 | [UI 화면 구성 — 레시피·세팅·디바이스](docs/analysis/01_ui_components.md) | 작성 중 |
+| 2 | [프로그램 아키텍처 및 테스트 구조](docs/analysis/02_architecture_and_tests.md) | 예정 |
+| 3 | [시퀀스 제어 구조](docs/analysis/03_sequence_control.md) | 예정 |
+| 4 | [하드웨어 구성](docs/analysis/04_hardware.md) | 예정 |
