@@ -46,10 +46,13 @@
 
 ## 🏢 아키텍처
 
-[[UI 화면 구성 — 레시피·세팅·디바이스](https://github.com/YoungWook-Park/TCD_Cursor/blob/refactor/device-nav-separation/docs/analysis/01_ui_components.md)](https://www.notion.so/UI-36e89297ff6080b2b162e785f8abfcb0?pvs=21)
+기술 분석 문서
 
-[[프로그램 아키텍처 및 테스트 구조](https://github.com/YoungWook-Park/TCD_Cursor/blob/refactor/device-nav-separation/docs/analysis/02_architecture_and_tests.md)](https://www.notion.so/36e89297ff6080438a33ceb598347787?pvs=21)
+AI 코드 역설계 기반 아키텍처 분석 시리즈.
 
-[[시퀀스 제어 구조](https://github.com/YoungWook-Park/TCD_Cursor/blob/refactor/device-nav-separation/docs/analysis/03_sequence_control.md)](https://www.notion.so/36e89297ff60807c83a4f05daf36ada9?pvs=21)
-
-[[하드웨어 구성](https://github.com/YoungWook-Park/TCD_Cursor/blob/refactor/device-nav-separation/docs/analysis/04_hardware.md) 및 인터페이스](https://www.notion.so/36e89297ff6080258ed6e93a73b16f3c?pvs=21)
+| # | 항목 | 상태 |
+|---|------|------|
+| 1 | [UI 화면 구성 — 레시피·세팅·디바이스](docs/analysis/01_ui_components.md) | 작성 중 |
+| 2 | [프로그램 아키텍처 및 테스트 구조](docs/analysis/02_architecture_and_tests.md) | 예정 |
+| 3 | [시퀀스 제어 구조](docs/analysis/03_sequence_control.md) | 예정 |
+| 4 | [하드웨어 구성](docs/analysis/04_hardware.md) | 예정 |
