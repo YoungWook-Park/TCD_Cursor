@@ -1,4 +1,6 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,277 +13,453 @@ using Tcd.Devices;
 namespace Tcd.App;
 
 /// <summary>
-/// 로봇 수동 제어 ViewModel.
-/// RobotTcpClient(IRobotDevice) 를 통해 로봇 시뮬레이터와 통신한다.
+/// 로봇 IO 핸드셰이크 기반 수동 제어 ViewModel.
 ///
-/// 실행 흐름:
-///   연결 → SetVelocity(pos, pct) → Move(pos) → WaitForPosition(pos, timeout)
+/// 초기화 흐름:
+///   Connect → [Init] → IoStartOn=true, IoRunning=true (동작 준비 완료)
 ///
-/// 인터락:
-///   IsConnected=false  → Move 불가
-///   IsRunning=true     → Move 불가
-///   IsHome/IsReady     → 안전 위치 아니면 Ready 이동만 허용 (서버 측도 동일 체크)
+/// 동작 흐름:
+///   SetVelocity + WriteProgramNo → [Go] → IoGoAck=true, IoMoving=true
+///   WaitForPosition → IoMoving=false, IoComplete=true
+///   자동: IoGoAck=false (Go Off) → IoComplete=false (Complete Off)
+///
+/// 비정상 종료:
+///   [Stop] → IoMoving=false, 모든 신호 Off
+///   [Reset] → 모든 신호 Off + IoRunning=true (다음 동작 대기)
 /// </summary>
 public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 {
-    #region Variable
+  #region Fields
 
-    private readonly MainCore    _core    = MainCore.Instance;
-    private readonly IRobotDevice _robot;
-    private CancellationTokenSource? _activeCts;
+  private readonly MainCore    _core  = MainCore.Instance;
+  private readonly IRobotDevice _robot;
+  private CancellationTokenSource? _activeCts;
 
-    private string _logStatus = "";
+  private string _host;
+  private int    _port;
+  private bool   _isConnecting;
+  private int    _velocity = 50;
+  private string _logStatus = "";
 
-    #endregion
+  // IO 신호 상태
+  private bool _ioStartOn;
+  private bool _ioRunning;
+  private bool _ioMoving;
+  private bool _ioGoAck;
+  private bool _ioComplete;
 
-    #region Constructor
+  // 로봇 상태 미러
+  private bool          _isConnected;
+  private bool          _isError;
+  private RobotPosition _currentPosition;
+  private string        _errorMessage = "";
 
-    public Manual_RobotViewModel()
+  private RobotProgramItem? _selectedProgramItem;
+
+  #endregion
+
+  #region Constructor
+
+  public Manual_RobotViewModel()
+  {
+    _robot = _core.RobotDevice;
+    _host  = _core.Devices.RobotHost;
+    _port  = _core.Devices.RobotPort;
+
+    _robot.StateChanged += OnRobotStateChanged;
+
+    Programs = new ObservableCollection<RobotProgramItem>(
+      Enum.GetValues<RobotPosition>()
+        .Select(p => new RobotProgramItem(p)));
+
+    _selectedProgramItem = Programs.FirstOrDefault(
+      p => p.Position == RobotPosition.Ready) ?? Programs.FirstOrDefault();
+  }
+
+  #endregion
+
+  #region Properties — Connection
+
+  public string Host
+  {
+    get => _host;
+    set => Set(ref _host, value);
+  }
+
+  public int Port
+  {
+    get => _port;
+    set => Set(ref _port, value);
+  }
+
+  public bool IsConnecting
+  {
+    get => _isConnecting;
+    private set { if (Set(ref _isConnecting, value)) RaiseCanExecute(); }
+  }
+
+  public bool IsConnected
+  {
+    get => _isConnected;
+    private set { if (Set(ref _isConnected, value)) RaiseCanExecute(); }
+  }
+
+  public bool IsError
+  {
+    get => _isError;
+    private set => Set(ref _isError, value);
+  }
+
+  public RobotPosition CurrentPosition
+  {
+    get => _currentPosition;
+    private set => Set(ref _currentPosition, value);
+  }
+
+  public string ErrorMessage
+  {
+    get => _errorMessage;
+    private set => Set(ref _errorMessage, value);
+  }
+
+  #endregion
+
+  #region Properties — IO Signals
+
+  /// <summary>PC → Robot: Connect 명령 후 Start IO 전송됨</summary>
+  public bool IoStartOn
+  {
+    get => _ioStartOn;
+    private set => Set(ref _ioStartOn, value);
+  }
+
+  /// <summary>Robot → PC: Running IO On — 동작 준비 완료</summary>
+  public bool IoRunning
+  {
+    get => _ioRunning;
+    private set { if (Set(ref _ioRunning, value)) RaiseCanExecute(); }
+  }
+
+  /// <summary>Robot → PC: 로봇 이동 중</summary>
+  public bool IoMoving
+  {
+    get => _ioMoving;
+    private set => Set(ref _ioMoving, value);
+  }
+
+  /// <summary>Robot → PC: Go 명령 수신 확인</summary>
+  public bool IoGoAck
+  {
+    get => _ioGoAck;
+    private set => Set(ref _ioGoAck, value);
+  }
+
+  /// <summary>Robot → PC: 이동 완료</summary>
+  public bool IoComplete
+  {
+    get => _ioComplete;
+    private set => Set(ref _ioComplete, value);
+  }
+
+  #endregion
+
+  #region Properties — Motion
+
+  public int Velocity
+  {
+    get => _velocity;
+    set => Set(ref _velocity, Math.Clamp(value, 1, 100));
+  }
+
+  public ObservableCollection<RobotProgramItem> Programs { get; }
+
+  public RobotProgramItem? SelectedProgramItem
+  {
+    get => _selectedProgramItem;
+    set => Set(ref _selectedProgramItem, value);
+  }
+
+  private RobotPosition SelectedProgram =>
+    _selectedProgramItem?.Position ?? RobotPosition.Ready;
+
+  public string LogStatus
+  {
+    get => _logStatus;
+    private set => Set(ref _logStatus, value);
+  }
+
+  #endregion
+
+  #region State Handler
+
+  private void OnRobotStateChanged(object? sender, RobotDeviceStateArgs e)
+  {
+    Application.Current?.Dispatcher.Invoke(() =>
     {
-        _robot = _core.RobotDevice;
-        _robot.StateChanged += OnRobotStateChanged;
-    }
+      var wasConnected = IsConnected;
 
-    #endregion
+      IsConnected     = e.IsConnected;
+      IsError         = e.IsError;
+      CurrentPosition = e.CurrentPosition;
+      ErrorMessage    = e.ErrorMessage ?? "";
 
-    #region Robot State Properties (IRobotDevice 미러링)
+      // 연결 끊기면 모든 IO 신호 Off
+      if (wasConnected && !e.IsConnected)
+        ResetAllSignals();
 
-    public bool IsConnected    => _robot.IsConnected;
-    public bool IsRunning      => _robot.IsRunning;
-    public bool IsHome         => _robot.IsHome;
-    public bool IsError        => _robot.IsError;
-    public RobotPosition CurrentPosition => _robot.CurrentPosition;
-    public string? ErrorMessage => _robot.ErrorMessage;
+      if (e.IsError)
+        LogStatus = $"[Error] {e.ErrorMessage}";
 
-    #endregion
+      // 이동 완료 감지: IsRunning 이 false 로 바뀔 때 IoMoving Off, IoComplete On
+      if (IoMoving && !e.IsRunning)
+        OnMoveCompleted();
+    });
+  }
 
-    #region Log
+  private void OnMoveCompleted()
+  {
+    IoMoving  = false;
+    IoComplete = true;
+    LogStatus = $"Complete: {CurrentPosition}";
 
-    public string LogStatus
+    // Go Off → Complete Off (핸드셰이크 완료)
+    Task.Delay(300).ContinueWith(_ =>
+      Application.Current?.Dispatcher.Invoke(() =>
+      {
+        IoGoAck    = false;
+        IoComplete = false;
+        LogStatus  = $"Ready — {CurrentPosition}";
+      }));
+  }
+
+  private void ResetAllSignals()
+  {
+    IoStartOn  = false;
+    IoRunning  = false;
+    IoMoving   = false;
+    IoGoAck    = false;
+    IoComplete = false;
+  }
+
+  #endregion
+
+  #region Commands — Connection
+
+  private RelayCommand? cmd_Connect;
+  public ICommand Cmd_Connect => cmd_Connect ??=
+    new RelayCommand(_ => ConnectAsync(), _ => !IsConnected && !IsConnecting);
+
+  private RelayCommand? cmd_Disconnect;
+  public ICommand Cmd_Disconnect => cmd_Disconnect ??=
+    new RelayCommand(_ => Disconnect(), _ => IsConnected);
+
+  private void ConnectAsync()
+  {
+    IsConnecting = true;
+    LogStatus = $"Connecting {Host}:{Port}...";
+
+    _ = Task.Run(async () =>
     {
-        get => _logStatus;
-        private set => Set(ref _logStatus, value);
-    }
+      try
+      {
+        await _robot.ConnectAsync(_host, _port).ConfigureAwait(false);
+        SetLog($"Connected to {Host}:{Port}");
+      }
+      catch (Exception ex)
+      {
+        SetLog($"Connect failed: {ex.Message}");
+      }
+      finally
+      {
+        Application.Current?.Dispatcher.Invoke(() => IsConnecting = false);
+      }
+    });
+  }
 
-    #endregion
+  private void Disconnect()
+  {
+    ResetAllSignals();
+    _robot.Disconnect();
+    SetLog("Disconnected");
+  }
 
-    #region State Change
+  #endregion
 
-    private void OnRobotStateChanged(object? sender, RobotDeviceStateArgs e)
+  #region Commands — IO Handshake
+
+  private RelayCommand? cmd_InitStartIo;
+  public ICommand Cmd_InitStartIo => cmd_InitStartIo ??=
+    new RelayCommand(_ => InitStartIo(), _ => IsConnected && !IoRunning);
+
+  private RelayCommand? cmd_Go;
+  public ICommand Cmd_Go => cmd_Go ??=
+    new RelayCommand(_ => Go(), _ => IsConnected && IoRunning && !IoMoving);
+
+  private RelayCommand? cmd_Stop;
+  public ICommand Cmd_Stop => cmd_Stop ??=
+    new RelayCommand(_ => Stop(), _ => IsConnected);
+
+  private RelayCommand? cmd_Reset;
+  public ICommand Cmd_Reset => cmd_Reset ??=
+    new RelayCommand(_ => Reset(), _ => IsConnected);
+
+  private void InitStartIo()
+  {
+    // Start IO On → Robot Running IO On (동작 준비 완료)
+    LogStatus = "Init: Start IO On...";
+    IoStartOn = true;
+
+    _ = Task.Run(async () =>
     {
-        // 백그라운드 스레드에서 발생 → UI 스레드 마샬링
+      try
+      {
+        // GetState 로 연결 확인 후 Running 상태 활성화
+        await _robot.SetVelocityAsync(RobotPosition.Ready, 30)
+          .ConfigureAwait(false);
+
         Application.Current?.Dispatcher.Invoke(() =>
         {
-            Raise(nameof(IsConnected));
-            Raise(nameof(IsRunning));
-            Raise(nameof(IsHome));
-            Raise(nameof(IsError));
-            Raise(nameof(CurrentPosition));
-            Raise(nameof(ErrorMessage));
-            RaiseMoveCommandsCanExecute();
-
-            if (e.IsError)
-                LogStatus = $"[Error] {e.ErrorMessage}";
+          IoRunning = true;
+          LogStatus = "Running IO On — Ready for operation";
         });
-    }
-
-    private void RaiseMoveCommandsCanExecute()
-    {
-        cmd_Stop?.RaiseCanExecuteChanged();
-        cmd_MoveHome?.RaiseCanExecuteChanged();
-        cmd_MoveReady?.RaiseCanExecuteChanged();
-        cmd_MoveS1Wait?.RaiseCanExecuteChanged();
-        cmd_MoveS1Pick?.RaiseCanExecuteChanged();
-        cmd_MoveS2Wait?.RaiseCanExecuteChanged();
-        cmd_MoveS2Pick?.RaiseCanExecuteChanged();
-        cmd_MoveUcWait?.RaiseCanExecuteChanged();
-        cmd_MoveUcPick?.RaiseCanExecuteChanged();
-        cmd_MoveLcWait?.RaiseCanExecuteChanged();
-        cmd_MoveLcPick?.RaiseCanExecuteChanged();
-        cmd_MovePeel?.RaiseCanExecuteChanged();
-    }
-
-    #endregion
-
-    #region Move Helper
-
-    /// <summary>
-    /// 현재 레시피에서 포지션 속도를 읽어 반환.
-    /// 레시피 미설정 시 RobotVelocityDefault 폴백.
-    /// </summary>
-    private int GetVelocity(RobotPosition pos)
-    {
-        var key    = RobotPositionName.FromPosition(pos);
-        var recipe = _core.Recipes.Current;
-        if (recipe?.RobotVelocity?.TryGetValue(key, out var v) == true)
-            return Math.Clamp(v, 1, 100);
-        return RobotVelocityDefault.ForPosition(pos);
-    }
-
-    /// <summary>
-    /// SetVelocity → Move → 완료 대기 공통 처리.
-    /// _activeCts 로 이전 대기 취소 후 새 작업 시작.
-    /// </summary>
-    private void ExecuteMove(
-        RobotPosition target, int velocityPct, string displayName)
-    {
-        _activeCts?.Cancel();
-        _activeCts?.Dispose();
-        var cts = new CancellationTokenSource();
-        _activeCts = cts;
-
-        LogStatus = $"Moving → {displayName} (vel={velocityPct}%)";
-
-        _ = Task.Run(async () =>
+      }
+      catch (Exception ex)
+      {
+        Application.Current?.Dispatcher.Invoke(() =>
         {
-            try
-            {
-                await _robot.SetVelocityAsync(target, velocityPct, cts.Token)
-                             .ConfigureAwait(false);
-                var ok = await _robot.MoveAsync(target, cts.Token)
-                                     .ConfigureAwait(false);
-                if (!ok)
-                {
-                    SetLog($"Move rejected by server — check interlock.");
-                    return;
-                }
-
-                await _robot.WaitForPositionAsync(
-                        target,
-                        _core.Settings.RobotMoveTimeout,
-                        cts.Token)
-                    .ConfigureAwait(false);
-
-                SetLog($"Arrived: {displayName}");
-            }
-            catch (OperationCanceledException)
-            {
-                SetLog($"Cancelled: {displayName}");
-            }
-            catch (Exception ex)
-            {
-                SetLog($"[Error] {ex.Message}");
-            }
+          IoStartOn = false;
+          LogStatus = $"Init failed: {ex.Message}";
         });
-    }
+      }
+    });
+  }
 
-    private void SetLog(string msg) =>
-        Application.Current?.Dispatcher.Invoke(() => LogStatus = msg);
+  private void Go()
+  {
+    _activeCts?.Cancel();
+    _activeCts?.Dispose();
+    var cts = new CancellationTokenSource();
+    _activeCts = cts;
 
-    #endregion
+    var target   = SelectedProgram;
+    var velocity = _velocity;
 
-    #region Commands — Stop
+    LogStatus = $"Go → {target} (vel={velocity}%)";
 
-    private RelayCommand? cmd_Stop;
-    public ICommand Cmd_Stop => cmd_Stop ??=
-        new RelayCommand(
-            _ => StopAsync(),
-            _ => IsConnected);
-
-    private void StopAsync()
+    _ = Task.Run(async () =>
     {
-        _activeCts?.Cancel();
-        _ = _robot.StopAsync();
-        LogStatus = "Stop sent";
+      try
+      {
+        // 속도 설정 (Write velocity word)
+        await _robot.SetVelocityAsync(target, velocity, cts.Token)
+          .ConfigureAwait(false);
+
+        // Go On → Moving On, Go_Ack On
+        var ok = await _robot.MoveAsync(target, cts.Token).ConfigureAwait(false);
+
+        if (!ok)
+        {
+          SetLog($"Go rejected by robot — check interlock.");
+          return;
+        }
+
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+          IoGoAck  = true;
+          IoMoving = true;
+        });
+
+        // WaitForPosition (Moving Off 대기)
+        await _robot.WaitForPositionAsync(
+          target,
+          _core.Settings.RobotMoveTimeout,
+          cts.Token).ConfigureAwait(false);
+
+        // OnMoveCompleted 는 StateChanged 이벤트에서 자동 호출
+      }
+      catch (OperationCanceledException)
+      {
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+          IoMoving = false;
+          IoGoAck  = false;
+          LogStatus = "Go cancelled";
+        });
+      }
+      catch (Exception ex)
+      {
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+          IoMoving = false;
+          IoGoAck  = false;
+          LogStatus = $"[Error] {ex.Message}";
+        });
+      }
+    });
+  }
+
+  private void Stop()
+  {
+    _activeCts?.Cancel();
+
+    _ = Task.Run(async () =>
+    {
+      try
+      {
+        await _robot.StopAsync().ConfigureAwait(false);
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+          IoMoving = false;
+          IoGoAck  = false;
+          LogStatus = "Stop sent";
+        });
+      }
+      catch (Exception ex) { SetLog($"Stop error: {ex.Message}"); }
+    });
+  }
+
+  private void Reset()
+  {
+    // 모든 플래그 Off → Running 만 On (다음 동작 대기)
+    IoMoving   = false;
+    IoGoAck    = false;
+    IoComplete = false;
+    IoRunning  = IoStartOn; // Start IO 가 켜져 있으면 Running 복원
+    LogStatus  = "Reset — flags cleared, Running restored";
+  }
+
+  #endregion
+
+  #region Helpers
+
+  private void SetLog(string msg) =>
+    Application.Current?.Dispatcher.Invoke(() => LogStatus = msg);
+
+  private void RaiseCanExecute()
+  {
+    cmd_Connect?.RaiseCanExecuteChanged();
+    cmd_Disconnect?.RaiseCanExecuteChanged();
+    cmd_InitStartIo?.RaiseCanExecuteChanged();
+    cmd_Go?.RaiseCanExecuteChanged();
+    cmd_Stop?.RaiseCanExecuteChanged();
+    cmd_Reset?.RaiseCanExecuteChanged();
+  }
+
+  #endregion
+
+  // ── Inner type ───────────────────────────────────────────────────────────
+
+  public sealed class RobotProgramItem
+  {
+    public RobotPosition Position { get; }
+    public string        Label    { get; }
+
+    public RobotProgramItem(RobotPosition pos)
+    {
+      Position = pos;
+      Label = RobotPositionName.FromPosition(pos);
     }
 
-    #endregion
-
-    #region Commands — Move (11개 포지션)
-
-    // ── 안전 위치 ──────────────────────────────────────────────────────────
-    private RelayCommand? cmd_MoveHome;
-    public ICommand Cmd_MoveHome => cmd_MoveHome ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.Home,
-                             GetVelocity(RobotPosition.Home),
-                             RobotPositionName.Home),
-            _ => IsConnected && !IsRunning);
-
-    private RelayCommand? cmd_MoveReady;
-    public ICommand Cmd_MoveReady => cmd_MoveReady ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.Ready,
-                             GetVelocity(RobotPosition.Ready),
-                             RobotPositionName.Ready),
-            _ => IsConnected && !IsRunning);
-
-    // ── S1 (CGO / 상부 필름) ───────────────────────────────────────────────
-    private RelayCommand? cmd_MoveS1Wait;
-    public ICommand Cmd_MoveS1Wait => cmd_MoveS1Wait ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.S1_PickupWait,
-                             GetVelocity(RobotPosition.S1_PickupWait),
-                             RobotPositionName.S1_PickupWait),
-            _ => IsConnected && !IsRunning);
-
-    private RelayCommand? cmd_MoveS1Pick;
-    public ICommand Cmd_MoveS1Pick => cmd_MoveS1Pick ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.S1_Pick,
-                             GetVelocity(RobotPosition.S1_Pick),
-                             RobotPositionName.S1_Pick),
-            _ => IsConnected && !IsRunning);
-
-    // ── S2 / LowStage (OCA / 하부 필름) ───────────────────────────────────
-    private RelayCommand? cmd_MoveS2Wait;
-    public ICommand Cmd_MoveS2Wait => cmd_MoveS2Wait ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.S2_PickupWait,
-                             GetVelocity(RobotPosition.S2_PickupWait),
-                             RobotPositionName.S2_PickupWait),
-            _ => IsConnected && !IsRunning);
-
-    private RelayCommand? cmd_MoveS2Pick;
-    public ICommand Cmd_MoveS2Pick => cmd_MoveS2Pick ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.S2_Pick,
-                             GetVelocity(RobotPosition.S2_Pick),
-                             RobotPositionName.S2_Pick),
-            _ => IsConnected && !IsRunning);
-
-    // ── Upper Chamber ──────────────────────────────────────────────────────
-    private RelayCommand? cmd_MoveUcWait;
-    public ICommand Cmd_MoveUcWait => cmd_MoveUcWait ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.UpperChamber_PickupWait,
-                             GetVelocity(RobotPosition.UpperChamber_PickupWait),
-                             RobotPositionName.UpperChamber_PickupWait),
-            _ => IsConnected && !IsRunning);
-
-    private RelayCommand? cmd_MoveUcPick;
-    public ICommand Cmd_MoveUcPick => cmd_MoveUcPick ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.UpperChamber_Pick,
-                             GetVelocity(RobotPosition.UpperChamber_Pick),
-                             RobotPositionName.UpperChamber_Pick),
-            _ => IsConnected && !IsRunning);
-
-    // ── Lower Chamber ──────────────────────────────────────────────────────
-    private RelayCommand? cmd_MoveLcWait;
-    public ICommand Cmd_MoveLcWait => cmd_MoveLcWait ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.LowerChamber_PickupWait,
-                             GetVelocity(RobotPosition.LowerChamber_PickupWait),
-                             RobotPositionName.LowerChamber_PickupWait),
-            _ => IsConnected && !IsRunning);
-
-    private RelayCommand? cmd_MoveLcPick;
-    public ICommand Cmd_MoveLcPick => cmd_MoveLcPick ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.LowerChamber_Pick,
-                             GetVelocity(RobotPosition.LowerChamber_Pick),
-                             RobotPositionName.LowerChamber_Pick),
-            _ => IsConnected && !IsRunning);
-
-    // ── Peel ───────────────────────────────────────────────────────────────
-    private RelayCommand? cmd_MovePeel;
-    public ICommand Cmd_MovePeel => cmd_MovePeel ??=
-        new RelayCommand(
-            _ => ExecuteMove(RobotPosition.Peel,
-                             GetVelocity(RobotPosition.Peel),
-                             RobotPositionName.Peel),
-            _ => IsConnected && !IsRunning);
-
-    #endregion
+    public override string ToString() => Label;
+  }
 }

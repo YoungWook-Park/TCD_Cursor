@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-06-01
+
+### 변경 내용
+- [Define] MotorTeachKeys.cs 신규 — 축별 고정 티칭 위치 이름 상수 (ZLower 6개·UVW 공통 2개·ZUpper 2개)
+- [Core] Recipes.cs — TcdRecipe에 NamedAxisPositions(축별 명명 티칭 딕셔너리) 및 Get/Set 헬퍼 추가
+- [Mvvm] Converters.cs 신규 — AxisTeachPointParamConverter (Teach 탭 Move/Teach 버튼 MultiValueConverter)
+- [App/UI] Manual_MotorViewModel 전면 재작성 — AxisTeachGroup·AxisTeachPoint 모델, 축별 독립 Move/Teach 커맨드
+- [App/UI] Manual_MotorView.xaml 재설계 — 2-컬럼 (좌: Motor Status, 우: Teach/Manual TabControl)
+- [App/UI] ManualViewModel 간소화 — Robot·Plc ViewModel 추가, 상단 통신 상태바 제거
+- [App/UI] ManualView.xaml 재구성 — Motor·Robot·PLC 3탭 구조, 기존 통신 상태바 제거
+- [App/UI] Manual_RobotViewModel 재작성 — IO 핸드셰이크 상태 머신 (IoStartOn·IoRunning·IoMoving·IoGoAck·IoComplete)
+- [App/UI] Manual_RobotView.xaml 재설계 — Connection·IO Signals·Initialize·Motion Control 패널 구성
+- [App/UI] MainWindow.xaml — 하단 네비게이션에서 Robot 버튼 제거 (Manual 탭 내 통합)
+
+### 브랜치 / 커밋
+- Branch: refactor/device-nav-separation
+- Commit: (이번 커밋)
+
+---
+
 ## 2026-05-27
 
 ### 변경 내용

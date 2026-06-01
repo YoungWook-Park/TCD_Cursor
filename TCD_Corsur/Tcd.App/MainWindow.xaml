@@ -107,10 +107,6 @@
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowManualPage}" />
                 <Button Width="100" Margin="4"
-                        Content="Robot"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding Cmd_ShowRobotPage}" />
-                <Button Width="100" Margin="4"
                         Content="Device"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowDevicePage}" />
