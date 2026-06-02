@@ -81,5 +81,30 @@ public sealed class TcdRecipe
     public void SetAxis(string key, double value) => AxisTeach[key] = value;
 
     public List<TeachPosition> TeachPositions { get; set; } = new();
+
+  /// <summary>
+  /// 축별 명명 티칭 위치. Key1: AxisName, Key2: PositionName, Value: Position.
+  /// MotorTeachKeys 상수로 키를 지정. 시퀀스에서 GetNamedPosition 으로 참조.
+  /// </summary>
+  public Dictionary<string, Dictionary<string, double>> NamedAxisPositions
+  { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+  public double GetNamedPosition(string axis, string name)
+  {
+    if (NamedAxisPositions.TryGetValue(axis, out var map) &&
+        map.TryGetValue(name, out var v))
+      return v;
+    return 0;
+  }
+
+  public void SetNamedPosition(string axis, string name, double value)
+  {
+    if (!NamedAxisPositions.TryGetValue(axis, out var map))
+    {
+      map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+      NamedAxisPositions[axis] = map;
+    }
+    map[name] = value;
+  }
 }
 

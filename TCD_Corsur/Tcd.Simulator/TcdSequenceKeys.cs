@@ -87,6 +87,26 @@ namespace Tcd.Simulator
         public const string Manual_Motor_ZUpper_ServoOn = "Manual_Motor_ZUpper_ServoOn";
         public const string Manual_Motor_ZUpper_ServoOff = "Manual_Motor_ZUpper_ServoOff";
 
+        // Manual IO sequences
+        public const string Manual_Io_LowStageVacOn         = "Manual_Io_LowStageVacOn";
+        public const string Manual_Io_LowStageVacOff        = "Manual_Io_LowStageVacOff";
+        public const string Manual_Io_HighStageVacOn        = "Manual_Io_HighStageVacOn";
+        public const string Manual_Io_HighStageVacOff       = "Manual_Io_HighStageVacOff";
+        public const string Manual_Io_RobotGripVacOn        = "Manual_Io_RobotGripVacOn";
+        public const string Manual_Io_RobotGripVacOff       = "Manual_Io_RobotGripVacOff";
+        /// <summary>인터락: LowerChamberAtBond &amp;&amp; UpperChamberAtBond</summary>
+        public const string Manual_Io_LowerChamberVacOn     = "Manual_Io_LowerChamberVacOn";
+        public const string Manual_Io_LowerChamberVacOff    = "Manual_Io_LowerChamberVacOff";
+        /// <summary>인터락: LowerChamberAtBond &amp;&amp; UpperChamberAtBond</summary>
+        public const string Manual_Io_UpperChamberVacOn     = "Manual_Io_UpperChamberVacOn";
+        public const string Manual_Io_UpperChamberVacOff    = "Manual_Io_UpperChamberVacOff";
+        /// <summary>인터락: UpperChamberVac On 확인</summary>
+        public const string Manual_Io_UpperEscEnable        = "Manual_Io_UpperEscEnable";
+        public const string Manual_Io_UpperEscDisable       = "Manual_Io_UpperEscDisable";
+        /// <summary>인터락: LowerChamberVac On 확인</summary>
+        public const string Manual_Io_LowerEscEnable        = "Manual_Io_LowerEscEnable";
+        public const string Manual_Io_LowerEscDisable       = "Manual_Io_LowerEscDisable";
+
         public const string Material_Create_Bonded = "Material_Create_Bonded";
         public const string Delay_Bond_Dwell1s = "Delay_Bond_Dwell1s";
 

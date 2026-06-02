@@ -5,135 +5,298 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="850" d:DesignWidth="1800"
+             d:DesignHeight="800" d:DesignWidth="900"
              d:DataContext="{d:DesignInstance Type=local:Manual_RobotViewModel}">
   <UserControl.Resources>
-    <!-- Running indicator: Yellow=running -->
-    <Style x:Key="RunLedStyle" TargetType="Ellipse">
+    <!-- IO Signal LED -->
+    <Style x:Key="IoLedStyle" TargetType="Ellipse">
       <Setter Property="Width"  Value="12"/>
       <Setter Property="Height" Value="12"/>
-      <Setter Property="Fill"   Value="#555"/>
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsRunning}" Value="True">
-          <Setter Property="Fill" Value="#FFDD44"/>
-        </DataTrigger>
-      </Style.Triggers>
+      <Setter Property="Fill"   Value="#444"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
-    <!-- Error indicator: Red=error -->
-    <Style x:Key="ErrLedStyle" TargetType="Ellipse">
-      <Setter Property="Width"  Value="12"/>
-      <Setter Property="Height" Value="12"/>
-      <Setter Property="Fill"   Value="#555"/>
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsError}" Value="True">
-          <Setter Property="Fill" Value="#FF4444"/>
-        </DataTrigger>
-      </Style.Triggers>
+    <Style x:Key="IoLedOnStyle" BasedOn="{StaticResource IoLedStyle}"
+           TargetType="Ellipse">
+      <Setter Property="Fill" Value="#44DD66"/>
+    </Style>
+    <Style x:Key="IoLedYellowStyle" BasedOn="{StaticResource IoLedStyle}"
+           TargetType="Ellipse">
+      <Setter Property="Fill" Value="#FFDD44"/>
     </Style>
   </UserControl.Resources>
 
-  <Grid Margin="8">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="8" MaxWidth="700">
 
-    <!-- ── Move Buttons ───────────────────────────────────────────────── -->
-    <GroupBox Grid.Row="0" Header="Teach Positions" Margin="0,0,0,6">
-      <StackPanel Margin="8,4,8,8">
+      <!-- ══ Connection ══════════════════════════════════════════════════ -->
+      <GroupBox Header="Connection" Margin="0,0,0,8">
+        <Grid Margin="8,6,8,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="55"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
 
-        <!-- Safe positions row -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-          <TextBlock Text="Safe:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="Home"  Width="80" Margin="0,0,6,0"
+          <TextBlock Grid.Column="0" Text="Host:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+          <TextBox   Grid.Column="1" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
+                     VerticalContentAlignment="Center" Padding="4,2"/>
+          <TextBlock Grid.Column="2" Text="Port:" VerticalAlignment="Center" Margin="8,0,4,0"/>
+          <TextBox   Grid.Column="3" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                     VerticalContentAlignment="Center" Padding="4,2"/>
+          <Button Grid.Column="4" Content="Connect"
                   Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveHome}"/>
-          <Button Content="Ready" Width="80" Margin="0,0,6,0"
+                  Width="80" Margin="8,0,4,0"
+                  Command="{Binding Cmd_Connect}"/>
+          <Button Grid.Column="5" Content="Disconnect"
                   Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveReady}"/>
-          <Button Content="STOP"  Width="80" Background="#AA2222" Foreground="White"
-                  FontWeight="Bold"
-                  Command="{Binding Cmd_Stop}"/>
+                  Width="85"
+                  Command="{Binding Cmd_Disconnect}"/>
+
+          <!-- 연결 LED -->
+          <StackPanel Grid.Column="7" Orientation="Horizontal"
+                      VerticalAlignment="Center" Margin="12,0,0,0">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="{Binding IsConnected, Converter={x:Null}}"
+                       VerticalAlignment="Center" FontSize="11">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Text" Value="Disconnected"/>
+                  <Setter Property="Foreground" Value="#888"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                      <Setter Property="Text" Value="Connected"/>
+                      <Setter Property="Foreground" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+        </Grid>
+      </GroupBox>
+
+      <!-- ══ IO Signal Status ════════════════════════════════════════════ -->
+      <GroupBox Header="IO Signals" Margin="0,0,0,8">
+        <StackPanel Orientation="Horizontal" Margin="10,8,10,8">
+
+          <!-- Start IO -->
+          <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IoStartOn}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Start IO" FontSize="11" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+          </StackPanel>
+
+          <!-- Running -->
+          <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IoRunning}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Running" FontSize="11" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+          </StackPanel>
+
+          <!-- Moving -->
+          <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IoMoving}" Value="True">
+                      <Setter Property="Fill" Value="#FFDD44"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Moving" FontSize="11" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+          </StackPanel>
+
+          <!-- Go Ack -->
+          <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IoGoAck}" Value="True">
+                      <Setter Property="Fill" Value="#44AAFF"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Go_Ack" FontSize="11" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+          </StackPanel>
+
+          <!-- Complete -->
+          <StackPanel Orientation="Horizontal">
+            <Ellipse Margin="0,0,5,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse" BasedOn="{StaticResource IoLedStyle}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IoComplete}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="Complete" FontSize="11" VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+          </StackPanel>
+
         </StackPanel>
+      </GroupBox>
 
-        <Separator Margin="0,2,0,6"/>
-
-        <!-- S1 (CGO / Upper Film) -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-          <TextBlock Text="S1:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="S1 Wait" Width="90" Margin="0,0,6,0"
+      <!-- ══ Initialize ══════════════════════════════════════════════════ -->
+      <GroupBox Header="Initialize" Margin="0,0,0,8">
+        <StackPanel Orientation="Horizontal" Margin="10,8,10,8">
+          <Button Content="Init  (Start IO On)"
+                  Width="160" Height="32"
                   Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveS1Wait}"/>
-          <Button Content="S1 Pick" Width="90"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveS1Pick}"/>
+                  Command="{Binding Cmd_InitStartIo}"/>
+          <TextBlock Text="  →  Running IO On 후 동작 준비 완료"
+                     VerticalAlignment="Center" FontSize="11"
+                     Foreground="{StaticResource TextSubtleBrush}"/>
         </StackPanel>
+      </GroupBox>
 
-        <!-- S2 / LowStage (OCA / Lower Film) -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-          <TextBlock Text="S2:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="S2 Wait" Width="90" Margin="0,0,6,0"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveS2Wait}"/>
-          <Button Content="S2 Pick" Width="90"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveS2Pick}"/>
-        </StackPanel>
+      <!-- ══ Motion Control ══════════════════════════════════════════════ -->
+      <GroupBox Header="Motion Control" Margin="0,0,0,8">
+        <Grid Margin="10,8,10,10">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="90"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
 
-        <!-- Upper Chamber -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-          <TextBlock Text="Upper Ch:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="UC Wait" Width="90" Margin="0,0,6,0"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveUcWait}"/>
-          <Button Content="UC Pick" Width="90"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveUcPick}"/>
-        </StackPanel>
+          <!-- Velocity -->
+          <TextBlock Grid.Row="0" Grid.Column="0"
+                     Text="Velocity:" VerticalAlignment="Center"
+                     FontSize="12" Margin="0,0,8,6"/>
+          <Slider    Grid.Row="0" Grid.Column="1"
+                     Minimum="1" Maximum="100"
+                     Value="{Binding Velocity}"
+                     VerticalAlignment="Center"
+                     Margin="0,0,8,6"/>
+          <TextBlock Grid.Row="0" Grid.Column="2"
+                     VerticalAlignment="Center" Margin="0,0,0,6"
+                     FontFamily="Consolas" FontSize="12">
+            <Run Text="{Binding Velocity, Mode=OneWay}"/>
+            <Run Text="%"/>
+          </TextBlock>
 
-        <!-- Lower Chamber -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-          <TextBlock Text="Lower Ch:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="LC Wait" Width="90" Margin="0,0,6,0"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveLcWait}"/>
-          <Button Content="LC Pick" Width="90"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MoveLcPick}"/>
-        </StackPanel>
+          <!-- Program -->
+          <TextBlock Grid.Row="1" Grid.Column="0"
+                     Text="Program:" VerticalAlignment="Center"
+                     FontSize="12" Margin="0,0,8,6"/>
+          <ComboBox  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                     ItemsSource="{Binding Programs}"
+                     SelectedItem="{Binding SelectedProgramItem}"
+                     DisplayMemberPath="Label"
+                     Margin="0,0,0,6"/>
 
-        <!-- Peel -->
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Peel:" Width="50" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
-          <Button Content="Peel" Width="90"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Command="{Binding Cmd_MovePeel}"/>
-        </StackPanel>
+          <!-- Buttons -->
+          <StackPanel Grid.Row="2" Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      Orientation="Horizontal"
+                      Margin="0,4,0,0">
+            <Button Content="Go"
+                    Width="80" Height="34"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_Go}"
+                    Margin="0,0,8,0"/>
+            <Button Content="STOP"
+                    Width="80" Height="34"
+                    Style="{StaticResource DangerButtonStyle}"
+                    Command="{Binding Cmd_Stop}"
+                    Margin="0,0,8,0"/>
+            <Button Content="Reset"
+                    Width="80" Height="34"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_Reset}"/>
+          </StackPanel>
+        </Grid>
+      </GroupBox>
 
-      </StackPanel>
-    </GroupBox>
+      <!-- ══ Status Log ══════════════════════════════════════════════════ -->
+      <GroupBox Header="Status">
+        <Grid Margin="8,4,8,8">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
 
-    <!-- ── Status Log ──────────────────────────────────────────────────── -->
-    <GroupBox Grid.Row="1" Header="Status">
-      <Grid Margin="8,4,8,8">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0"
+                     Text="{Binding LogStatus}"
+                     FontFamily="Consolas" FontSize="12"
+                     TextWrapping="Wrap" Margin="0,0,0,6"/>
 
-        <TextBlock Grid.Row="0"
-                   Text="{Binding LogStatus}"
-                   FontFamily="Consolas" FontSize="12"
-                   TextWrapping="Wrap" Margin="0,0,0,4"/>
+          <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Position: " FontSize="11"
+                       Foreground="{StaticResource TextSubtleBrush}"/>
+            <TextBlock Text="{Binding CurrentPosition}" FontSize="11"
+                       FontFamily="Consolas"/>
+            <TextBlock Text="  Error: " FontSize="11"
+                       Foreground="{StaticResource TextSubtleBrush}"
+                       Margin="12,0,0,0"/>
+            <TextBlock FontSize="11" FontFamily="Consolas">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Text" Value="—"/>
+                  <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                      <Setter Property="Text" Value="FAULT"/>
+                      <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+        </Grid>
+      </GroupBox>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-          <TextBlock Text="Position: " FontSize="11" Foreground="#AAA"/>
-          <TextBlock Text="{Binding CurrentPosition}" FontSize="11"/>
-          <TextBlock Text="  Home: " FontSize="11" Foreground="#AAA" Margin="12,0,0,0"/>
-          <TextBlock Text="{Binding IsHome}" FontSize="11"/>
-        </StackPanel>
-      </Grid>
-    </GroupBox>
-
-  </Grid>
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

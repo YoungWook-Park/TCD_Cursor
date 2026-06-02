@@ -6,331 +6,233 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:Tcd.App"
              mc:Ignorable="d"
-             d:DesignHeight="850" d:DesignWidth="1800"
+             d:DesignHeight="800" d:DesignWidth="1600"
              d:DataContext="{d:DesignInstance Type=local:Manual_MotorViewModel}">
-  <Grid Margin="8">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
-    </Grid.RowDefinitions>
+  <Grid Margin="6">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="8"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
 
-    <!-- Teach / move controls -->
-    <GroupBox Header="Axes (Teach / Move)">
-      <Grid Margin="10">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="70"/>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <!-- ══ 좌: Motor Status + STOP ALL ══════════════════════════════════ -->
+    <DockPanel Grid.Column="0" LastChildFill="False">
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,10,6" Text="U"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,10,6" Text="{Binding U, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="0" Grid.Column="2" Margin="0,0,6,6" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveU}" />
-        <Button Grid.Row="0" Grid.Column="3" Margin="0,0,6,6" Content="Teach" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_TeachU}" />
-        <Button Grid.Row="0" Grid.Column="4" Margin="0,0,6,6" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopU}" />
-        <Button Grid.Row="0" Grid.Column="5" Margin="0,0,6,6" Content="Servo On" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnU}" />
-        <Button Grid.Row="0" Grid.Column="6" Margin="0,0,6,6" Content="Servo Off" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffU}" />
-        <Button Grid.Row="0" Grid.Column="7" Margin="0,0,0,6" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeU}" />
-          
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,10,6" Text="V"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,10,6" Text="{Binding V, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="1" Grid.Column="2" Margin="0,0,6,6" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveV}" />
-        <Button Grid.Row="1" Grid.Column="3" Margin="0,0,6,6" Content="Teach" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_TeachV}" />
-        <Button Grid.Row="1" Grid.Column="4" Margin="0,0,6,6" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopV}" />
-        <Button Grid.Row="1" Grid.Column="5" Margin="0,0,6,6" Content="Servo On" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnV}" />
-        <Button Grid.Row="1" Grid.Column="6" Margin="0,0,6,6" Content="Servo Off" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffV}" />
-        <Button Grid.Row="1" Grid.Column="7" Margin="0,0,0,6" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeV}" />
-          
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,10,6" Text="W"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,10,6" Text="{Binding W, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="2" Grid.Column="2" Margin="0,0,6,6" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveW}" />
-        <Button Grid.Row="2" Grid.Column="3" Margin="0,0,6,6" Content="Teach" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_TeachW}" />
-        <Button Grid.Row="2" Grid.Column="4" Margin="0,0,6,6" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopW}" />
-        <Button Grid.Row="2" Grid.Column="5" Margin="0,0,6,6" Content="Servo On" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnW}" />
-        <Button Grid.Row="2" Grid.Column="6" Margin="0,0,6,6" Content="Servo Off" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffW}" />
-        <Button Grid.Row="2" Grid.Column="7" Margin="0,0,0,6" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeW}" />
-          
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,10,6" Text="Z Load"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,10,6" Text="{Binding ZLoad, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="3" Grid.Column="2" Margin="0,0,6,6" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveZLoad}" />
-        <Button Grid.Row="3" Grid.Column="3" Margin="0,0,6,6" Content="Teach" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_TeachZLoad}" />
-        <Button Grid.Row="3" Grid.Column="4" Margin="0,0,6,6" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopZLoad}" />
-        <Button Grid.Row="3" Grid.Column="5" Margin="0,0,6,6" Content="Servo On" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnZLoad}" />
-        <Button Grid.Row="3" Grid.Column="6" Margin="0,0,6,6" Content="Servo Off" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffZLoad}" />
-        <Button Grid.Row="3" Grid.Column="7" Margin="0,0,0,6" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeZLoad}" />
-          
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,10,0" Text="Z Bond"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="0,0,10,0" Text="{Binding ZBond, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Row="4" Grid.Column="2" Margin="0,0,6,0" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveZBond}" />
-        <Button Grid.Row="4" Grid.Column="3" Margin="0,0,6,0" Content="Teach" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_TeachZBond}" />
-        <Button Grid.Row="4" Grid.Column="4" Margin="0,0,6,0" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopZBond}" />
-        <Button Grid.Row="4" Grid.Column="5" Margin="0,0,6,0" Content="Servo On" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnZBond}" />
-        <Button Grid.Row="4" Grid.Column="6" Margin="0,0,6,0" Content="Servo Off" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffZBond}" />
-        <Button Grid.Row="4" Grid.Column="7" Margin="0,0,0,0" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeZBond}" />
-          
-        <!-- Jog controls -->
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,8,10,0" Text="Jog"/>
-        <StackPanel Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="7" Orientation="Horizontal" Margin="0,8,0,0">
-          <ComboBox Width="80" ItemsSource="{Binding Axes}" SelectedItem="{Binding SelectedAxis}" />
-          <TextBox Width="80" Margin="8,0,0,0" Text="{Binding JogSpeed, UpdateSourceTrigger=PropertyChanged}" />
-          <Button Content="+Jog" Margin="8,0,0,0" Style="{StaticResource PrimaryButtonStyle}">
-            <i:Interaction.Triggers>
-              <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogPlusDown}" />
-              </i:EventTrigger>
-              <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogPlusUp}" />
-              </i:EventTrigger>
-              <i:EventTrigger EventName="MouseLeave">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogPlusUp}" />
-              </i:EventTrigger>
-            </i:Interaction.Triggers>
-          </Button>
-          <Button Content="-Jog" Margin="4,0,0,0" Style="{StaticResource PrimaryButtonStyle}">
-            <i:Interaction.Triggers>
-              <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogMinusDown}" />
-              </i:EventTrigger>
-              <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogMinusUp}" />
-              </i:EventTrigger>
-              <i:EventTrigger EventName="MouseLeave">
-                <i:InvokeCommandAction Command="{Binding Cmd_JogMinusUp}" />
-              </i:EventTrigger>
-            </i:Interaction.Triggers>
-          </Button>
-        </StackPanel>
-      </Grid>
-    </GroupBox>
+      <GroupBox DockPanel.Dock="Top" Header="Motor Status">
+        <DataGrid ItemsSource="{Binding AxisStatuses}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  RowHeight="26"
+                  Margin="4">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Axis"    Binding="{Binding AxisName}" Width="60"/>
+            <DataGridTextColumn Header="Position" Binding="{Binding Position, StringFormat=N3}" Width="85"/>
 
-    <!-- Motor Status + Teach Positions (좌우 분할) -->
-    <Grid Grid.Row="1">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
+            <DataGridTemplateColumn Header="Servo" Width="55">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsServoOn}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="OFF"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsServoOn}" Value="True">
+                            <Setter Property="Text" Value="ON"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-      <!-- 좌: Motor Status -->
-      <GroupBox Grid.Column="0" Header="Motor Status">
-      <DataGrid ItemsSource="{Binding AxisStatuses}"
-                AutoGenerateColumns="False"
-                IsReadOnly="True"
-                RowHeight="26"
-                Margin="4">
-        <DataGrid.Columns>
+            <DataGridTemplateColumn Header="Home" Width="55">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsHome}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="—"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsHome}" Value="True">
+                            <Setter Property="Text" Value="HOME"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-          <!-- Axis 이름 -->
-          <DataGridTextColumn Header="Axis" Binding="{Binding AxisName}" Width="70"/>
+            <DataGridTemplateColumn Header="Moving" Width="60">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsMoving}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellOrangeBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="—"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsMoving}" Value="True">
+                            <Setter Property="Text" Value="MOVING"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellOrangeFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-          <!-- Position -->
-          <DataGridTextColumn Header="Position" Binding="{Binding Position, StringFormat=N3}" Width="90"/>
+            <DataGridTemplateColumn Header="Fault" Width="55">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsFault}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="—"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsFault}" Value="True">
+                            <Setter Property="Text" Value="FAULT"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-          <!-- Servo On: 초록=ON, 회색=OFF -->
-          <DataGridTemplateColumn Header="Servo" Width="60">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsServoOn}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="OFF"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsServoOn}" Value="True">
-                          <Setter Property="Text" Value="ON"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+            <DataGridTemplateColumn Header="+Lmt" Width="50">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="—"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
+                            <Setter Property="Text" Value="+LMT"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-          <!-- Home: 초록=HOME, 회색=- -->
-          <DataGridTemplateColumn Header="Home" Width="60">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsHome}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellGreenBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="—"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsHome}" Value="True">
-                          <Setter Property="Text" Value="HOME"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellGreenFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+            <DataGridTemplateColumn Header="-Lmt" Width="50">
+              <DataGridTemplateColumn.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
+                      <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </DataGridTemplateColumn.CellStyle>
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="—"/>
+                        <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
+                            <Setter Property="Text" Value="-LMT"/>
+                            <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
 
-          <!-- Moving: 주황=MOVING, 회색=- -->
-          <DataGridTemplateColumn Header="Moving" Width="70">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsMoving}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellOrangeBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="—"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsMoving}" Value="True">
-                          <Setter Property="Text" Value="MOVING"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellOrangeFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+          </DataGrid.Columns>
+        </DataGrid>
+      </GroupBox>
 
-          <!-- Fault: 빨강=FAULT, 회색=- -->
-          <DataGridTemplateColumn Header="Fault" Width="60">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsFault}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="—"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsFault}" Value="True">
-                          <Setter Property="Text" Value="FAULT"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+      <!-- STOP ALL 버튼 -->
+      <Button DockPanel.Dock="Top" Content="STOP ALL"
+              Height="36" Margin="4,8,4,0"
+              Style="{StaticResource DangerButtonStyle}"
+              Command="{Binding Cmd_StopAllMotors}"/>
 
-          <!-- +Limit: 빨강=+LMT, 회색=- -->
-          <DataGridTemplateColumn Header="+Limit" Width="60">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="—"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsLimitPos}" Value="True">
-                          <Setter Property="Text" Value="+LMT"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+      <!-- 상태 로그 -->
+      <TextBlock DockPanel.Dock="Top"
+                 Text="{Binding LogStatus}"
+                 FontFamily="Consolas" FontSize="11"
+                 Foreground="{StaticResource TextSubtleBrush}"
+                 TextWrapping="Wrap"
+                 Margin="4,6,4,0"
+                 MaxWidth="430"/>
+    </DockPanel>
 
-          <!-- -Limit: 빨강=-LMT, 회색=- -->
-          <DataGridTemplateColumn Header="-Limit" Width="60">
-            <DataGridTemplateColumn.CellStyle>
-              <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource CellRedBgBrush}"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </DataGridTemplateColumn.CellStyle>
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="—"/>
-                      <Setter Property="Foreground" Value="{StaticResource CellOffFgBrush}"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsLimitNeg}" Value="True">
-                          <Setter Property="Text" Value="-LMT"/>
-                          <Setter Property="Foreground" Value="{StaticResource CellRedFgBrush}"/>
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+    <!-- ══ 우: TabControl (Teach / Manual) ════════════════════════════════ -->
+    <TabControl Grid.Column="2">
 
-        </DataGrid.Columns>
-      </DataGrid>
-    </GroupBox>
-
-      <!-- 우: Teach Positions -->
-      <GroupBox Grid.Column="1" Margin="8,0,0,0" Header="Teach Positions">
+      <!-- ── Teach 탭 ──────────────────────────────────────────────────── -->
+      <TabItem Header="Teach" Height="28">
         <Grid>
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -339,70 +241,243 @@
 
           <!-- 툴바 -->
           <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,4,4,4">
-            <Button Content="Add" Width="60" Margin="0,0,4,0"
+            <Button Content="Save" Width="70" Margin="0,0,6,0"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Command="{Binding Cmd_AddTeachRow}"/>
-            <Button Content="Remove" Width="70" Margin="0,0,12,0"
+                    Command="{Binding Cmd_SaveTeach}"/>
+            <Button Content="Load" Width="70"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Command="{Binding Cmd_RemoveTeachRow}"/>
-            <Button Content="Load from Recipe" Width="120" Margin="0,0,4,0"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    Command="{Binding Cmd_LoadTeachPositions}"/>
-            <Button Content="Save to Recipe" Width="110"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    Command="{Binding Cmd_SaveTeachPositions}"/>
+                    Command="{Binding Cmd_LoadTeach}"/>
           </StackPanel>
 
-          <!-- DataGrid -->
-          <DataGrid Grid.Row="1"
-                    ItemsSource="{Binding TeachPositions}"
-                    SelectedItem="{Binding SelectedTeachPosition}"
-                    AutoGenerateColumns="False"
-                    CanUserAddRows="False"
-                    RowHeight="26"
-                    Margin="4,0,4,4">
-            <DataGrid.Columns>
-              <DataGridTextColumn Header="Name"   Width="100"
-                  Binding="{Binding Name, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="U"      Width="60"
-                  Binding="{Binding U, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="V"      Width="60"
-                  Binding="{Binding V, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="W"      Width="60"
-                  Binding="{Binding W, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="ZLower" Width="70"
-                  Binding="{Binding ZLower, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="ZUpper" Width="70"
-                  Binding="{Binding ZUpper, StringFormat=N3, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="Vel"    Width="60"
-                  Binding="{Binding Velocity, StringFormat=N0, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTextColumn Header="Acc"    Width="60"
-                  Binding="{Binding Acc, StringFormat=N0, UpdateSourceTrigger=LostFocus}"/>
-              <DataGridTemplateColumn Header="Action" Width="70">
-                <DataGridTemplateColumn.CellTemplate>
-                  <DataTemplate>
-                    <Button Content="Move To"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Margin="2,1"
-                            CommandParameter="{Binding}"
-                            Command="{Binding DataContext.Cmd_MoveToPosition,
-                                RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                  </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-              </DataGridTemplateColumn>
-            </DataGrid.Columns>
-          </DataGrid>
+          <!-- 축별 티칭 그룹 -->
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding AxisTeachGroups}" Margin="4,0,4,4">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:Manual_MotorViewModel+AxisTeachGroup}">
+                  <GroupBox Margin="0,0,0,8">
+                    <GroupBox.Header>
+                      <TextBlock Text="{Binding DisplayName}"
+                                 FontWeight="SemiBold" FontSize="12"/>
+                    </GroupBox.Header>
+
+                    <ItemsControl ItemsSource="{Binding Points}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:Manual_MotorViewModel+AxisTeachPoint}">
+                          <!-- 각 티칭 포인트 행 -->
+                          <Grid Margin="2,2,2,2">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="180"/>
+                              <ColumnDefinition Width="90"/>
+                              <ColumnDefinition Width="70"/>
+                              <ColumnDefinition Width="70"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas" FontSize="12"
+                                       Foreground="{StaticResource TextBrush}"/>
+
+                            <TextBox Grid.Column="1"
+                                     Margin="4,0"
+                                     VerticalContentAlignment="Center"
+                                     FontFamily="Consolas" FontSize="12"
+                                     Text="{Binding Position, StringFormat=N3,
+                                            UpdateSourceTrigger=LostFocus}"/>
+
+                            <Button Grid.Column="2"
+                                    Content="Move"
+                                    Margin="0,1,4,1"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{Binding DataContext.Cmd_MoveToTeachPoint,
+                                              RelativeSource={RelativeSource AncestorType=ItemsControl,
+                                              AncestorLevel=2}}">
+                              <Button.CommandParameter>
+                                <MultiBinding>
+                                  <MultiBinding.Converter>
+                                    <local:AxisTeachPointParamConverter/>
+                                  </MultiBinding.Converter>
+                                  <Binding Path="DataContext.AxisName"
+                                           RelativeSource="{RelativeSource AncestorType=ItemsControl,
+                                           AncestorLevel=1}"/>
+                                  <Binding Path="."/>
+                                </MultiBinding>
+                              </Button.CommandParameter>
+                            </Button>
+
+                            <Button Grid.Column="3"
+                                    Content="Teach"
+                                    Margin="0,1,0,1"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{Binding DataContext.Cmd_TeachCurrentPos,
+                                              RelativeSource={RelativeSource AncestorType=ItemsControl,
+                                              AncestorLevel=2}}">
+                              <Button.CommandParameter>
+                                <MultiBinding>
+                                  <MultiBinding.Converter>
+                                    <local:AxisTeachPointParamConverter/>
+                                  </MultiBinding.Converter>
+                                  <Binding Path="DataContext.AxisName"
+                                           RelativeSource="{RelativeSource AncestorType=ItemsControl,
+                                           AncestorLevel=1}"/>
+                                  <Binding Path="."/>
+                                </MultiBinding>
+                              </Button.CommandParameter>
+                            </Button>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </GroupBox>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
         </Grid>
-      </GroupBox>
+      </TabItem>
 
-    </Grid><!-- end Motor Status + Teach Positions -->
+      <!-- ── Manual 탭 ─────────────────────────────────────────────────── -->
+      <TabItem Header="Manual" Height="28">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="8,6,8,6">
 
-    <!-- Stop button -->
-    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-      <Button Content="STOP ALL" Width="120"
-              Style="{StaticResource DangerButtonStyle}"
-              Command="{Binding Cmd_StopAllMotors}" />
-    </StackPanel>
+            <!-- 축별 Move/Stop/Servo/Home 행 -->
+            <GroupBox Header="Axis Control" Margin="0,0,0,8">
+              <Grid Margin="6">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="65"/>
+                  <ColumnDefinition Width="90"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Header row -->
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="Target" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" Margin="0,0,0,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Move" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="Stop" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="Srv ON" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="5" Text="Srv OFF" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="Home" FontSize="11"
+                           Foreground="{StaticResource TextSubtleBrush}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+
+                <!-- U -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="U" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" Margin="0,0,6,4" Text="{Binding U, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button    Grid.Row="1" Grid.Column="2" Margin="2,0,2,4" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveU}"/>
+                <Button    Grid.Row="1" Grid.Column="3" Margin="2,0,2,4" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopU}"/>
+                <Button    Grid.Row="1" Grid.Column="4" Margin="2,0,2,4" Content="ON"   Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnU}"/>
+                <Button    Grid.Row="1" Grid.Column="5" Margin="2,0,2,4" Content="OFF"  Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffU}"/>
+                <Button    Grid.Row="1" Grid.Column="6" Margin="2,0,0,4" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeU}"/>
+
+                <!-- V -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="V" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" Margin="0,0,6,4" Text="{Binding V, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button    Grid.Row="2" Grid.Column="2" Margin="2,0,2,4" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveV}"/>
+                <Button    Grid.Row="2" Grid.Column="3" Margin="2,0,2,4" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopV}"/>
+                <Button    Grid.Row="2" Grid.Column="4" Margin="2,0,2,4" Content="ON"   Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnV}"/>
+                <Button    Grid.Row="2" Grid.Column="5" Margin="2,0,2,4" Content="OFF"  Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffV}"/>
+                <Button    Grid.Row="2" Grid.Column="6" Margin="2,0,0,4" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeV}"/>
+
+                <!-- W -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="W" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" Margin="0,0,6,4" Text="{Binding W, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button    Grid.Row="3" Grid.Column="2" Margin="2,0,2,4" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveW}"/>
+                <Button    Grid.Row="3" Grid.Column="3" Margin="2,0,2,4" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopW}"/>
+                <Button    Grid.Row="3" Grid.Column="4" Margin="2,0,2,4" Content="ON"   Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnW}"/>
+                <Button    Grid.Row="3" Grid.Column="5" Margin="2,0,2,4" Content="OFF"  Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffW}"/>
+                <Button    Grid.Row="3" Grid.Column="6" Margin="2,0,0,4" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeW}"/>
+
+                <!-- ZLower -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="ZLower" VerticalAlignment="Center" Margin="0,0,6,4" FontSize="11"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" Margin="0,0,6,4" Text="{Binding ZLoad, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button    Grid.Row="4" Grid.Column="2" Margin="2,0,2,4" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveZLoad}"/>
+                <Button    Grid.Row="4" Grid.Column="3" Margin="2,0,2,4" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopZLoad}"/>
+                <Button    Grid.Row="4" Grid.Column="4" Margin="2,0,2,4" Content="ON"   Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnZLoad}"/>
+                <Button    Grid.Row="4" Grid.Column="5" Margin="2,0,2,4" Content="OFF"  Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffZLoad}"/>
+                <Button    Grid.Row="4" Grid.Column="6" Margin="2,0,0,4" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeZLoad}"/>
+              </Grid>
+            </GroupBox>
+
+            <!-- ZUpper 별도 행 (ZLower 와 구조적으로 분리) -->
+            <GroupBox Header="ZUpper" Margin="0,0,0,8">
+              <Grid Margin="6">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="65"/>
+                  <ColumnDefinition Width="90"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                  <ColumnDefinition Width="68"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="ZUpper" VerticalAlignment="Center" FontSize="11"/>
+                <TextBox   Grid.Column="1" Margin="0,0,6,0" Text="{Binding ZBond, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button    Grid.Column="2" Margin="2,0,2,0" Content="Move" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_MoveZBond}"/>
+                <Button    Grid.Column="3" Margin="2,0,2,0" Content="Stop" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_StopZBond}"/>
+                <Button    Grid.Column="4" Margin="2,0,2,0" Content="ON"   Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOnZBond}"/>
+                <Button    Grid.Column="5" Margin="2,0,2,0" Content="OFF"  Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_ServoOffZBond}"/>
+                <Button    Grid.Column="6" Margin="2,0,0,0" Content="Home" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding Cmd_HomeZBond}"/>
+              </Grid>
+            </GroupBox>
+
+            <!-- Jog -->
+            <GroupBox Header="Jog">
+              <StackPanel Orientation="Horizontal" Margin="6,4,6,4">
+                <TextBlock Text="Axis:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11"/>
+                <ComboBox Width="80" ItemsSource="{Binding Axes}"
+                          SelectedItem="{Binding SelectedAxis}"/>
+                <TextBlock Text="Speed:" VerticalAlignment="Center" Margin="10,0,6,0" FontSize="11"/>
+                <TextBox Width="60" Text="{Binding JogSpeed, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="+Jog" Width="60" Margin="10,0,4,0"
+                        Style="{StaticResource PrimaryButtonStyle}">
+                  <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogPlusDown}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogPlusUp}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseLeave">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogPlusUp}"/>
+                    </i:EventTrigger>
+                  </i:Interaction.Triggers>
+                </Button>
+                <Button Content="-Jog" Width="60"
+                        Style="{StaticResource PrimaryButtonStyle}">
+                  <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogMinusDown}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogMinusUp}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseLeave">
+                      <i:InvokeCommandAction Command="{Binding Cmd_JogMinusUp}"/>
+                    </i:EventTrigger>
+                  </i:Interaction.Triggers>
+                </Button>
+              </StackPanel>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
   </Grid>
 </UserControl>
-

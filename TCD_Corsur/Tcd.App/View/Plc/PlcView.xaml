@@ -301,6 +301,54 @@
             <TextBlock Text="B2.0  AtAtmospheric"   FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
           </StackPanel>
 
+          <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding DI_LowerChamberVac}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="B2.1  LwrChamberVac"   FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding DI_UpperEscReady}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="B2.2  UprEscReady"     FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="#444"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding DI_LowerEscReady}" Value="True">
+                      <Setter Property="Fill" Value="#44DD66"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+            </Ellipse>
+            <TextBlock Text="B2.3  LwrEscReady"     FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
+          </StackPanel>
+
         </StackPanel>
       </GroupBox>
 
@@ -441,12 +489,42 @@
           </Button>
 
           <Button Style="{StaticResource DoToggleStyle}"
-                  Command="{Binding Cmd_ToggleEscEnable}">
+                  Command="{Binding Cmd_ToggleLowerChamberVac}">
             <Button.ContentTemplate>
               <DataTemplate>
                 <TextBlock>
-                  <Run Text="ESC Enable "/>
-                  <Run Text="{Binding DataContext.DO_EscEnable,
+                  <Run Text="LwrChVac "/>
+                  <Run Text="{Binding DataContext.DO_LowerChamberVac,
+                       RelativeSource={RelativeSource AncestorType=Button},
+                       Mode=OneWay,
+                       StringFormat='[ {0} ]'}"/>
+                </TextBlock>
+              </DataTemplate>
+            </Button.ContentTemplate>
+          </Button>
+
+          <Button Style="{StaticResource DoToggleStyle}"
+                  Command="{Binding Cmd_ToggleUpperEscEnable}">
+            <Button.ContentTemplate>
+              <DataTemplate>
+                <TextBlock>
+                  <Run Text="Upr ESC En "/>
+                  <Run Text="{Binding DataContext.DO_UpperEscEnable,
+                       RelativeSource={RelativeSource AncestorType=Button},
+                       Mode=OneWay,
+                       StringFormat='[ {0} ]'}"/>
+                </TextBlock>
+              </DataTemplate>
+            </Button.ContentTemplate>
+          </Button>
+
+          <Button Style="{StaticResource DoToggleStyle}"
+                  Command="{Binding Cmd_ToggleLowerEscEnable}">
+            <Button.ContentTemplate>
+              <DataTemplate>
+                <TextBlock>
+                  <Run Text="Lwr ESC En "/>
+                  <Run Text="{Binding DataContext.DO_LowerEscEnable,
                        RelativeSource={RelativeSource AncestorType=Button},
                        Mode=OneWay,
                        StringFormat='[ {0} ]'}"/>
