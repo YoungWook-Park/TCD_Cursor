@@ -47,6 +47,9 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
   private bool _di_MaterialLowStage;
   private bool _di_MaterialHighStage;
   private bool _di_AtAtmospheric;
+  private bool _di_LowerChamberVac;
+  private bool _di_UpperEscReady;
+  private bool _di_LowerEscReady;
 
   // ── DO (WPF → PLC, 스냅샷에서 읽어 미러링) ─────────────────────────
   private bool _do_VacPump;
@@ -54,7 +57,9 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
   private bool _do_HighStageVac;
   private bool _do_RobotGripVac;
   private bool _do_UpperChamberVac;
-  private bool _do_EscEnable;
+  private bool _do_LowerChamberVac;
+  private bool _do_UpperEscEnable;
+  private bool _do_LowerEscEnable;
   private bool _do_ChamberMoveToBond;
   private bool _do_LaminationActive;
   private bool _do_VentValveOpen;
@@ -203,6 +208,24 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
     private set => Set(ref _di_AtAtmospheric, value);
   }
 
+  public bool DI_LowerChamberVac
+  {
+    get => _di_LowerChamberVac;
+    private set => Set(ref _di_LowerChamberVac, value);
+  }
+
+  public bool DI_UpperEscReady
+  {
+    get => _di_UpperEscReady;
+    private set => Set(ref _di_UpperEscReady, value);
+  }
+
+  public bool DI_LowerEscReady
+  {
+    get => _di_LowerEscReady;
+    private set => Set(ref _di_LowerEscReady, value);
+  }
+
   #endregion
 
   #region DO Properties
@@ -237,10 +260,22 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
     private set => Set(ref _do_UpperChamberVac, value);
   }
 
-  public bool DO_EscEnable
+  public bool DO_LowerChamberVac
   {
-    get => _do_EscEnable;
-    private set => Set(ref _do_EscEnable, value);
+    get => _do_LowerChamberVac;
+    private set => Set(ref _do_LowerChamberVac, value);
+  }
+
+  public bool DO_UpperEscEnable
+  {
+    get => _do_UpperEscEnable;
+    private set => Set(ref _do_UpperEscEnable, value);
+  }
+
+  public bool DO_LowerEscEnable
+  {
+    get => _do_LowerEscEnable;
+    private set => Set(ref _do_LowerEscEnable, value);
   }
 
   public bool DO_ChamberMoveToBond
@@ -308,6 +343,9 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
       DI_MaterialLowStage    = GetBit(e.Bits, (int)DiBit.MaterialLowStage);
       DI_MaterialHighStage   = GetBit(e.Bits, (int)DiBit.MaterialHighStage);
       DI_AtAtmospheric       = GetBit(e.Bits, (int)DiBit.AtAtmospheric);
+      DI_LowerChamberVac     = GetBit(e.Bits, (int)DiBit.LowerChamberVac);
+      DI_UpperEscReady       = GetBit(e.Bits, (int)DiBit.UpperEscReady);
+      DI_LowerEscReady       = GetBit(e.Bits, (int)DiBit.LowerEscReady);
 
       // ── DO bits (스냅샷에서 현재 출력 상태 미러링) ──────────────────
       DO_VacPump          = GetBit(e.Bits, (int)DoBit.VacPumpRequest);
@@ -315,7 +353,9 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
       DO_HighStageVac     = GetBit(e.Bits, (int)DoBit.HighStageVacOn);
       DO_RobotGripVac     = GetBit(e.Bits, (int)DoBit.RobotGripVacOn);
       DO_UpperChamberVac  = GetBit(e.Bits, (int)DoBit.UpperChamberVacOn);
-      DO_EscEnable        = GetBit(e.Bits, (int)DoBit.EscEnable);
+      DO_LowerChamberVac  = GetBit(e.Bits, (int)DoBit.LowerChamberVacOn);
+      DO_UpperEscEnable   = GetBit(e.Bits, (int)DoBit.UpperEscEnable);
+      DO_LowerEscEnable   = GetBit(e.Bits, (int)DoBit.LowerEscEnable);
       DO_ChamberMoveToBond= GetBit(e.Bits, (int)DoBit.ChamberMoveToBond);
       DO_LaminationActive = GetBit(e.Bits, (int)DoBit.LaminationActive);
       DO_VentValveOpen    = GetBit(e.Bits, (int)DoBit.VentValveOpen);
@@ -457,10 +497,22 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
       _ => WriteDo(DoBit.UpperChamberVacOn, !DO_UpperChamberVac, "UpperChamberVac"),
       _ => IsConnected);
 
-  private RelayCommand? cmd_ToggleEscEnable;
-  public ICommand Cmd_ToggleEscEnable => cmd_ToggleEscEnable ??=
+  private RelayCommand? cmd_ToggleUpperEscEnable;
+  public ICommand Cmd_ToggleUpperEscEnable => cmd_ToggleUpperEscEnable ??=
     new RelayCommand(
-      _ => WriteDo(DoBit.EscEnable, !DO_EscEnable, "ESC Enable"),
+      _ => WriteDo(DoBit.UpperEscEnable, !DO_UpperEscEnable, "Upper ESC Enable"),
+      _ => IsConnected);
+
+  private RelayCommand? cmd_ToggleLowerEscEnable;
+  public ICommand Cmd_ToggleLowerEscEnable => cmd_ToggleLowerEscEnable ??=
+    new RelayCommand(
+      _ => WriteDo(DoBit.LowerEscEnable, !DO_LowerEscEnable, "Lower ESC Enable"),
+      _ => IsConnected);
+
+  private RelayCommand? cmd_ToggleLowerChamberVac;
+  public ICommand Cmd_ToggleLowerChamberVac => cmd_ToggleLowerChamberVac ??=
+    new RelayCommand(
+      _ => WriteDo(DoBit.LowerChamberVacOn, !DO_LowerChamberVac, "LowerChamberVac"),
       _ => IsConnected);
 
   private RelayCommand? cmd_ToggleChamberBond;
@@ -517,7 +569,9 @@ public sealed class PlcViewModel : NotifyPropertyChangedBase
     cmd_ToggleHighStageVac?.RaiseCanExecuteChanged();
     cmd_ToggleRobotGripVac?.RaiseCanExecuteChanged();
     cmd_ToggleUpperChamberVac?.RaiseCanExecuteChanged();
-    cmd_ToggleEscEnable?.RaiseCanExecuteChanged();
+    cmd_ToggleLowerChamberVac?.RaiseCanExecuteChanged();
+    cmd_ToggleUpperEscEnable?.RaiseCanExecuteChanged();
+    cmd_ToggleLowerEscEnable?.RaiseCanExecuteChanged();
     cmd_ToggleChamberBond?.RaiseCanExecuteChanged();
     cmd_ToggleLamination?.RaiseCanExecuteChanged();
     cmd_ToggleVentValve?.RaiseCanExecuteChanged();

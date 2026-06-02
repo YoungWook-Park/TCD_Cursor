@@ -19,6 +19,9 @@ namespace Tcd.Devices
     MaterialLowStage    = 14,  // B1.6
     MaterialHighStage   = 15,  // B1.7
     AtAtmospheric       = 16,  // B2.0
+    LowerChamberVac     = 17,  // B2.1
+    UpperEscReady       = 18,  // B2.2
+    LowerEscReady       = 19,  // B2.3
   }
 
   /// <summary>
@@ -31,11 +34,21 @@ namespace Tcd.Devices
     HighStageVacOn     = 26,  // B3.2
     RobotGripVacOn     = 27,  // B3.3
     UpperChamberVacOn  = 28,  // B3.4
-    EscEnable          = 29,  // B3.5
+    UpperEscEnable     = 29,  // B3.5  (구 EscEnable → 상부 ESC 전용)
     ChamberMoveToBond  = 34,  // B4.2
     ChamberMoveToReady = 35,  // B4.3
     LaminationActive   = 36,  // B4.4
     VentValveOpen      = 42,  // B5.2
+    LowerChamberVacOn  = 43,  // B5.3
+    LowStageBlow       = 44,  // B5.4
+    HighStageBlow      = 45,  // B5.5
+    LowerChamberBlow   = 46,  // B5.6
+    UpperChamberBlow   = 47,  // B5.7
+    // B6.* reserved: HsBit (Cmd_Start/Stop, Sts_Seq*, Alm_Any)
+    RobotGripBlow      = 56,  // B7.0
+    LowerEscEnable     = 57,  // B7.1
+    UpperEscDisable    = 58,  // B7.2
+    LowerEscDisable    = 59,  // B7.3
   }
 
   /// <summary>

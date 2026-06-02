@@ -1,0 +1,152 @@
+<UserControl x:Class="Tcd.App.View.Manual_IoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="900"
+             d:DataContext="{d:DesignInstance Type=local:Manual_IoViewModel}">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- ══ IO 버튼 그리드 ════════════════════════════════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- ── Stage Vac ─────────────────────────────────────────────── -->
+      <GroupBox Grid.Column="0" Header="Stage Vacuum" Margin="0,0,6,0">
+        <StackPanel Margin="8,8,8,8">
+
+          <TextBlock Text="Lower Stage" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Vac ON"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowStageVacOn}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Vac OFF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowStageVacOff}"
+                    Width="80"/>
+          </StackPanel>
+
+          <TextBlock Text="Upper Stage" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Vac ON"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_HighStageVacOn}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Vac OFF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_HighStageVacOff}"
+                    Width="80"/>
+          </StackPanel>
+
+          <Separator Margin="0,4,0,8"/>
+
+          <TextBlock Text="Robot Grip" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Vac ON"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_RobotGripVacOn}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Vac OFF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_RobotGripVacOff}"
+                    Width="80"/>
+          </StackPanel>
+
+        </StackPanel>
+      </GroupBox>
+
+      <!-- ── Chamber Vac (인터락: Z Bond 위치) ─────────────────────── -->
+      <GroupBox Grid.Column="1" Header="Chamber Vacuum  ⚠ Z Bond 인터락"
+                Margin="0,0,6,0">
+        <StackPanel Margin="8,8,8,8">
+
+          <TextBlock Text="Upper Chamber" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Vac ON"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_UpperChamberVacOn}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Vac OFF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_UpperChamberVacOff}"
+                    Width="80"/>
+          </StackPanel>
+
+          <TextBlock Text="Lower Chamber" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Vac ON"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowerChamberVacOn}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Vac OFF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowerChamberVacOff}"
+                    Width="80"/>
+          </StackPanel>
+
+        </StackPanel>
+      </GroupBox>
+
+      <!-- ── ESC (인터락: 챔버 진공 ON) ────────────────────────────── -->
+      <GroupBox Grid.Column="2" Header="ESC Chuck  ⚠ 챔버 진공 인터락">
+        <StackPanel Margin="8,8,8,8">
+
+          <TextBlock Text="Upper ESC" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Enable"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_UpperEscEnable}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Disable"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_UpperEscDisable}"
+                    Width="80"/>
+          </StackPanel>
+
+          <TextBlock Text="Lower ESC" FontSize="11" Foreground="#AAA"
+                     Margin="0,0,0,4"/>
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Enable"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowerEscEnable}"
+                    Width="80" Margin="0,0,4,0"/>
+            <Button Content="Disable"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding Cmd_LowerEscDisable}"
+                    Width="80"/>
+          </StackPanel>
+
+        </StackPanel>
+      </GroupBox>
+
+    </Grid>
+
+    <!-- ══ 상태 로그 ═══════════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="1" Header="Status" Margin="0,6,0,0">
+      <TextBlock Margin="8,4,8,8"
+                 Text="{Binding LogStatus}"
+                 FontFamily="Consolas" FontSize="12"
+                 Foreground="{StaticResource TextBrush}"
+                 TextWrapping="Wrap"/>
+    </GroupBox>
+
+  </Grid>
+</UserControl>

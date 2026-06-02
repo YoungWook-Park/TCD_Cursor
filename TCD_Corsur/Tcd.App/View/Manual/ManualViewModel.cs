@@ -12,4 +12,5 @@ public sealed class ManualViewModel : NotifyPropertyChangedBase
   public Manual_MotorViewModel Motor { get; } = new();
   public Manual_RobotViewModel Robot { get; } = new();
   public PlcViewModel          Plc   { get; } = new();
+  public Manual_IoViewModel    Io    { get; } = new();
 }
