@@ -49,15 +49,15 @@ Atomic        — DelegateSequence 원자 단위 (TcdSequenceRegistry.cs)
 
 5축 (U / V / W / ZLower / ZUpper) 각 8가지 조작:
 
-| 조작 | 설명 |
-|------|------|
-| AbsMove | 레시피 티칭 위치로 절대 이동 |
-| IncMove | `param(double)` 만큼 증분 이동 |
-| JogMove | `param(double)` 속도로 조그 (CT 취소 시 정지) |
-| Stop | 즉시 정지 |
-| Home | 홈 복귀 |
-| FaultReset | 폴트 클리어 |
-| ServoOn / ServoOff | 서보 제어 |
+| 조작                 | 설명                                  |
+| ------------------ | ----------------------------------- |
+| AbsMove            | 레시피 티칭 위치로 절대 이동                    |
+| IncMove            | `param(double)` 만큼 증분 이동            |
+| JogMove            | `param(double)` 속도로 조그 (CT 취소 시 정지) |
+| Stop               | 즉시 정지                               |
+| Home               | 홈 복귀                                |
+| FaultReset         | 폴트 클리어                              |
+| ServoOn / ServoOff | 서보 제어                               |
 
 키 패턴: `Manual_Motor_{Axis}_{Operation}` (예: `Manual_Motor_U_IncMove`)
 
@@ -65,16 +65,16 @@ Atomic        — DelegateSequence 원자 단위 (TcdSequenceRegistry.cs)
 
 ## Atomic 시퀀스 목록
 
-| 그룹 | 예시 키 |
-|------|---------|
-| Robot 이동 | `Robot_Move_Stage`, `Robot_Move_Home`, `Robot_Move_UpperLoad`, `Robot_Move_LowerLoad` |
-| Robot 대기 | `Robot_Wait_Stage`, `Robot_Wait_Home`, … |
-| Robot Pick/Place | `Robot_Pick_Stage1`, `Robot_Place_UpperChamber`, … |
-| Axis Command | `AxisU_Command_Zero`, `AxisZ_Command_Bond`, `AxisZ_Command_Load` |
-| Axis Wait | `AxisU_Wait_Zero`, `AxisZ_Wait_Bond`, `AxisZ_Wait_Load` |
-| PLC | `Plc_Wait_StageLoaded` |
-| 자재 | `Material_Create_Bonded` |
-| 기타 | `Delay_Bond_Dwell1s`, `Sequence_Init` |
+| 그룹               | 예시 키                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| Robot 이동         | `Robot_Move_Stage`, `Robot_Move_Home`, `Robot_Move_UpperLoad`, `Robot_Move_LowerLoad` |
+| Robot 대기         | `Robot_Wait_Stage`, `Robot_Wait_Home`, …                                              |
+| Robot Pick/Place | `Robot_Pick_Stage1`, `Robot_Place_UpperChamber`, …                                    |
+| Axis Command     | `AxisU_Command_Zero`, `AxisZ_Command_Bond`, `AxisZ_Command_Load`                      |
+| Axis Wait        | `AxisU_Wait_Zero`, `AxisZ_Wait_Bond`, `AxisZ_Wait_Load`                               |
+| PLC              | `Plc_Wait_StageLoaded`                                                                |
+| 자재               | `Material_Create_Bonded`                                                              |
+| 기타               | `Delay_Bond_Dwell1s`, `Sequence_Init`                                                 |
 
 ---
 

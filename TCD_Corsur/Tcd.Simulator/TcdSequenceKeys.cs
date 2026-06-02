@@ -87,6 +87,21 @@ namespace Tcd.Simulator
         public const string Manual_Motor_ZUpper_ServoOn = "Manual_Motor_ZUpper_ServoOn";
         public const string Manual_Motor_ZUpper_ServoOff = "Manual_Motor_ZUpper_ServoOff";
 
+        // Manual Robot sequences (SequenceManager 경유, 인터락 포함)
+        public const string Manual_Robot_Home                = "Manual_Robot_Home";
+        public const string Manual_Robot_UpperStageWait      = "Manual_Robot_UpperStageWait";
+        public const string Manual_Robot_UpperStageContact   = "Manual_Robot_UpperStageContact";
+        public const string Manual_Robot_LowerStageWait      = "Manual_Robot_LowerStageWait";
+        public const string Manual_Robot_LowerStageContact   = "Manual_Robot_LowerStageContact";
+        /// <summary>인터락: LowerChamberAtReady &amp;&amp; UpperChamberAtReady</summary>
+        public const string Manual_Robot_UpperChamberWait    = "Manual_Robot_UpperChamberWait";
+        /// <summary>인터락: LowerChamberAtReady &amp;&amp; UpperChamberAtReady</summary>
+        public const string Manual_Robot_UpperChamberContact = "Manual_Robot_UpperChamberContact";
+        /// <summary>인터락: LowerChamberAtReady &amp;&amp; UpperChamberAtReady</summary>
+        public const string Manual_Robot_LowerChamberWait    = "Manual_Robot_LowerChamberWait";
+        /// <summary>인터락: LowerChamberAtReady &amp;&amp; UpperChamberAtReady</summary>
+        public const string Manual_Robot_LowerChamberContact = "Manual_Robot_LowerChamberContact";
+
         // Manual IO sequences
         public const string Manual_Io_LowStageVacOn         = "Manual_Io_LowStageVacOn";
         public const string Manual_Io_LowStageVacOff        = "Manual_Io_LowStageVacOff";

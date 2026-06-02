@@ -31,6 +31,9 @@
         <DataTemplate DataType="{x:Type local:ManualViewModel}">
             <view:ManualView DataContext="{Binding}" />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:TeachViewModel}">
+            <view:TeachView DataContext="{Binding}" />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type local:PlcViewModel}">
             <view:PlcView DataContext="{Binding}" />
         </DataTemplate>
@@ -106,6 +109,10 @@
                         Content="Manual"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding Cmd_ShowManualPage}" />
+                <Button Width="100" Margin="4"
+                        Content="Teach"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding Cmd_ShowTeachPage}" />
                 <Button Width="100" Margin="4"
                         Content="Device"
                         Style="{StaticResource PrimaryButtonStyle}"

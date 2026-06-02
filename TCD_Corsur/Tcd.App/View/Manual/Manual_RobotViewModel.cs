@@ -9,29 +9,21 @@ using Tcd.App.Core;
 using Tcd.App.Define;
 using Tcd.App.Mvvm;
 using Tcd.Devices;
+using Tcd.Sequence;
+using Tcd.Simulator;
 
 namespace Tcd.App;
 
 /// <summary>
-/// 로봇 IO 핸드셰이크 기반 수동 제어 ViewModel.
-///
-/// 초기화 흐름:
-///   Connect → [Init] → IoStartOn=true, IoRunning=true (동작 준비 완료)
-///
-/// 동작 흐름:
-///   SetVelocity + WriteProgramNo → [Go] → IoGoAck=true, IoMoving=true
-///   WaitForPosition → IoMoving=false, IoComplete=true
-///   자동: IoGoAck=false (Go Off) → IoComplete=false (Complete Off)
-///
-/// 비정상 종료:
-///   [Stop] → IoMoving=false, 모든 신호 Off
-///   [Reset] → 모든 신호 Off + IoRunning=true (다음 동작 대기)
+/// 로봇 수동 제어 ViewModel.
+/// 연결 관리 및 IO 상태 표시를 담당.
+/// 이동 명령은 SequenceManager 경유 (인터락은 Manual_Robot 시퀀스 내부에서 처리).
 /// </summary>
 public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 {
   #region Fields
 
-  private readonly MainCore    _core  = MainCore.Instance;
+  private readonly MainCore     _core  = MainCore.Instance;
   private readonly IRobotDevice _robot;
   private CancellationTokenSource? _activeCts;
 
@@ -41,14 +33,12 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
   private int    _velocity = 50;
   private string _logStatus = "";
 
-  // IO 신호 상태
+  // IO 신호 상태 (표시 전용 — StateChanged 이벤트로 갱신)
   private bool _ioStartOn;
   private bool _ioRunning;
   private bool _ioMoving;
-  private bool _ioGoAck;
   private bool _ioComplete;
 
-  // 로봇 상태 미러
   private bool          _isConnected;
   private bool          _isError;
   private RobotPosition _currentPosition;
@@ -70,10 +60,11 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
     Programs = new ObservableCollection<RobotProgramItem>(
       Enum.GetValues<RobotPosition>()
+        .Where(p => SequenceKeyFor(p) != null)
         .Select(p => new RobotProgramItem(p)));
 
     _selectedProgramItem = Programs.FirstOrDefault(
-      p => p.Position == RobotPosition.Ready) ?? Programs.FirstOrDefault();
+      p => p.Position == RobotPosition.Home) ?? Programs.FirstOrDefault();
   }
 
   #endregion
@@ -124,37 +115,26 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
   #endregion
 
-  #region Properties — IO Signals
+  #region Properties — IO Signals (표시 전용)
 
-  /// <summary>PC → Robot: Connect 명령 후 Start IO 전송됨</summary>
   public bool IoStartOn
   {
     get => _ioStartOn;
     private set => Set(ref _ioStartOn, value);
   }
 
-  /// <summary>Robot → PC: Running IO On — 동작 준비 완료</summary>
   public bool IoRunning
   {
     get => _ioRunning;
     private set { if (Set(ref _ioRunning, value)) RaiseCanExecute(); }
   }
 
-  /// <summary>Robot → PC: 로봇 이동 중</summary>
   public bool IoMoving
   {
     get => _ioMoving;
-    private set => Set(ref _ioMoving, value);
+    private set { if (Set(ref _ioMoving, value)) RaiseCanExecute(); }
   }
 
-  /// <summary>Robot → PC: Go 명령 수신 확인</summary>
-  public bool IoGoAck
-  {
-    get => _ioGoAck;
-    private set => Set(ref _ioGoAck, value);
-  }
-
-  /// <summary>Robot → PC: 이동 완료</summary>
   public bool IoComplete
   {
     get => _ioComplete;
@@ -179,8 +159,8 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     set => Set(ref _selectedProgramItem, value);
   }
 
-  private RobotPosition SelectedProgram =>
-    _selectedProgramItem?.Position ?? RobotPosition.Ready;
+  private RobotPosition SelectedPosition =>
+    _selectedProgramItem?.Position ?? RobotPosition.Home;
 
   public string LogStatus
   {
@@ -203,14 +183,13 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
       CurrentPosition = e.CurrentPosition;
       ErrorMessage    = e.ErrorMessage ?? "";
 
-      // 연결 끊기면 모든 IO 신호 Off
       if (wasConnected && !e.IsConnected)
-        ResetAllSignals();
+        ResetDisplaySignals();
 
       if (e.IsError)
         LogStatus = $"[Error] {e.ErrorMessage}";
 
-      // 이동 완료 감지: IsRunning 이 false 로 바뀔 때 IoMoving Off, IoComplete On
+      // 이동 완료 감지
       if (IoMoving && !e.IsRunning)
         OnMoveCompleted();
     });
@@ -218,26 +197,23 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
   private void OnMoveCompleted()
   {
-    IoMoving  = false;
+    IoMoving   = false;
     IoComplete = true;
-    LogStatus = $"Complete: {CurrentPosition}";
+    LogStatus  = $"Complete: {CurrentPosition}";
 
-    // Go Off → Complete Off (핸드셰이크 완료)
     Task.Delay(300).ContinueWith(_ =>
       Application.Current?.Dispatcher.Invoke(() =>
       {
-        IoGoAck    = false;
         IoComplete = false;
         LogStatus  = $"Ready — {CurrentPosition}";
       }));
   }
 
-  private void ResetAllSignals()
+  private void ResetDisplaySignals()
   {
     IoStartOn  = false;
     IoRunning  = false;
     IoMoving   = false;
-    IoGoAck    = false;
     IoComplete = false;
   }
 
@@ -278,34 +254,21 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
 
   private void Disconnect()
   {
-    ResetAllSignals();
+    ResetDisplaySignals();
     _robot.Disconnect();
     SetLog("Disconnected");
   }
 
   #endregion
 
-  #region Commands — IO Handshake
+  #region Commands — Init
 
   private RelayCommand? cmd_InitStartIo;
   public ICommand Cmd_InitStartIo => cmd_InitStartIo ??=
     new RelayCommand(_ => InitStartIo(), _ => IsConnected && !IoRunning);
 
-  private RelayCommand? cmd_Go;
-  public ICommand Cmd_Go => cmd_Go ??=
-    new RelayCommand(_ => Go(), _ => IsConnected && IoRunning && !IoMoving);
-
-  private RelayCommand? cmd_Stop;
-  public ICommand Cmd_Stop => cmd_Stop ??=
-    new RelayCommand(_ => Stop(), _ => IsConnected);
-
-  private RelayCommand? cmd_Reset;
-  public ICommand Cmd_Reset => cmd_Reset ??=
-    new RelayCommand(_ => Reset(), _ => IsConnected);
-
   private void InitStartIo()
   {
-    // Start IO On → Robot Running IO On (동작 준비 완료)
     LogStatus = "Init: Start IO On...";
     IoStartOn = true;
 
@@ -313,7 +276,6 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     {
       try
       {
-        // GetState 로 연결 확인 후 Running 상태 활성화
         await _robot.SetVelocityAsync(RobotPosition.Ready, 30)
           .ConfigureAwait(false);
 
@@ -334,69 +296,67 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     });
   }
 
-  private void Go()
+  #endregion
+
+  #region Commands — Move (시퀀스 경유)
+
+  private RelayCommand? cmd_Move;
+  public ICommand Cmd_Move => cmd_Move ??=
+    new RelayCommand(
+      _ => MoveToSelected(),
+      _ => IsConnected && IoRunning && !IoMoving);
+
+  private void MoveToSelected()
   {
+    var seqKey = SequenceKeyFor(SelectedPosition);
+    if (seqKey == null)
+    {
+      LogStatus = $"No sequence for {SelectedPosition}";
+      return;
+    }
+
     _activeCts?.Cancel();
     _activeCts?.Dispose();
     var cts = new CancellationTokenSource();
     _activeCts = cts;
 
-    var target   = SelectedProgram;
-    var velocity = _velocity;
-
-    LogStatus = $"Go → {target} (vel={velocity}%)";
+    IoMoving  = true;
+    LogStatus = $"Go → {RobotPositionName.FromPosition(SelectedPosition)} (vel={Velocity}%)";
 
     _ = Task.Run(async () =>
     {
       try
       {
-        // 속도 설정 (Write velocity word)
-        await _robot.SetVelocityAsync(target, velocity, cts.Token)
+        var result = await _core.Sequences
+          .RunAsync(seqKey, _core.Simulation, Velocity, cts.Token)
           .ConfigureAwait(false);
 
-        // Go On → Moving On, Go_Ack On
-        var ok = await _robot.MoveAsync(target, cts.Token).ConfigureAwait(false);
-
-        if (!ok)
-        {
-          SetLog($"Go rejected by robot — check interlock.");
-          return;
-        }
-
-        Application.Current?.Dispatcher.Invoke(() =>
-        {
-          IoGoAck  = true;
-          IoMoving = true;
-        });
-
-        // WaitForPosition (Moving Off 대기)
-        await _robot.WaitForPositionAsync(
-          target,
-          _core.Settings.RobotMoveTimeout,
-          cts.Token).ConfigureAwait(false);
-
-        // OnMoveCompleted 는 StateChanged 이벤트에서 자동 호출
+        SetLog(result.Status == SequenceStatus.Succeeded
+          ? $"OK: {RobotPositionName.FromPosition(SelectedPosition)}"
+          : $"FAIL: {result.Error ?? seqKey}");
       }
       catch (OperationCanceledException)
       {
-        Application.Current?.Dispatcher.Invoke(() =>
-        {
-          IoMoving = false;
-          IoGoAck  = false;
-          LogStatus = "Go cancelled";
-        });
+        SetLog("Move cancelled");
       }
       catch (Exception ex)
       {
-        Application.Current?.Dispatcher.Invoke(() =>
-        {
-          IoMoving = false;
-          IoGoAck  = false;
-          LogStatus = $"[Error] {ex.Message}";
-        });
+        SetLog($"[Error] {ex.Message}");
+      }
+      finally
+      {
+        Application.Current?.Dispatcher.Invoke(() => IoMoving = false);
       }
     });
   }
+
+  #endregion
+
+  #region Commands — Stop (비상 정지 — 직접 호출)
+
+  private RelayCommand? cmd_Stop;
+  public ICommand Cmd_Stop => cmd_Stop ??=
+    new RelayCommand(_ => Stop(), _ => IsConnected);
 
   private void Stop()
   {
@@ -409,8 +369,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
         await _robot.StopAsync().ConfigureAwait(false);
         Application.Current?.Dispatcher.Invoke(() =>
         {
-          IoMoving = false;
-          IoGoAck  = false;
+          IoMoving  = false;
           LogStatus = "Stop sent";
         });
       }
@@ -418,19 +377,23 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     });
   }
 
-  private void Reset()
-  {
-    // 모든 플래그 Off → Running 만 On (다음 동작 대기)
-    IoMoving   = false;
-    IoGoAck    = false;
-    IoComplete = false;
-    IoRunning  = IoStartOn; // Start IO 가 켜져 있으면 Running 복원
-    LogStatus  = "Reset — flags cleared, Running restored";
-  }
-
   #endregion
 
   #region Helpers
+
+  private static string? SequenceKeyFor(RobotPosition pos) => pos switch
+  {
+    RobotPosition.Home                => TcdSequenceKeys.Manual_Robot_Home,
+    RobotPosition.UpperStageWait      => TcdSequenceKeys.Manual_Robot_UpperStageWait,
+    RobotPosition.UpperStageContact   => TcdSequenceKeys.Manual_Robot_UpperStageContact,
+    RobotPosition.LowerStageWait      => TcdSequenceKeys.Manual_Robot_LowerStageWait,
+    RobotPosition.LowerStageContact   => TcdSequenceKeys.Manual_Robot_LowerStageContact,
+    RobotPosition.UpperChamberWait    => TcdSequenceKeys.Manual_Robot_UpperChamberWait,
+    RobotPosition.UpperChamberContact => TcdSequenceKeys.Manual_Robot_UpperChamberContact,
+    RobotPosition.LowerChamberWait    => TcdSequenceKeys.Manual_Robot_LowerChamberWait,
+    RobotPosition.LowerChamberContact => TcdSequenceKeys.Manual_Robot_LowerChamberContact,
+    _                                 => null,
+  };
 
   private void SetLog(string msg) =>
     Application.Current?.Dispatcher.Invoke(() => LogStatus = msg);
@@ -440,9 +403,8 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     cmd_Connect?.RaiseCanExecuteChanged();
     cmd_Disconnect?.RaiseCanExecuteChanged();
     cmd_InitStartIo?.RaiseCanExecuteChanged();
-    cmd_Go?.RaiseCanExecuteChanged();
+    cmd_Move?.RaiseCanExecuteChanged();
     cmd_Stop?.RaiseCanExecuteChanged();
-    cmd_Reset?.RaiseCanExecuteChanged();
   }
 
   #endregion
@@ -457,7 +419,7 @@ public sealed class Manual_RobotViewModel : NotifyPropertyChangedBase
     public RobotProgramItem(RobotPosition pos)
     {
       Position = pos;
-      Label = RobotPositionName.FromPosition(pos);
+      Label    = RobotPositionName.FromPosition(pos);
     }
 
     public override string ToString() => Label;

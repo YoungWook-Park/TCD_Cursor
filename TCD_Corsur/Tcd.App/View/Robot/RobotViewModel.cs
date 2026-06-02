@@ -218,41 +218,41 @@ public sealed class RobotViewModel : NotifyPropertyChangedBase
   public ICommand Cmd_MoveReady => cmd_MoveReady ??=
     new RelayCommand(_ => FireMove(RobotPosition.Ready), _ => CanMove);
 
-  private RelayCommand? cmd_MoveS1PickupWait;
-  public ICommand Cmd_MoveS1PickupWait => cmd_MoveS1PickupWait ??=
-    new RelayCommand(_ => FireMove(RobotPosition.S1_PickupWait), _ => CanMove);
+  private RelayCommand? cmd_MoveUpperStageWait;
+  public ICommand Cmd_MoveUpperStageWait => cmd_MoveUpperStageWait ??=
+    new RelayCommand(_ => FireMove(RobotPosition.UpperStageWait), _ => CanMove);
 
-  private RelayCommand? cmd_MoveS1Pick;
-  public ICommand Cmd_MoveS1Pick => cmd_MoveS1Pick ??=
-    new RelayCommand(_ => FireMove(RobotPosition.S1_Pick), _ => CanMove);
+  private RelayCommand? cmd_MoveUpperStageContact;
+  public ICommand Cmd_MoveUpperStageContact => cmd_MoveUpperStageContact ??=
+    new RelayCommand(_ => FireMove(RobotPosition.UpperStageContact), _ => CanMove);
 
-  private RelayCommand? cmd_MoveS2PickupWait;
-  public ICommand Cmd_MoveS2PickupWait => cmd_MoveS2PickupWait ??=
-    new RelayCommand(_ => FireMove(RobotPosition.S2_PickupWait), _ => CanMove);
+  private RelayCommand? cmd_MoveLowerStageWait;
+  public ICommand Cmd_MoveLowerStageWait => cmd_MoveLowerStageWait ??=
+    new RelayCommand(_ => FireMove(RobotPosition.LowerStageWait), _ => CanMove);
 
-  private RelayCommand? cmd_MoveS2Pick;
-  public ICommand Cmd_MoveS2Pick => cmd_MoveS2Pick ??=
-    new RelayCommand(_ => FireMove(RobotPosition.S2_Pick), _ => CanMove);
+  private RelayCommand? cmd_MoveLowerStageContact;
+  public ICommand Cmd_MoveLowerStageContact => cmd_MoveLowerStageContact ??=
+    new RelayCommand(_ => FireMove(RobotPosition.LowerStageContact), _ => CanMove);
 
-  private RelayCommand? cmd_MoveUCPickupWait;
-  public ICommand Cmd_MoveUCPickupWait => cmd_MoveUCPickupWait ??=
+  private RelayCommand? cmd_MoveUpperChamberWait;
+  public ICommand Cmd_MoveUpperChamberWait => cmd_MoveUpperChamberWait ??=
     new RelayCommand(
-      _ => FireMove(RobotPosition.UpperChamber_PickupWait), _ => CanMove);
+      _ => FireMove(RobotPosition.UpperChamberWait), _ => CanMove);
 
-  private RelayCommand? cmd_MoveUCPick;
-  public ICommand Cmd_MoveUCPick => cmd_MoveUCPick ??=
+  private RelayCommand? cmd_MoveUpperChamberContact;
+  public ICommand Cmd_MoveUpperChamberContact => cmd_MoveUpperChamberContact ??=
     new RelayCommand(
-      _ => FireMove(RobotPosition.UpperChamber_Pick), _ => CanMove);
+      _ => FireMove(RobotPosition.UpperChamberContact), _ => CanMove);
 
-  private RelayCommand? cmd_MoveLCPickupWait;
-  public ICommand Cmd_MoveLCPickupWait => cmd_MoveLCPickupWait ??=
+  private RelayCommand? cmd_MoveLowerChamberWait;
+  public ICommand Cmd_MoveLowerChamberWait => cmd_MoveLowerChamberWait ??=
     new RelayCommand(
-      _ => FireMove(RobotPosition.LowerChamber_PickupWait), _ => CanMove);
+      _ => FireMove(RobotPosition.LowerChamberWait), _ => CanMove);
 
-  private RelayCommand? cmd_MoveLCPick;
-  public ICommand Cmd_MoveLCPick => cmd_MoveLCPick ??=
+  private RelayCommand? cmd_MoveLowerChamberContact;
+  public ICommand Cmd_MoveLowerChamberContact => cmd_MoveLowerChamberContact ??=
     new RelayCommand(
-      _ => FireMove(RobotPosition.LowerChamber_Pick), _ => CanMove);
+      _ => FireMove(RobotPosition.LowerChamberContact), _ => CanMove);
 
   private RelayCommand? cmd_MovePeel;
   public ICommand Cmd_MovePeel => cmd_MovePeel ??=
@@ -288,14 +288,14 @@ public sealed class RobotViewModel : NotifyPropertyChangedBase
     cmd_Stop?.RaiseCanExecuteChanged();
     cmd_MoveHome?.RaiseCanExecuteChanged();
     cmd_MoveReady?.RaiseCanExecuteChanged();
-    cmd_MoveS1PickupWait?.RaiseCanExecuteChanged();
-    cmd_MoveS1Pick?.RaiseCanExecuteChanged();
-    cmd_MoveS2PickupWait?.RaiseCanExecuteChanged();
-    cmd_MoveS2Pick?.RaiseCanExecuteChanged();
-    cmd_MoveUCPickupWait?.RaiseCanExecuteChanged();
-    cmd_MoveUCPick?.RaiseCanExecuteChanged();
-    cmd_MoveLCPickupWait?.RaiseCanExecuteChanged();
-    cmd_MoveLCPick?.RaiseCanExecuteChanged();
+    cmd_MoveUpperStageWait?.RaiseCanExecuteChanged();
+    cmd_MoveUpperStageContact?.RaiseCanExecuteChanged();
+    cmd_MoveLowerStageWait?.RaiseCanExecuteChanged();
+    cmd_MoveLowerStageContact?.RaiseCanExecuteChanged();
+    cmd_MoveUpperChamberWait?.RaiseCanExecuteChanged();
+    cmd_MoveUpperChamberContact?.RaiseCanExecuteChanged();
+    cmd_MoveLowerChamberWait?.RaiseCanExecuteChanged();
+    cmd_MoveLowerChamberContact?.RaiseCanExecuteChanged();
     cmd_MovePeel?.RaiseCanExecuteChanged();
   }
 

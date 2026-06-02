@@ -55,6 +55,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
         Robot    = new RobotViewModel();
         Recipe   = new RecipeViewModel();
         Manual   = new ManualViewModel();
+        Teach    = new TeachViewModel();
         Device   = new DeviceViewModel();
         Settings = new SettingsViewModel();
         CurrentContent = Main;
@@ -87,6 +88,7 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
     public RobotViewModel Robot { get; }
     public RecipeViewModel Recipe { get; }
     public ManualViewModel Manual { get; }
+    public TeachViewModel Teach { get; }
     public DeviceViewModel Device { get; }
     public SettingsViewModel Settings { get; }
 
@@ -259,6 +261,9 @@ public sealed class MainWindowViewModel : NotifyPropertyChangedBase
 
     private RelayCommand? cmd_ShowManualPage;
     public ICommand Cmd_ShowManualPage => cmd_ShowManualPage ??= new RelayCommand(_ => CurrentContent = Manual);
+
+    private RelayCommand? cmd_ShowTeachPage;
+    public ICommand Cmd_ShowTeachPage => cmd_ShowTeachPage ??= new RelayCommand(_ => CurrentContent = Teach);
 
     private RelayCommand? cmd_ShowRobotPage;
     public ICommand Cmd_ShowRobotPage => cmd_ShowRobotPage ??= new RelayCommand(_ => CurrentContent = Robot);

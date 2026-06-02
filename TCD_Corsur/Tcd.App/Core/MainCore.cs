@@ -95,6 +95,7 @@ public sealed class MainCore
         Manual_AxisZLower.RegisterAll(Sequences);
         Manual_AxisZUpper.RegisterAll(Sequences);
         Manual_Io.RegisterAll(Sequences);
+        Manual_Robot.RegisterAll(Sequences);
     }
 
     private void RegisterSemiAutoAndAutoSequences()
