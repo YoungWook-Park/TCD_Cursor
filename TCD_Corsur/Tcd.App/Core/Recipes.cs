@@ -47,17 +47,17 @@ public sealed class TcdRecipe
     public Dictionary<string, int> RobotVelocity { get; set; } =
         new(StringComparer.OrdinalIgnoreCase)
     {
-        [RobotPositionName.Home]                    = RobotVelocityDefault.Home,
-        [RobotPositionName.Ready]                   = RobotVelocityDefault.Ready,
-        [RobotPositionName.S1_PickupWait]           = RobotVelocityDefault.S1_PickupWait,
-        [RobotPositionName.S1_Pick]                 = RobotVelocityDefault.S1_Pick,
-        [RobotPositionName.S2_PickupWait]           = RobotVelocityDefault.S2_PickupWait,
-        [RobotPositionName.S2_Pick]                 = RobotVelocityDefault.S2_Pick,
-        [RobotPositionName.UpperChamber_PickupWait] = RobotVelocityDefault.UpperChamber_PickupWait,
-        [RobotPositionName.UpperChamber_Pick]       = RobotVelocityDefault.UpperChamber_Pick,
-        [RobotPositionName.LowerChamber_PickupWait] = RobotVelocityDefault.LowerChamber_PickupWait,
-        [RobotPositionName.LowerChamber_Pick]       = RobotVelocityDefault.LowerChamber_Pick,
-        [RobotPositionName.Peel]                    = RobotVelocityDefault.Peel,
+        [RobotPositionName.Home]                = RobotVelocityDefault.Home,
+        [RobotPositionName.Ready]               = RobotVelocityDefault.Ready,
+        [RobotPositionName.UpperStageWait]      = RobotVelocityDefault.UpperStageWait,
+        [RobotPositionName.UpperStageContact]   = RobotVelocityDefault.UpperStageContact,
+        [RobotPositionName.LowerStageWait]      = RobotVelocityDefault.LowerStageWait,
+        [RobotPositionName.LowerStageContact]   = RobotVelocityDefault.LowerStageContact,
+        [RobotPositionName.UpperChamberWait]    = RobotVelocityDefault.UpperChamberWait,
+        [RobotPositionName.UpperChamberContact] = RobotVelocityDefault.UpperChamberContact,
+        [RobotPositionName.LowerChamberWait]    = RobotVelocityDefault.LowerChamberWait,
+        [RobotPositionName.LowerChamberContact] = RobotVelocityDefault.LowerChamberContact,
+        [RobotPositionName.Peel]                = RobotVelocityDefault.Peel,
     };
 
     public int GetRobotVelocity(string positionName) =>
@@ -106,5 +106,37 @@ public sealed class TcdRecipe
     }
     map[name] = value;
   }
+
+  /// <summary>축-포지션별 이동 파라미터 (Speed/Accel/Decel).</summary>
+  public Dictionary<string, Dictionary<string, AxisPositionParams>> NamedAxisParams
+  { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+  public AxisPositionParams GetNamedParams(string axis, string name)
+  {
+    if (NamedAxisParams.TryGetValue(axis, out var map) &&
+        map.TryGetValue(name, out var p))
+      return new AxisPositionParams
+        { Speed = p.Speed, Accel = p.Accel, Decel = p.Decel };
+    return new AxisPositionParams
+      { Speed = MotionVelocity, Accel = MotionAcc, Decel = MotionDec };
+  }
+
+  public void SetNamedParams(string axis, string name, AxisPositionParams p)
+  {
+    if (!NamedAxisParams.TryGetValue(axis, out var map))
+    {
+      map = new Dictionary<string, AxisPositionParams>(
+        StringComparer.OrdinalIgnoreCase);
+      NamedAxisParams[axis] = map;
+    }
+    map[name] = p;
+  }
+}
+
+public sealed class AxisPositionParams
+{
+  public double Speed { get; set; } = 100;
+  public double Accel { get; set; } = 1000;
+  public double Decel { get; set; } = 1000;
 }
 

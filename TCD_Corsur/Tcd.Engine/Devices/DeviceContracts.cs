@@ -7,23 +7,23 @@ namespace Tcd.Devices
 {
     public enum RobotPosition
     {
-        // ── 기존 인프로세스 SimRobot / 자동 시퀀스 호환 ──────────────────
+        // ── 인프로세스 SimRobot / 자동 시퀀스 호환 (변경 금지) ────────────
         Home             = 0,
-        Stage            = 1,   // 스테이지 영역 (기존 시퀀스 공용)
-        UpperChamberLoad = 2,
-        LowerChamberLoad = 3,
+        Stage            = 1,   // 레거시: Auto/SemiAuto 시퀀스에서만 사용
+        UpperChamberLoad = 2,   // 레거시: Auto/SemiAuto 시퀀스에서만 사용
+        LowerChamberLoad = 3,   // 레거시: Auto/SemiAuto 시퀀스에서만 사용
 
-        // ── TCP 로봇 시뮬레이터 확장 포지션 ──────────────────────────────
-        Ready                   = 10,
-        S1_PickupWait           = 11,
-        S1_Pick                 = 12,
-        S2_PickupWait           = 13,
-        S2_Pick                 = 14,
-        UpperChamber_PickupWait = 15,
-        UpperChamber_Pick       = 16,
-        LowerChamber_PickupWait = 17,
-        LowerChamber_Pick       = 18,
-        Peel                    = 19,
+        // ── TCP 로봇 디바이스 포지션 (Manual / SemiAuto 신규) ─────────────
+        Ready              = 10, // 초기화 전용 (SetVelocity 기준 포지션)
+        UpperStageWait     = 11, // 상부 스테이지 진입 전 대기
+        UpperStageContact  = 12, // 상부 스테이지 접촉 (픽/플레이스)
+        LowerStageWait     = 13, // 하부 스테이지 진입 전 대기
+        LowerStageContact  = 14, // 하부 스테이지 접촉
+        UpperChamberWait   = 15, // 상부 챔버 진입 전 대기  ← Z Ready 인터락
+        UpperChamberContact= 16, // 상부 챔버 접촉          ← Z Ready 인터락
+        LowerChamberWait   = 17, // 하부 챔버 진입 전 대기  ← Z Ready 인터락
+        LowerChamberContact= 18, // 하부 챔버 접촉          ← Z Ready 인터락
+        Peel               = 19,
     }
 
     public interface IRobot
