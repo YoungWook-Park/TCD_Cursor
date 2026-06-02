@@ -125,8 +125,42 @@ namespace Tcd.Simulator
         public const string Material_Create_Bonded = "Material_Create_Bonded";
         public const string Delay_Bond_Dwell1s = "Delay_Bond_Dwell1s";
 
+        // ── 로봇 원자 시퀀스: 새 포지션 (SemiAuto 조합용) ──────────────────
+        public const string Robot_Move_UpperStageWait      = "Robot_Move_UpperStageWait";
+        public const string Robot_Wait_UpperStageWait      = "Robot_Wait_UpperStageWait";
+        public const string Robot_Move_UpperStageContact   = "Robot_Move_UpperStageContact";
+        public const string Robot_Wait_UpperStageContact   = "Robot_Wait_UpperStageContact";
+        public const string Robot_Move_LowerStageWait      = "Robot_Move_LowerStageWait";
+        public const string Robot_Wait_LowerStageWait      = "Robot_Wait_LowerStageWait";
+        public const string Robot_Move_LowerStageContact   = "Robot_Move_LowerStageContact";
+        public const string Robot_Wait_LowerStageContact   = "Robot_Wait_LowerStageContact";
+        public const string Robot_Move_UpperChamberWait    = "Robot_Move_UpperChamberWait";
+        public const string Robot_Wait_UpperChamberWait    = "Robot_Wait_UpperChamberWait";
+        public const string Robot_Move_UpperChamberContact = "Robot_Move_UpperChamberContact";
+        public const string Robot_Wait_UpperChamberContact = "Robot_Wait_UpperChamberContact";
+        public const string Robot_Move_LowerChamberWait    = "Robot_Move_LowerChamberWait";
+        public const string Robot_Wait_LowerChamberWait    = "Robot_Wait_LowerChamberWait";
+        public const string Robot_Move_LowerChamberContact = "Robot_Move_LowerChamberContact";
+        public const string Robot_Wait_LowerChamberContact = "Robot_Wait_LowerChamberContact";
+        public const string Robot_Pick_UpperChamber        = "Robot_Pick_UpperChamber";
+        public const string Robot_Place_Stage1             = "Robot_Place_Stage1";
+
+        // ── SemiAuto: Pick-Place 4방향 ────────────────────────────────────
+        /// <summary>인터락: Upper Chamber 비어있음, Robot @ Home</summary>
+        public const string SEMI_UpperStagePick_UpperChamberPlace = "SEMI_UpperStagePick_UpperChamberPlace";
+        /// <summary>인터락: Lower Chamber 비어있음, Robot @ Home</summary>
+        public const string SEMI_LowerStagePick_LowerChamberPlace = "SEMI_LowerStagePick_LowerChamberPlace";
+        /// <summary>인터락: Upper Chamber 자재 있음, Upper Stage 비어있음</summary>
+        public const string SEMI_UpperChamberPick_UpperStagePlace = "SEMI_UpperChamberPick_UpperStagePlace";
+        /// <summary>인터락: Lower Chamber 자재 있음, Lower Stage 비어있음</summary>
+        public const string SEMI_LowerChamberPick_LowerStagePlace = "SEMI_LowerChamberPick_LowerStagePlace";
+
+        // ── 레거시 (이전 버전 호환, 신규 시퀀스로 대체됨) ───────────────────
+        [System.Obsolete("Use SEMI_UpperStagePick_UpperChamberPlace")]
         public const string SEMI_LoadUpperFilm = "SEMI_LoadUpperFilm";
+        [System.Obsolete("Use SEMI_LowerStagePick_LowerChamberPlace")]
         public const string SEMI_LoadLowerFilm = "SEMI_LoadLowerFilm";
+
         public const string SEMI_AlignUVW = "SEMI_AlignUVW";
         public const string SEMI_Bond = "SEMI_Bond";
         public const string SEMI_UnloadProductToStage2 = "SEMI_UnloadProductToStage2";
