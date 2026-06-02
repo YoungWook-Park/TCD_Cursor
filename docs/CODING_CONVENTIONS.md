@@ -65,5 +65,54 @@ _core.SaveRecipe(r);
 
 ---
 
-## 추가 규칙 (여기서부터 직접 작성)
+## 줄 바꿈 금지 규칙
 
+세미콜론(`;`)을 만나기 전까지 하나의 문장은 반드시 한 줄로 작성한다.
+**메서드 선언부**, **생성자/메서드 호출의 인수 목록**, **체인 호출** 모두 동일하게 적용한다.
+
+### 1) 메서드 선언부 — 파라미터 목록 분리 금지
+
+```csharp
+// Bad
+protected override async Task DeviceActionAsync(
+    ISequenceContext context, object parameter, CancellationToken ct)
+{
+
+// Good
+protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+{
+```
+
+### 2) 생성자·메서드 호출 — 인수 목록 분리 금지
+
+```csharp
+// Bad
+throw new InvalidOperationException(
+    $"{Axis} AbsMove 미완료: 아직 이동 중");
+
+context.Alarms.Raise(new Alarm(
+    "SEQ_ERROR",
+    $"{DisplayName}: {ex.Message}",
+    AlarmSeverity.Error,
+    context.Time.Now));
+
+// Good
+throw new InvalidOperationException($"{Axis} AbsMove 미완료: 아직 이동 중");
+
+context.Alarms.Raise(new Alarm("SEQ_ERROR", $"{DisplayName}: {ex.Message}", AlarmSeverity.Error, context.Time.Now));
+```
+
+### 3) 체인 호출 — 중간 줄 바꿈 금지
+
+```csharp
+// Bad
+await DeviceActionAsync(context, parameter, cancellationToken)
+    .ConfigureAwait(false);
+
+// Good
+await DeviceActionAsync(context, parameter, cancellationToken).ConfigureAwait(false);
+```
+
+---
+
+#### 들여쓰기는 Tab (공백 4번)

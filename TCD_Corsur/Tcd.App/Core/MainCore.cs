@@ -89,13 +89,13 @@ public sealed class MainCore
 
     private void RegisterManualMotorSequences()
     {
-        Manual_AxisU.RegisterAll(Sequences);
-        Manual_AxisV.RegisterAll(Sequences);
-        Manual_AxisW.RegisterAll(Sequences);
-        Manual_AxisZLower.RegisterAll(Sequences);
-        Manual_AxisZUpper.RegisterAll(Sequences);
-        Manual_Io.RegisterAll(Sequences);
-        Manual_Robot.RegisterAll(Sequences);
+        new Manual_AxisU(this).RegisterAll(Sequences);
+        new Manual_AxisV(this).RegisterAll(Sequences);
+        new Manual_AxisW(this).RegisterAll(Sequences);
+        new Manual_AxisZLower(this).RegisterAll(Sequences);
+        new Manual_AxisZUpper(this).RegisterAll(Sequences);
+        new Manual_Io(this).RegisterAll(Sequences);
+        new Manual_Robot(this).RegisterAll(Sequences);
     }
 
     private void RegisterSemiAutoAndAutoSequences()

@@ -2,115 +2,244 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
+using Tcd.App.Sequences;
 using Tcd.Core.Logging;
 using Tcd.Sequence;
 using Tcd.Simulator;
 
 namespace Tcd.App.Sequences.Manual;
 
-/// <summary>V축 수동 시퀀스 팩토리.</summary>
-public static class Manual_AxisV
+public sealed class Manual_AxisV
 {
+    #region Variables
+    private readonly MainCore _core;
     private const string Axis = AxisDefine.V;
+    #endregion
 
-    public static void RegisterAll(SequenceManager mgr)
+    public Manual_AxisV(MainCore core) => _core = core;
+
+    public void RegisterAll(SequenceManager mgr)
     {
-        mgr.Register(AbsMove());
-        mgr.Register(IncMove());
-        mgr.Register(JogMove());
-        mgr.Register(Stop());
-        mgr.Register(Home());
-        mgr.Register(FaultReset());
-        mgr.Register(ServoOn());
-        mgr.Register(ServoOff());
+        mgr.Register(new AbsMoveSequence(_core));
+        mgr.Register(new IncMoveSequence(_core));
+        mgr.Register(new JogMoveSequence(_core));
+        mgr.Register(new StopSequence(_core));
+        mgr.Register(new HomeSequence(_core));
+        mgr.Register(new FaultResetSequence(_core));
+        mgr.Register(new ServoOnSequence(_core));
+        mgr.Register(new ServoOffSequence(_core));
     }
 
-    public static ISequence AbsMove() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_AbsMove, $"{Axis} AbsMove",
-        async (ctx, p, ct) =>
-        {
-            CheckMotionInterlock(ctx);
-            var core = MainCore.Instance;
-            core.LogContext = new LogContext { SequenceKey = TcdSequenceKeys.Manual_Motor_V_AbsMove, RunId = Guid.NewGuid(), AxisName = Axis };
-            var target = p is double d ? d
-                : (p is IConvertible c ? c.ToDouble(null)
-                : (core.Recipes.Current?.GetAxis(Axis, 0) ?? 0));
-            core.Log.Info(core.LogContext, "Start", $"AbsMove target={target}");
-            await core.Motion.AbsMoveAsync(Axis, target, ct).ConfigureAwait(false);
-            core.Log.Info(core.LogContext, "End", "AbsMove 완료");
-        });
+    // ── AbsMove ────────────────────────────────────────────────────────────
 
-    public static ISequence IncMove() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_IncMove, $"{Axis} IncMove",
-        async (ctx, p, ct) =>
-        {
-            CheckMotionInterlock(ctx);
-            var core = MainCore.Instance;
-            core.LogContext = new LogContext { SequenceKey = TcdSequenceKeys.Manual_Motor_V_IncMove, RunId = Guid.NewGuid(), AxisName = Axis };
-            double delta = p is double d ? d : (p is IConvertible c ? c.ToDouble(null) : 0);
-            core.Log.Info(core.LogContext, "Start", $"IncMove delta={delta}");
-            await core.Motion.IncMoveAsync(Axis, delta, ct).ConfigureAwait(false);
-            core.Log.Info(core.LogContext, "End", "IncMove 완료");
-        });
-
-    public static ISequence JogMove() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_JogMove, $"{Axis} JogMove",
-        async (ctx, p, ct) =>
-        {
-            CheckMotionInterlock(ctx);
-            var core = MainCore.Instance;
-            core.LogContext = new LogContext { SequenceKey = TcdSequenceKeys.Manual_Motor_V_JogMove, RunId = Guid.NewGuid(), AxisName = Axis };
-            double velocity = p is double v ? v : (p is IConvertible c ? c.ToDouble(null) : 0);
-            core.Log.Info(core.LogContext, "Start", $"JogMove velocity={velocity}");
-            await core.Motion.JogAsync(Axis, velocity, ct).ConfigureAwait(false);
-            core.Log.Info(core.LogContext, "End", "JogMove 종료");
-        });
-
-    public static ISequence Stop() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_Stop, $"{Axis} Stop",
-        async (ctx, p, ct) =>
-        {
-            await MainCore.Instance.Motion.StopAsync(Axis, ct).ConfigureAwait(false);
-        });
-
-    public static ISequence Home() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_Home, $"{Axis} Home",
-        async (ctx, p, ct) =>
-        {
-            CheckMotionInterlock(ctx);
-            // TODO: V축 Home 전용 인터락 조건 추가
-            var core = MainCore.Instance;
-            core.LogContext = new LogContext { SequenceKey = TcdSequenceKeys.Manual_Motor_V_Home, RunId = Guid.NewGuid(), AxisName = Axis };
-            core.Log.Info(core.LogContext, "Start", "Home 시작");
-            await core.Motion.HomeAsync(Axis, ct).ConfigureAwait(false);
-            core.Log.Info(core.LogContext, "End", "Home 완료");
-        });
-
-    public static ISequence FaultReset() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_FaultReset, $"{Axis} FaultReset",
-        async (ctx, p, ct) =>
-        {
-            await MainCore.Instance.Motion.FaultClearAsync(Axis, ct).ConfigureAwait(false);
-        });
-
-    public static ISequence ServoOn() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_ServoOn, $"{Axis} ServoOn",
-        async (ctx, p, ct) =>
-        {
-            await MainCore.Instance.Motion.ServoOnAsync(Axis, ct).ConfigureAwait(false);
-        });
-
-    public static ISequence ServoOff() => new DelegateSequence(
-        TcdSequenceKeys.Manual_Motor_V_ServoOff, $"{Axis} ServoOff",
-        async (ctx, p, ct) =>
-        {
-            await MainCore.Instance.Motion.ServoOffAsync(Axis, ct).ConfigureAwait(false);
-        });
-
-    /// <summary>V축 공통 모션 인터락.</summary>
-    private static void CheckMotionInterlock(Tcd.Sequence.ISequenceContext ctx)
+    private sealed class AbsMoveSequence : SequenceBase
     {
-        ctx.StopToken.ThrowIfCancellationRequested();
-        // TODO: V축 specific 인터락 조건
+        public AbsMoveSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_AbsMove;
+        public override string DisplayName => $"{Axis} AbsMove";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            _core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid(), AxisName = Axis };
+            double target = ResolveAbsTarget(parameter);
+            _core.Log.Info(_core.LogContext, "Start", $"AbsMove target={target}");
+            await _core.Motion.AbsMoveAsync(Axis, target, ct).ConfigureAwait(false);
+            _core.Log.Info(_core.LogContext, "End", "AbsMove 완료");
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (state.IsMoving)
+                throw new InvalidOperationException($"{Axis} AbsMove 미완료: 아직 이동 중");
+            if (state.IsFault)
+                throw new InvalidOperationException($"{Axis} AbsMove 후 폴트 감지");
+            return Task.CompletedTask;
+        }
+
+        private double ResolveAbsTarget(object parameter)
+        {
+            if (parameter is double d) return d;
+            if (parameter is IConvertible c) return c.ToDouble(null);
+            return _core.Recipes.Current?.GetAxis(Axis, 0) ?? 0;
+        }
+    }
+
+    // ── IncMove ────────────────────────────────────────────────────────────
+
+    private sealed class IncMoveSequence : SequenceBase
+    {
+        public IncMoveSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_IncMove;
+        public override string DisplayName => $"{Axis} IncMove";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            _core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid(), AxisName = Axis };
+            double delta = ResolveDelta(parameter);
+            _core.Log.Info(_core.LogContext, "Start", $"IncMove delta={delta}");
+            await _core.Motion.IncMoveAsync(Axis, delta, ct).ConfigureAwait(false);
+            _core.Log.Info(_core.LogContext, "End", "IncMove 완료");
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (state.IsMoving)
+                throw new InvalidOperationException($"{Axis} IncMove 미완료: 아직 이동 중");
+            if (state.IsFault)
+                throw new InvalidOperationException($"{Axis} IncMove 후 폴트 감지");
+            return Task.CompletedTask;
+        }
+
+        private static double ResolveDelta(object parameter)
+        {
+            if (parameter is double d) return d;
+            if (parameter is IConvertible c) return c.ToDouble(null);
+            return 0;
+        }
+    }
+
+    // ── JogMove ────────────────────────────────────────────────────────────
+
+    private sealed class JogMoveSequence : SequenceBase
+    {
+        public JogMoveSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_JogMove;
+        public override string DisplayName => $"{Axis} JogMove";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            _core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid(), AxisName = Axis };
+            double velocity = ResolveVelocity(parameter);
+            _core.Log.Info(_core.LogContext, "Start", $"JogMove velocity={velocity}");
+            await _core.Motion.JogAsync(Axis, velocity, ct).ConfigureAwait(false);
+            _core.Log.Info(_core.LogContext, "End", "JogMove 종료");
+        }
+
+        private static double ResolveVelocity(object parameter)
+        {
+            if (parameter is double d) return d;
+            if (parameter is IConvertible c) return c.ToDouble(null);
+            return 0;
+        }
+    }
+
+    // ── Stop ───────────────────────────────────────────────────────────────
+
+    private sealed class StopSequence : SequenceBase
+    {
+        public StopSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_Stop;
+        public override string DisplayName => $"{Axis} Stop";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Motion.StopAsync(Axis, ct).ConfigureAwait(false);
+        }
+    }
+
+    // ── Home ───────────────────────────────────────────────────────────────
+
+    private sealed class HomeSequence : SequenceBase
+    {
+        public HomeSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_Home;
+        public override string DisplayName => $"{Axis} Home";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            // TODO: V축 specific 인터락 조건
+            _core.LogContext = new LogContext { SequenceKey = Key, RunId = Guid.NewGuid(), AxisName = Axis };
+            _core.Log.Info(_core.LogContext, "Start", "Home 시작");
+            await _core.Motion.HomeAsync(Axis, ct).ConfigureAwait(false);
+            _core.Log.Info(_core.LogContext, "End", "Home 완료");
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (!state.IsHome)
+                throw new InvalidOperationException($"{Axis} Home 미완료: IsHome=false");
+            return Task.CompletedTask;
+        }
+    }
+
+    // ── FaultReset ─────────────────────────────────────────────────────────
+
+    private sealed class FaultResetSequence : SequenceBase
+    {
+        public FaultResetSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_FaultReset;
+        public override string DisplayName => $"{Axis} FaultReset";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Motion.FaultClearAsync(Axis, ct).ConfigureAwait(false);
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (state.IsFault)
+                throw new InvalidOperationException($"{Axis} FaultReset 미완료: 폴트 미해제");
+            return Task.CompletedTask;
+        }
+    }
+
+    // ── ServoOn ────────────────────────────────────────────────────────────
+
+    private sealed class ServoOnSequence : SequenceBase
+    {
+        public ServoOnSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_ServoOn;
+        public override string DisplayName => $"{Axis} ServoOn";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Motion.ServoOnAsync(Axis, ct).ConfigureAwait(false);
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (!state.IsServoOn)
+                throw new InvalidOperationException($"{Axis} ServoOn 미완료: IsServoOn=false");
+            return Task.CompletedTask;
+        }
+    }
+
+    // ── ServoOff ───────────────────────────────────────────────────────────
+
+    private sealed class ServoOffSequence : SequenceBase
+    {
+        public ServoOffSequence(MainCore core) : base(core) { }
+
+        public override string Key         => TcdSequenceKeys.Manual_Motor_V_ServoOff;
+        public override string DisplayName => $"{Axis} ServoOff";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Motion.ServoOffAsync(Axis, ct).ConfigureAwait(false);
+        }
+
+        protected override Task PostActionAsync(ISequenceContext context, CancellationToken ct)
+        {
+            var state = _core.AxisStateProvider.GetAxisState(Axis);
+            if (state.IsServoOn)
+                throw new InvalidOperationException($"{Axis} ServoOff 미완료: IsServoOn=true");
+            return Task.CompletedTask;
+        }
     }
 }

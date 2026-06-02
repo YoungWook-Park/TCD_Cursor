@@ -2,7 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Define;
-using Tcd.Core;
+using Tcd.App.Sequences;
 using Tcd.Devices;
 using Tcd.Sequence;
 using Tcd.Simulator;
@@ -10,12 +10,14 @@ using Tcd.Simulator;
 namespace Tcd.App.Sequences.SemiAuto;
 
 /// <summary>SEMI: UVW 정렬. 인터락: 로봇이 홈 위치에 있어야 함. U/V/W 동시 명령 후 대기.</summary>
-public sealed class SemiAutoAlignUVWSequence : ISequence
+public sealed class SemiAutoAlignUVWSequence : SequenceBase
 {
     #region Variables
-
     private readonly SequenceManager _mgr;
-    private readonly TcdSimulation _sim;
+    private readonly TcdSimulation   _sim;
+
+    private static readonly System.TimeSpan AxisWaitTimeout = System.TimeSpan.FromSeconds(2);
+    #endregion
 
     public SemiAutoAlignUVWSequence(SequenceManager mgr, TcdSimulation sim)
     {
@@ -23,45 +25,34 @@ public sealed class SemiAutoAlignUVWSequence : ISequence
         _sim = sim;
     }
 
-    public string Key => TcdSequenceKeys.SEMI_AlignUVW;
-    public string DisplayName => "SEMI: Align UVW";
+    public override string Key         => TcdSequenceKeys.SEMI_AlignUVW;
+    public override string DisplayName => "SEMI: Align UVW";
 
-    private static readonly TimeSpan AxisWaitTimeout = TimeSpan.FromSeconds(2);
-
-    #endregion
-
-    #region Function
-
-    public async Task<SequenceResult> ExecuteAsync(ISequenceContext context, object parameter, CancellationToken cancellationToken)
+    protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
     {
         if (_sim.Robot.CurrentPosition != RobotPosition.Home)
-        {
-            context.Alarms.Raise(new Alarm(AlarmKeys.RobotNotAtHome, "UVW align interlock: Robot must be at home position.", AlarmSeverity.Error, context.Time.Now));
-            return SequenceResult.Fail("Robot must be at home before UVW align.");
-        }
+            throw new System.InvalidOperationException(AlarmKeys.RobotNotAtHome);
 
-        // fork: command U, V, W simultaneously
         var cmdResults = await Task.WhenAll(
-            _mgr.RunAsync(TcdSequenceKeys.AxisU_Command_Zero, context, null, cancellationToken),
-            _mgr.RunAsync(TcdSequenceKeys.AxisV_Command_Zero, context, null, cancellationToken),
-            _mgr.RunAsync(TcdSequenceKeys.AxisW_Command_Zero, context, null, cancellationToken)
+            _mgr.RunAsync(TcdSequenceKeys.AxisU_Command_Zero, context, null, ct),
+            _mgr.RunAsync(TcdSequenceKeys.AxisV_Command_Zero, context, null, ct),
+            _mgr.RunAsync(TcdSequenceKeys.AxisW_Command_Zero, context, null, ct)
         ).ConfigureAwait(false);
 
-        var cmdFail = cmdResults.FirstOrDefault(r => r.Status != SequenceStatus.Succeeded);
-        if (cmdFail != null) return cmdFail;
+        if (cmdResults.Any(r => r.Status == SequenceStatus.Stopped))
+            throw new System.OperationCanceledException(ct);
+        if (cmdResults.Any(r => r.Status != SequenceStatus.Succeeded))
+            throw new System.InvalidOperationException("UVW command failed");
 
-        // join: wait all three in-position
         var waitResults = await Task.WhenAll(
-            _mgr.RunAsync(TcdSequenceKeys.AxisU_Wait_Zero, context, AxisWaitTimeout, cancellationToken),
-            _mgr.RunAsync(TcdSequenceKeys.AxisV_Wait_Zero, context, AxisWaitTimeout, cancellationToken),
-            _mgr.RunAsync(TcdSequenceKeys.AxisW_Wait_Zero, context, AxisWaitTimeout, cancellationToken)
+            _mgr.RunAsync(TcdSequenceKeys.AxisU_Wait_Zero, context, AxisWaitTimeout, ct),
+            _mgr.RunAsync(TcdSequenceKeys.AxisV_Wait_Zero, context, AxisWaitTimeout, ct),
+            _mgr.RunAsync(TcdSequenceKeys.AxisW_Wait_Zero, context, AxisWaitTimeout, ct)
         ).ConfigureAwait(false);
 
-        var waitFail = waitResults.FirstOrDefault(r => r.Status != SequenceStatus.Succeeded);
-        if (waitFail != null) return waitFail;
-
-        return SequenceResult.Success();
+        if (waitResults.Any(r => r.Status == SequenceStatus.Stopped))
+            throw new System.OperationCanceledException(ct);
+        if (waitResults.Any(r => r.Status != SequenceStatus.Succeeded))
+            throw new System.InvalidOperationException("UVW wait timeout");
     }
-
-    #endregion
 }
