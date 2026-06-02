@@ -1,183 +1,245 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Tcd.App.Core;
 using Tcd.App.Define;
+using Tcd.App.Sequences;
 using Tcd.Devices;
 using Tcd.Sequence;
 using Tcd.Simulator;
 
 namespace Tcd.App.Sequences.Manual;
 
-/// <summary>
-/// IO 수동 시퀀스 팩토리.
-/// 챔버 진공 / ESC 계열은 인터락 포함, 나머지는 단순 On/Off.
-/// </summary>
-public static class Manual_Io
+/// <summary>IO 수동 시퀀스. 챔버 진공/ESC는 인터락 포함, 나머지는 단순 On/Off.</summary>
+public sealed class Manual_Io
 {
-  public static void RegisterAll(SequenceManager mgr)
-  {
-    mgr.Register(LowStageVacOn());
-    mgr.Register(LowStageVacOff());
-    mgr.Register(HighStageVacOn());
-    mgr.Register(HighStageVacOff());
-    mgr.Register(RobotGripVacOn());
-    mgr.Register(RobotGripVacOff());
-    mgr.Register(LowerChamberVacOn());
-    mgr.Register(LowerChamberVacOff());
-    mgr.Register(UpperChamberVacOn());
-    mgr.Register(UpperChamberVacOff());
-    mgr.Register(UpperEscEnable());
-    mgr.Register(UpperEscDisable());
-    mgr.Register(LowerEscEnable());
-    mgr.Register(LowerEscDisable());
-  }
+    #region Variables
+    private readonly MainCore _core;
+    #endregion
 
-  // ── Stage / Robot Vac (인터락 없음) ────────────────────────────────────
+    public Manual_Io(MainCore core) => _core = core;
 
-  public static ISequence LowStageVacOn() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowStageVacOn, "Lower Stage Vac On",
-    async (ctx, p, ct) =>
+    public void RegisterAll(SequenceManager mgr)
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.LowStageVacOn, true, ct).ConfigureAwait(false);
-    });
+        mgr.Register(new LowStageVacOnSequence(_core));
+        mgr.Register(new LowStageVacOffSequence(_core));
+        mgr.Register(new HighStageVacOnSequence(_core));
+        mgr.Register(new HighStageVacOffSequence(_core));
+        mgr.Register(new RobotGripVacOnSequence(_core));
+        mgr.Register(new RobotGripVacOffSequence(_core));
+        mgr.Register(new LowerChamberVacOnSequence(_core));
+        mgr.Register(new LowerChamberVacOffSequence(_core));
+        mgr.Register(new UpperChamberVacOnSequence(_core));
+        mgr.Register(new UpperChamberVacOffSequence(_core));
+        mgr.Register(new UpperEscEnableSequence(_core));
+        mgr.Register(new UpperEscDisableSequence(_core));
+        mgr.Register(new LowerEscEnableSequence(_core));
+        mgr.Register(new LowerEscDisableSequence(_core));
+    }
 
-  public static ISequence LowStageVacOff() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowStageVacOff, "Lower Stage Vac Off",
-    async (ctx, p, ct) =>
+    private static async Task CheckChamberClosedAsync(IPlc plc, CancellationToken ct)
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.LowStageVacOn, false, ct).ConfigureAwait(false);
-    });
+        var lowerAtBond = await plc.ReadBitAsync(DiBit.LowerChamberAtBond, ct).ConfigureAwait(false);
+        var upperAtBond = await plc.ReadBitAsync(DiBit.UpperChamberAtBond, ct).ConfigureAwait(false);
+        if (!lowerAtBond || !upperAtBond)
+            throw new InvalidOperationException(AlarmKeys.ChamberNotClosed);
+    }
 
-  public static ISequence HighStageVacOn() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_HighStageVacOn, "Upper Stage Vac On",
-    async (ctx, p, ct) =>
+    // ── Stage Vac (인터락 없음) ───────────────────────────────────────────────
+
+    private sealed class LowStageVacOnSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.HighStageVacOn, true, ct).ConfigureAwait(false);
-    });
+        public LowStageVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowStageVacOn;
+        public override string DisplayName => "Lower Stage Vac On";
 
-  public static ISequence HighStageVacOff() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_HighStageVacOff, "Upper Stage Vac Off",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowStageVacOn, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowStageVacOffSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.HighStageVacOn, false, ct).ConfigureAwait(false);
-    });
+        public LowStageVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowStageVacOff;
+        public override string DisplayName => "Lower Stage Vac Off";
 
-  public static ISequence RobotGripVacOn() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_RobotGripVacOn, "Robot Grip Vac On",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowStageVacOn, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class HighStageVacOnSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.RobotGripVacOn, true, ct).ConfigureAwait(false);
-    });
+        public HighStageVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_HighStageVacOn;
+        public override string DisplayName => "Upper Stage Vac On";
 
-  public static ISequence RobotGripVacOff() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_RobotGripVacOff, "Robot Grip Vac Off",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.HighStageVacOn, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class HighStageVacOffSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.RobotGripVacOn, false, ct).ConfigureAwait(false);
-    });
+        public HighStageVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_HighStageVacOff;
+        public override string DisplayName => "Upper Stage Vac Off";
 
-  // ── Chamber Vac (인터락: LowerZ && UpperZ @ Bond 위치) ─────────────────
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.HighStageVacOn, false, ct).ConfigureAwait(false);
+        }
+    }
 
-  public static ISequence LowerChamberVacOn() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowerChamberVacOn, "Lower Chamber Vac On",
-    async (ctx, p, ct) =>
+    private sealed class RobotGripVacOnSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.LowerChamberVacOn, true, ct).ConfigureAwait(false);
-    });
+        public RobotGripVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_RobotGripVacOn;
+        public override string DisplayName => "Robot Grip Vac On";
 
-  public static ISequence LowerChamberVacOff() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowerChamberVacOff, "Lower Chamber Vac Off",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.RobotGripVacOn, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class RobotGripVacOffSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.LowerChamberVacOn, false, ct).ConfigureAwait(false);
-    });
+        public RobotGripVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_RobotGripVacOff;
+        public override string DisplayName => "Robot Grip Vac Off";
 
-  public static ISequence UpperChamberVacOn() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_UpperChamberVacOn, "Upper Chamber Vac On",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.RobotGripVacOn, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    // ── Chamber Vac (인터락: 챔버 닫힘 확인) ─────────────────────────────────
+
+    private sealed class LowerChamberVacOnSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.UpperChamberVacOn, true, ct).ConfigureAwait(false);
-    });
+        public LowerChamberVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerChamberVacOn;
+        public override string DisplayName => "Lower Chamber Vac On";
 
-  public static ISequence UpperChamberVacOff() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_UpperChamberVacOff, "Upper Chamber Vac Off",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            var plc = _core.Simulation.Plc;
+            await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.LowerChamberVacOn, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowerChamberVacOffSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.UpperChamberVacOn, false, ct).ConfigureAwait(false);
-    });
+        public LowerChamberVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerChamberVacOff;
+        public override string DisplayName => "Lower Chamber Vac Off";
 
-  // ── ESC (인터락: 해당 챔버 진공 On 확인) ───────────────────────────────
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowerChamberVacOn, false, ct).ConfigureAwait(false);
+        }
+    }
 
-  public static ISequence UpperEscEnable() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_UpperEscEnable, "Upper ESC Enable",
-    async (ctx, p, ct) =>
+    private sealed class UpperChamberVacOnSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      var vacOn = await plc.ReadBitAsync(DiBit.UpperChamberVac, ct).ConfigureAwait(false);
-      if (!vacOn)
-        throw new InvalidOperationException(AlarmKeys.UpperChamberVacNotReady);
-      await plc.WriteBitAsync(DoBit.UpperEscEnable, true, ct).ConfigureAwait(false);
-    });
+        public UpperChamberVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperChamberVacOn;
+        public override string DisplayName => "Upper Chamber Vac On";
 
-  public static ISequence UpperEscDisable() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_UpperEscDisable, "Upper ESC Disable",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            var plc = _core.Simulation.Plc;
+            await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.UpperChamberVacOn, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class UpperChamberVacOffSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.UpperEscEnable, false, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.UpperEscDisable, true, ct).ConfigureAwait(false);
-      await Task.Delay(200, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.UpperEscDisable, false, ct).ConfigureAwait(false);
-    });
+        public UpperChamberVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperChamberVacOff;
+        public override string DisplayName => "Upper Chamber Vac Off";
 
-  public static ISequence LowerEscEnable() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowerEscEnable, "Lower ESC Enable",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.UpperChamberVacOn, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    // ── ESC (인터락: 해당 챔버 진공 On 확인) ─────────────────────────────────
+
+    private sealed class UpperEscEnableSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      var vacOn = await plc.ReadBitAsync(DiBit.LowerChamberVac, ct).ConfigureAwait(false);
-      if (!vacOn)
-        throw new InvalidOperationException(AlarmKeys.LowerChamberVacNotReady);
-      await plc.WriteBitAsync(DoBit.LowerEscEnable, true, ct).ConfigureAwait(false);
-    });
+        public UpperEscEnableSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperEscEnable;
+        public override string DisplayName => "Upper ESC Enable";
 
-  public static ISequence LowerEscDisable() => new DelegateSequence(
-    TcdSequenceKeys.Manual_Io_LowerEscDisable, "Lower ESC Disable",
-    async (ctx, p, ct) =>
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            var plc = _core.Simulation.Plc;
+            var vacOn = await plc.ReadBitAsync(DiBit.UpperChamberVac, ct).ConfigureAwait(false);
+            if (!vacOn)
+                throw new InvalidOperationException(AlarmKeys.UpperChamberVacNotReady);
+            await plc.WriteBitAsync(DoBit.UpperEscEnable, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class UpperEscDisableSequence : SequenceBase
     {
-      var plc = MainCore.Instance.Simulation.Plc;
-      await plc.WriteBitAsync(DoBit.LowerEscEnable, false, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.LowerEscDisable, true, ct).ConfigureAwait(false);
-      await Task.Delay(200, ct).ConfigureAwait(false);
-      await plc.WriteBitAsync(DoBit.LowerEscDisable, false, ct).ConfigureAwait(false);
-    });
+        public UpperEscDisableSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperEscDisable;
+        public override string DisplayName => "Upper ESC Disable";
 
-  // ── 공통 인터락 헬퍼 ──────────────────────────────────────────────────
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            var plc = _core.Simulation.Plc;
+            await plc.WriteBitAsync(DoBit.UpperEscEnable, false, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.UpperEscDisable, true, ct).ConfigureAwait(false);
+            await Task.Delay(200, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.UpperEscDisable, false, ct).ConfigureAwait(false);
+        }
+    }
 
-  /// <summary>
-  /// 챔버 진공 On 인터락.
-  /// LowerChamberAtBond AND UpperChamberAtBond 센서가 모두 true여야 함.
-  /// </summary>
-  private static async Task CheckChamberClosedAsync(IPlc plc, System.Threading.CancellationToken ct)
-  {
-    var lowerAtBond = await plc.ReadBitAsync(DiBit.LowerChamberAtBond, ct)
-      .ConfigureAwait(false);
-    var upperAtBond = await plc.ReadBitAsync(DiBit.UpperChamberAtBond, ct)
-      .ConfigureAwait(false);
+    private sealed class LowerEscEnableSequence : SequenceBase
+    {
+        public LowerEscEnableSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerEscEnable;
+        public override string DisplayName => "Lower ESC Enable";
 
-    if (!lowerAtBond || !upperAtBond)
-      throw new InvalidOperationException(AlarmKeys.ChamberNotClosed);
-  }
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            CheckInterlock(context);
+            var plc = _core.Simulation.Plc;
+            var vacOn = await plc.ReadBitAsync(DiBit.LowerChamberVac, ct).ConfigureAwait(false);
+            if (!vacOn)
+                throw new InvalidOperationException(AlarmKeys.LowerChamberVacNotReady);
+            await plc.WriteBitAsync(DoBit.LowerEscEnable, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowerEscDisableSequence : SequenceBase
+    {
+        public LowerEscDisableSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerEscDisable;
+        public override string DisplayName => "Lower ESC Disable";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            var plc = _core.Simulation.Plc;
+            await plc.WriteBitAsync(DoBit.LowerEscEnable, false, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.LowerEscDisable, true, ct).ConfigureAwait(false);
+            await Task.Delay(200, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.LowerEscDisable, false, ct).ConfigureAwait(false);
+        }
+    }
 }

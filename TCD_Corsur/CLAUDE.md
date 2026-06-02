@@ -145,7 +145,7 @@ Bonding animation: Upper Chamber moves ↓ and Lower Chamber moves ↑ independe
 
 ## Coding Conventions
 
-- **Indentation**: 2 spaces (per project rules in `.cursor/rules/`)
+- **Indentation**: 4 spaces (Tab) — `docs/CODING_CONVENTIONS.md` 기준
 - **Line length**: ≤ 80 characters preferred
 - **Naming**: C# standard (PascalCase for types/methods, camelCase for locals, `_camelCase` for private fields)
 - **Async**: All device operations are `async Task`; use `ConfigureAwait(false)` in non-UI code
