@@ -30,6 +30,10 @@
         <io:Manual_IoView DataContext="{Binding Io}"/>
       </TabItem>
 
+      <TabItem Header="SemiAuto" Height="30" Width="100">
+        <io:Manual_SemiAutoView DataContext="{Binding SemiAuto}"/>
+      </TabItem>
+
     </TabControl>
   </Grid>
 </UserControl>

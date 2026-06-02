@@ -1,0 +1,88 @@
+<UserControl x:Class="Tcd.App.View.Manual_SemiAutoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Tcd.App"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="700"
+             d:DataContext="{d:DesignInstance Type=local:Manual_SemiAutoViewModel}">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- ══ Pick-Place 버튼 그리드 ════════════════════════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- ── Load: Stage → Chamber ─────────────────────────────────── -->
+      <GroupBox Grid.Column="0" Header="Load  (Stage → Chamber)"
+                Margin="0,0,6,0">
+        <StackPanel Margin="12,12,12,12">
+
+          <TextBlock Text="Upper Stage → Upper Chamber"
+                     FontSize="11" Foreground="#AAA" Margin="0,0,0,6"/>
+          <Button Content="Upper Stage Pick / Upper Chamber Place"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_UpperStagePick_UpperChamberPlace}"
+                  Height="36" Margin="0,0,0,16"/>
+
+          <TextBlock Text="Lower Stage → Lower Chamber"
+                     FontSize="11" Foreground="#AAA" Margin="0,0,0,6"/>
+          <Button Content="Lower Stage Pick / Lower Chamber Place"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_LowerStagePick_LowerChamberPlace}"
+                  Height="36"/>
+
+        </StackPanel>
+      </GroupBox>
+
+      <!-- ── Unload: Chamber → Stage ───────────────────────────────── -->
+      <GroupBox Grid.Column="1" Header="Unload  (Chamber → Stage)">
+        <StackPanel Margin="12,12,12,12">
+
+          <TextBlock Text="Upper Chamber → Upper Stage"
+                     FontSize="11" Foreground="#AAA" Margin="0,0,0,6"/>
+          <Button Content="Upper Chamber Pick / Upper Stage Place"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_UpperChamberPick_UpperStagePlace}"
+                  Height="36" Margin="0,0,0,16"/>
+
+          <TextBlock Text="Lower Chamber → Lower Stage"
+                     FontSize="11" Foreground="#AAA" Margin="0,0,0,6"/>
+          <Button Content="Lower Chamber Pick / Lower Stage Place"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Command="{Binding Cmd_LowerChamberPick_LowerStagePlace}"
+                  Height="36"/>
+
+        </StackPanel>
+      </GroupBox>
+
+    </Grid>
+
+    <!-- ══ Stop ═══════════════════════════════════════════════════════ -->
+    <Button Grid.Row="1"
+            Content="■  STOP"
+            Style="{StaticResource PrimaryButtonStyle}"
+            Command="{Binding Cmd_Stop}"
+            Height="36" Margin="0,8,0,0"
+            Background="#CC3333" Foreground="White"/>
+
+    <!-- ══ 상태 로그 ═══════════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="2" Header="Status" Margin="0,6,0,0">
+      <TextBlock Margin="8,4,8,8"
+                 Text="{Binding LogStatus}"
+                 FontFamily="Consolas" FontSize="12"
+                 Foreground="{StaticResource TextBrush}"
+                 TextWrapping="Wrap"/>
+    </GroupBox>
+
+  </Grid>
+</UserControl>

@@ -100,6 +100,12 @@ public sealed class MainCore
 
     private void RegisterSemiAutoAndAutoSequences()
     {
+        // 신규 4방향 Pick-Place (기존 LoadUpperFilm/LoadLowerFilm 대체)
+        Sequences.Register(new SemiAutoUpperStagePick_UpperChamberPlace(Sequences, Simulation));
+        Sequences.Register(new SemiAutoLowerStagePick_LowerChamberPlace(Sequences, Simulation));
+        Sequences.Register(new SemiAutoUpperChamberPick_UpperStagePlace(Sequences, Simulation));
+        Sequences.Register(new SemiAutoLowerChamberPick_LowerStagePlace(Sequences, Simulation));
+        // 기존 시퀀스 유지 (레거시 키로 등록, Auto 시퀀스와 호환)
         Sequences.Register(new SemiAutoLoadUpperFilmSequence(Sequences, Simulation));
         Sequences.Register(new SemiAutoLoadLowerFilmSequence(Sequences, Simulation));
         Sequences.Register(new SemiAutoAlignUVWSequence(Sequences, Simulation));

@@ -64,8 +64,46 @@ namespace Tcd.Simulator
                 (ctx, p, ct) => sim.Robot.PlaceAsync(MaterialLocation.LowerChamber, ct)));
             mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Pick_LowerChamber, "Robot pick lower chamber",
                 (ctx, p, ct) => sim.Robot.PickAsync(MaterialLocation.LowerChamber, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Pick_UpperChamber, "Robot pick upper chamber",
+                (ctx, p, ct) => sim.Robot.PickAsync(MaterialLocation.UpperChamber, ct)));
             mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Place_Stage2, "Robot place stage2",
                 (ctx, p, ct) => sim.Robot.PlaceAsync(MaterialLocation.Stage2, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Place_Stage1, "Robot place stage1",
+                (ctx, p, ct) => sim.Robot.PlaceAsync(MaterialLocation.Stage1, ct)));
+
+            // 새 포지션 원자 시퀀스 (UpperStageWait/Contact, LowerStageWait/Contact, ChamberWait/Contact)
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_UpperStageWait, "Robot CMD move upper stage wait",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.UpperStageWait, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_UpperStageWait, "Robot WAIT upper stage wait",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.UpperStageWait, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_UpperStageContact, "Robot CMD move upper stage contact",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.UpperStageContact, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_UpperStageContact, "Robot WAIT upper stage contact",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.UpperStageContact, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_LowerStageWait, "Robot CMD move lower stage wait",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.LowerStageWait, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_LowerStageWait, "Robot WAIT lower stage wait",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.LowerStageWait, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_LowerStageContact, "Robot CMD move lower stage contact",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.LowerStageContact, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_LowerStageContact, "Robot WAIT lower stage contact",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.LowerStageContact, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_UpperChamberWait, "Robot CMD move upper chamber wait",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.UpperChamberWait, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_UpperChamberWait, "Robot WAIT upper chamber wait",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.UpperChamberWait, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_UpperChamberContact, "Robot CMD move upper chamber contact",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.UpperChamberContact, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_UpperChamberContact, "Robot WAIT upper chamber contact",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.UpperChamberContact, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_LowerChamberWait, "Robot CMD move lower chamber wait",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.LowerChamberWait, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_LowerChamberWait, "Robot WAIT lower chamber wait",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.LowerChamberWait, Timeout(p, 2), ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Move_LowerChamberContact, "Robot CMD move lower chamber contact",
+                (ctx, p, ct) => sim.Robot.CommandMoveToAsync(RobotPosition.LowerChamberContact, ct)));
+            mgr.Register(new DelegateSequence(TcdSequenceKeys.Robot_Wait_LowerChamberContact, "Robot WAIT lower chamber contact",
+                (ctx, p, ct) => sim.Robot.WaitForPositionAsync(RobotPosition.LowerChamberContact, Timeout(p, 2), ct)));
 
             // UVW align (command & wait)
             mgr.Register(new DelegateSequence(TcdSequenceKeys.AxisU_Command_Zero, "U CMD move 0",
