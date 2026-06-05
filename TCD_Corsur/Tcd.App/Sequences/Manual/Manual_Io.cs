@@ -35,6 +35,12 @@ public sealed class Manual_Io
         mgr.Register(new UpperEscDisableSequence(_core));
         mgr.Register(new LowerEscEnableSequence(_core));
         mgr.Register(new LowerEscDisableSequence(_core));
+        mgr.Register(new ChamberPumpVacOnSequence(_core));
+        mgr.Register(new ChamberPumpVacOffSequence(_core));
+        mgr.Register(new LowStageBlowOnSequence(_core));
+        mgr.Register(new LowStageBlowOffSequence(_core));
+        mgr.Register(new RobotGripBlowOnSequence(_core));
+        mgr.Register(new RobotGripBlowOffSequence(_core));
     }
 
     private static async Task CheckChamberClosedAsync(IPlc plc, CancellationToken ct)
@@ -119,7 +125,7 @@ public sealed class Manual_Io
         }
     }
 
-    // ── Chamber Vac (인터락: 챔버 닫힘 확인) ─────────────────────────────────
+    // ── Chamber Vac (자재 흡착용, 인터락 없음) ───────────────────────────────
 
     private sealed class LowerChamberVacOnSequence : SequenceBase
     {
@@ -129,10 +135,7 @@ public sealed class Manual_Io
 
         protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
         {
-            CheckInterlock(context);
-            var plc = _core.Simulation.Plc;
-            await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
-            await plc.WriteBitAsync(DoBit.LowerChamberVacOn, true, ct).ConfigureAwait(false);
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowerChamberVacOn, true, ct).ConfigureAwait(false);
         }
     }
 
@@ -156,10 +159,7 @@ public sealed class Manual_Io
 
         protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
         {
-            CheckInterlock(context);
-            var plc = _core.Simulation.Plc;
-            await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
-            await plc.WriteBitAsync(DoBit.UpperChamberVacOn, true, ct).ConfigureAwait(false);
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.UpperChamberVacOn, true, ct).ConfigureAwait(false);
         }
     }
 
@@ -240,6 +240,84 @@ public sealed class Manual_Io
             await plc.WriteBitAsync(DoBit.LowerEscDisable, true, ct).ConfigureAwait(false);
             await Task.Delay(200, ct).ConfigureAwait(false);
             await plc.WriteBitAsync(DoBit.LowerEscDisable, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    // ── 챔버 진공 펌프 (인터락: 챔버 닫힘 — 열린 상태 작동 시 펌프 손상) ─────
+
+    private sealed class ChamberPumpVacOnSequence : SequenceBase
+    {
+        public ChamberPumpVacOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_ChamberPumpVacOn;
+        public override string DisplayName => "Chamber Pump Vac On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            var plc = _core.Simulation.Plc;
+            await CheckChamberClosedAsync(plc, ct).ConfigureAwait(false);
+            await plc.WriteBitAsync(DoBit.VacPumpRequest, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class ChamberPumpVacOffSequence : SequenceBase
+    {
+        public ChamberPumpVacOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_ChamberPumpVacOff;
+        public override string DisplayName => "Chamber Pump Vac Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.VacPumpRequest, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    // ── Stage / Grip Blow (인터락 없음) ────────────────────────────────────────
+
+    private sealed class LowStageBlowOnSequence : SequenceBase
+    {
+        public LowStageBlowOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowStageBlowOn;
+        public override string DisplayName => "Lower Stage Blow On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowStageBlow, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowStageBlowOffSequence : SequenceBase
+    {
+        public LowStageBlowOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowStageBlowOff;
+        public override string DisplayName => "Lower Stage Blow Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowStageBlow, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class RobotGripBlowOnSequence : SequenceBase
+    {
+        public RobotGripBlowOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_RobotGripBlowOn;
+        public override string DisplayName => "Robot Grip Blow On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.RobotGripBlow, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class RobotGripBlowOffSequence : SequenceBase
+    {
+        public RobotGripBlowOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_RobotGripBlowOff;
+        public override string DisplayName => "Robot Grip Blow Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.RobotGripBlow, false, ct).ConfigureAwait(false);
         }
     }
 }
