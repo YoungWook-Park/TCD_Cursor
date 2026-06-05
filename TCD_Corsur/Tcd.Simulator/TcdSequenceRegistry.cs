@@ -23,6 +23,7 @@ namespace Tcd.Simulator
 
         private static void RegisterManual(TcdSimulation sim, SequenceManager mgr, IMotionService motion)
         {
+            RegisterIo(sim, mgr);
             // PLC wait (both stage1+stage2 must be loaded)
             mgr.Register(new DelegateSequence(
                 TcdSequenceKeys.Plc_Wait_StageLoaded,
@@ -153,6 +154,105 @@ namespace Tcd.Simulator
         private static TimeSpan Timeout(object parameter, int secondsDefault)
         {
             return parameter is TimeSpan ts ? ts : TimeSpan.FromSeconds(secondsDefault);
+        }
+
+        /// <summary>
+        /// Manual_Io_* 키로 IO DelegateSequence 등록 (sim.Plc 직접 사용).
+        /// MainCore에서 Manual_Io.RegisterAll()이 덮어쓰므로 테스트 전용 baseline.
+        /// </summary>
+        private static void RegisterIo(TcdSimulation sim, SequenceManager mgr)
+        {
+            // Stage Vac
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowStageVacOn,
+                "Lower Stage Vac On",  sim, DoBit.LowStageVacOn, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowStageVacOff,
+                "Lower Stage Vac Off", sim, DoBit.LowStageVacOn, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_HighStageVacOn,
+                "Upper Stage Vac On",  sim, DoBit.HighStageVacOn, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_HighStageVacOff,
+                "Upper Stage Vac Off", sim, DoBit.HighStageVacOn, false);
+
+            // Robot Grip Vac
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_RobotGripVacOn,
+                "Robot Grip Vac On",  sim, DoBit.RobotGripVacOn, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_RobotGripVacOff,
+                "Robot Grip Vac Off", sim, DoBit.RobotGripVacOn, false);
+
+            // Chamber Vac (자재 흡착용, 인터락 없음)
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowerChamberVacOn,
+                "Lower Chamber Vac On",  sim, DoBit.LowerChamberVacOn, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowerChamberVacOff,
+                "Lower Chamber Vac Off", sim, DoBit.LowerChamberVacOn, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_UpperChamberVacOn,
+                "Upper Chamber Vac On",  sim, DoBit.UpperChamberVacOn, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_UpperChamberVacOff,
+                "Upper Chamber Vac Off", sim, DoBit.UpperChamberVacOn, false);
+
+            // Stage / Chamber / Grip Blow
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowStageBlowOn,
+                "Lower Stage Blow On",   sim, DoBit.LowStageBlow, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowStageBlowOff,
+                "Lower Stage Blow Off",  sim, DoBit.LowStageBlow, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_HighStageBlowOn,
+                "Upper Stage Blow On",   sim, DoBit.HighStageBlow, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_HighStageBlowOff,
+                "Upper Stage Blow Off",  sim, DoBit.HighStageBlow, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_UpperChamberBlowOn,
+                "Upper Chamber Blow On",   sim, DoBit.UpperChamberBlow, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_UpperChamberBlowOff,
+                "Upper Chamber Blow Off",  sim, DoBit.UpperChamberBlow, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowerChamberBlowOn,
+                "Lower Chamber Blow On",   sim, DoBit.LowerChamberBlow, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowerChamberBlowOff,
+                "Lower Chamber Blow Off",  sim, DoBit.LowerChamberBlow, false);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_RobotGripBlowOn,
+                "Robot Grip Blow On",  sim, DoBit.RobotGripBlow, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_RobotGripBlowOff,
+                "Robot Grip Blow Off", sim, DoBit.RobotGripBlow, false);
+
+            // ESC Enable (시뮬: DI 인터락 없음 — 프로덕션은 MainCore 버전이 덮어씀)
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_UpperEscEnable,
+                "Upper ESC Enable", sim, DoBit.UpperEscEnable, true);
+            IoBit(mgr, TcdSequenceKeys.Manual_Io_LowerEscEnable,
+                "Lower ESC Enable", sim, DoBit.LowerEscEnable, true);
+
+            // ESC Disable (Enable=false + Disable pulse + 200ms)
+            mgr.Register(new DelegateSequence(
+                TcdSequenceKeys.Manual_Io_UpperEscDisable, "Upper ESC Disable",
+                async (ctx, p, ct) =>
+                {
+                    var plc = sim.Plc;
+                    await plc.WriteBitAsync(DoBit.UpperEscEnable, false, ct)
+                        .ConfigureAwait(false);
+                    await plc.WriteBitAsync(DoBit.UpperEscDisable, true, ct)
+                        .ConfigureAwait(false);
+                    await ctx.Time.Delay(TimeSpan.FromMilliseconds(200), ct)
+                        .ConfigureAwait(false);
+                    await plc.WriteBitAsync(DoBit.UpperEscDisable, false, ct)
+                        .ConfigureAwait(false);
+                }));
+            mgr.Register(new DelegateSequence(
+                TcdSequenceKeys.Manual_Io_LowerEscDisable, "Lower ESC Disable",
+                async (ctx, p, ct) =>
+                {
+                    var plc = sim.Plc;
+                    await plc.WriteBitAsync(DoBit.LowerEscEnable, false, ct)
+                        .ConfigureAwait(false);
+                    await plc.WriteBitAsync(DoBit.LowerEscDisable, true, ct)
+                        .ConfigureAwait(false);
+                    await ctx.Time.Delay(TimeSpan.FromMilliseconds(200), ct)
+                        .ConfigureAwait(false);
+                    await plc.WriteBitAsync(DoBit.LowerEscDisable, false, ct)
+                        .ConfigureAwait(false);
+                }));
+        }
+
+        private static void IoBit(
+            SequenceManager mgr, string key, string name,
+            TcdSimulation sim, DoBit bit, bool value)
+        {
+            mgr.Register(new DelegateSequence(key, name,
+                (ctx, p, ct) => sim.Plc.WriteBitAsync(bit, value, ct)));
         }
     }
 }

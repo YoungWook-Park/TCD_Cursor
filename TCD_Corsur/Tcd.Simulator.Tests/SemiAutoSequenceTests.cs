@@ -193,6 +193,39 @@ namespace Tcd.Simulator.Tests
       Assert.Equal(SequenceStatus.Failed, result.Status);
     }
 
+    [Fact]
+    public async Task LowerStagePick_LowerChamberPlace_RobotNotAtHome_Fails()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.LoadStage();
+      await sim.Robot.CommandMoveToAsync(RobotPosition.Stage, CancellationToken.None);
+      await sim.Robot.WaitForPositionAsync(
+        RobotPosition.Stage, TimeSpan.FromSeconds(1), CancellationToken.None);
+
+      var result = await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerStagePick_LowerChamberPlace,
+        sim, null, CancellationToken.None);
+
+      Assert.Equal(SequenceStatus.Failed, result.Status);
+    }
+
+    [Fact]
+    public async Task LowerStagePick_LowerChamberPlace_Cancelled_Stops()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.LoadStage();
+      await SetZReadyAsync(sim.Plc);
+
+      using var cts = new CancellationTokenSource();
+      cts.Cancel();
+
+      var result = await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerStagePick_LowerChamberPlace,
+        sim, null, cts.Token);
+
+      Assert.Equal(SequenceStatus.Stopped, result.Status);
+    }
+
     // ════════════════════════════════════════════════════════════════════
     // 3. Upper Chamber Pick → Upper Stage Place (언로드)
     // ════════════════════════════════════════════════════════════════════
@@ -341,6 +374,46 @@ namespace Tcd.Simulator.Tests
         sim, null, CancellationToken.None);
 
       Assert.Equal(SequenceStatus.Failed, result.Status);
+    }
+
+    [Fact]
+    public async Task LowerChamberPick_LowerStagePlace_RobotNotAtHome_Fails()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.Materials.Place(
+        new Material(Guid.NewGuid(), MaterialKind.LowerFilm,
+          MaterialState.Loaded, MaterialLocation.LowerChamber),
+        MaterialLocation.LowerChamber);
+      await SetZReadyAsync(sim.Plc);
+      await sim.Robot.CommandMoveToAsync(RobotPosition.Stage, CancellationToken.None);
+      await sim.Robot.WaitForPositionAsync(
+        RobotPosition.Stage, TimeSpan.FromSeconds(1), CancellationToken.None);
+
+      var result = await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerChamberPick_LowerStagePlace,
+        sim, null, CancellationToken.None);
+
+      Assert.Equal(SequenceStatus.Failed, result.Status);
+    }
+
+    [Fact]
+    public async Task LowerChamberPick_LowerStagePlace_Cancelled_Stops()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.Materials.Place(
+        new Material(Guid.NewGuid(), MaterialKind.LowerFilm,
+          MaterialState.Loaded, MaterialLocation.LowerChamber),
+        MaterialLocation.LowerChamber);
+      await SetZReadyAsync(sim.Plc);
+
+      using var cts = new CancellationTokenSource();
+      cts.Cancel();
+
+      var result = await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerChamberPick_LowerStagePlace,
+        sim, null, cts.Token);
+
+      Assert.Equal(SequenceStatus.Stopped, result.Status);
     }
 
     // ════════════════════════════════════════════════════════════════════

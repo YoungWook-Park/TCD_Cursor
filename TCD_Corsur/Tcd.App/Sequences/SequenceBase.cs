@@ -31,6 +31,7 @@ public abstract class SequenceBase : ISequence
     {
         try
         {
+            CheckInterlock(context);
             await DeviceActionAsync(context, parameter, cancellationToken).ConfigureAwait(false);
             await PostActionAsync(context, cancellationToken).ConfigureAwait(false);
             return SequenceResult.Success();

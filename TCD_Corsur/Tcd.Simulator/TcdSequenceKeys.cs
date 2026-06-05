@@ -124,6 +124,12 @@ namespace Tcd.Simulator
         public const string Manual_Io_ChamberPumpVacOff     = "Manual_Io_ChamberPumpVacOff";
         public const string Manual_Io_LowStageBlowOn        = "Manual_Io_LowStageBlowOn";
         public const string Manual_Io_LowStageBlowOff       = "Manual_Io_LowStageBlowOff";
+        public const string Manual_Io_HighStageBlowOn       = "Manual_Io_HighStageBlowOn";
+        public const string Manual_Io_HighStageBlowOff      = "Manual_Io_HighStageBlowOff";
+        public const string Manual_Io_UpperChamberBlowOn    = "Manual_Io_UpperChamberBlowOn";
+        public const string Manual_Io_UpperChamberBlowOff   = "Manual_Io_UpperChamberBlowOff";
+        public const string Manual_Io_LowerChamberBlowOn    = "Manual_Io_LowerChamberBlowOn";
+        public const string Manual_Io_LowerChamberBlowOff   = "Manual_Io_LowerChamberBlowOff";
         public const string Manual_Io_RobotGripBlowOn       = "Manual_Io_RobotGripBlowOn";
         public const string Manual_Io_RobotGripBlowOff      = "Manual_Io_RobotGripBlowOff";
 

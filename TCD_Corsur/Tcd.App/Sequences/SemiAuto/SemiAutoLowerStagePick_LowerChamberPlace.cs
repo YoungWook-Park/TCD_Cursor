@@ -49,12 +49,12 @@ public sealed class SemiAutoLowerStagePick_LowerChamberPlace : SequenceBase
         await RunAsync(TcdSequenceKeys.Robot_Move_LowerStageContact, ctx, ct);
         await RunAsync(TcdSequenceKeys.Robot_Wait_LowerStageContact, ctx, RobotTimeout, ct);
 
-        await _sim.Plc.WriteBitAsync(DoBit.LowStageVacOn,   false, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.RobotGripVacOn,  true,  ct).ConfigureAwait(false);
-        await _sim.Robot.PickAsync(MaterialLocation.Stage2, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.LowStageBlow,    true,  ct).ConfigureAwait(false);
-        await _sim.Time.Delay(BlowTime, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.LowStageBlow,    false, ct).ConfigureAwait(false);
+        await RunAsync(TcdSequenceKeys.Manual_Io_LowStageVacOff, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Manual_Io_RobotGripVacOn, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Robot_Pick_Stage2, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Manual_Io_LowStageBlowOn, ctx, ct);
+        await ctx.Time.Delay(BlowTime, ct).ConfigureAwait(false);
+        await RunAsync(TcdSequenceKeys.Manual_Io_LowStageBlowOff, ctx, ct);
 
         await RunAsync(TcdSequenceKeys.Robot_Move_LowerStageWait, ctx, ct);
         await RunAsync(TcdSequenceKeys.Robot_Wait_LowerStageWait, ctx, RobotTimeout, ct);
@@ -73,14 +73,14 @@ public sealed class SemiAutoLowerStagePick_LowerChamberPlace : SequenceBase
         await RunAsync(TcdSequenceKeys.Robot_Move_LowerChamberContact, ctx, ct);
         await RunAsync(TcdSequenceKeys.Robot_Wait_LowerChamberContact, ctx, RobotTimeout, ct);
 
-        await _sim.Plc.WriteBitAsync(DoBit.LowerEscEnable,    true, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.LowerChamberVacOn, true, ct).ConfigureAwait(false);
-        await _sim.Time.Delay(VacBuildTime, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.RobotGripVacOn,    false, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.RobotGripBlow,     true,  ct).ConfigureAwait(false);
-        await _sim.Time.Delay(GripBlowTime, ct).ConfigureAwait(false);
-        await _sim.Plc.WriteBitAsync(DoBit.RobotGripBlow,     false, ct).ConfigureAwait(false);
-        await _sim.Robot.PlaceAsync(MaterialLocation.LowerChamber, ct).ConfigureAwait(false);
+        await RunAsync(TcdSequenceKeys.Manual_Io_LowerEscEnable, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Manual_Io_LowerChamberVacOn, ctx, ct);
+        await ctx.Time.Delay(VacBuildTime, ct).ConfigureAwait(false);
+        await RunAsync(TcdSequenceKeys.Manual_Io_RobotGripVacOff, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Manual_Io_RobotGripBlowOn, ctx, ct);
+        await ctx.Time.Delay(GripBlowTime, ct).ConfigureAwait(false);
+        await RunAsync(TcdSequenceKeys.Manual_Io_RobotGripBlowOff, ctx, ct);
+        await RunAsync(TcdSequenceKeys.Robot_Place_LowerChamber, ctx, ct);
 
         await RunAsync(TcdSequenceKeys.Robot_Move_LowerChamberWait, ctx, ct);
         await RunAsync(TcdSequenceKeys.Robot_Wait_LowerChamberWait, ctx, RobotTimeout, ct);
