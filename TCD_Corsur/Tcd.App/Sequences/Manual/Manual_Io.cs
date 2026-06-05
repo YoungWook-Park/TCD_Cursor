@@ -39,6 +39,12 @@ public sealed class Manual_Io
         mgr.Register(new ChamberPumpVacOffSequence(_core));
         mgr.Register(new LowStageBlowOnSequence(_core));
         mgr.Register(new LowStageBlowOffSequence(_core));
+        mgr.Register(new HighStageBlowOnSequence(_core));
+        mgr.Register(new HighStageBlowOffSequence(_core));
+        mgr.Register(new UpperChamberBlowOnSequence(_core));
+        mgr.Register(new UpperChamberBlowOffSequence(_core));
+        mgr.Register(new LowerChamberBlowOnSequence(_core));
+        mgr.Register(new LowerChamberBlowOffSequence(_core));
         mgr.Register(new RobotGripBlowOnSequence(_core));
         mgr.Register(new RobotGripBlowOffSequence(_core));
     }
@@ -185,7 +191,6 @@ public sealed class Manual_Io
 
         protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
         {
-            CheckInterlock(context);
             var plc = _core.Simulation.Plc;
             var vacOn = await plc.ReadBitAsync(DiBit.UpperChamberVac, ct).ConfigureAwait(false);
             if (!vacOn)
@@ -218,7 +223,6 @@ public sealed class Manual_Io
 
         protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
         {
-            CheckInterlock(context);
             var plc = _core.Simulation.Plc;
             var vacOn = await plc.ReadBitAsync(DiBit.LowerChamberVac, ct).ConfigureAwait(false);
             if (!vacOn)
@@ -294,6 +298,78 @@ public sealed class Manual_Io
         protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
         {
             await _core.Simulation.Plc.WriteBitAsync(DoBit.LowStageBlow, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class HighStageBlowOnSequence : SequenceBase
+    {
+        public HighStageBlowOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_HighStageBlowOn;
+        public override string DisplayName => "Upper Stage Blow On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.HighStageBlow, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class HighStageBlowOffSequence : SequenceBase
+    {
+        public HighStageBlowOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_HighStageBlowOff;
+        public override string DisplayName => "Upper Stage Blow Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.HighStageBlow, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class UpperChamberBlowOnSequence : SequenceBase
+    {
+        public UpperChamberBlowOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperChamberBlowOn;
+        public override string DisplayName => "Upper Chamber Blow On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.UpperChamberBlow, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class UpperChamberBlowOffSequence : SequenceBase
+    {
+        public UpperChamberBlowOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_UpperChamberBlowOff;
+        public override string DisplayName => "Upper Chamber Blow Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.UpperChamberBlow, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowerChamberBlowOnSequence : SequenceBase
+    {
+        public LowerChamberBlowOnSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerChamberBlowOn;
+        public override string DisplayName => "Lower Chamber Blow On";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowerChamberBlow, true, ct).ConfigureAwait(false);
+        }
+    }
+
+    private sealed class LowerChamberBlowOffSequence : SequenceBase
+    {
+        public LowerChamberBlowOffSequence(MainCore core) : base(core) { }
+        public override string Key         => TcdSequenceKeys.Manual_Io_LowerChamberBlowOff;
+        public override string DisplayName => "Lower Chamber Blow Off";
+
+        protected override async Task DeviceActionAsync(ISequenceContext context, object parameter, CancellationToken ct)
+        {
+            await _core.Simulation.Plc.WriteBitAsync(DoBit.LowerChamberBlow, false, ct).ConfigureAwait(false);
         }
     }
 
