@@ -36,11 +36,6 @@ namespace Tcd.Simulator
 
         public const string Plc_Wait_StageLoaded = "Plc_Wait_StageLoaded";
 
-        public const string Manual_Axis0_AbsMove = "Manual_Axis0_AbsMove";
-        public const string Manual_Axis0_Stop = "Manual_Axis0_Stop";
-        public const string Manual_Axis1_AbsMove = "Manual_Axis1_AbsMove";
-        public const string Manual_Axis1_Stop = "Manual_Axis1_Stop";
-
         // Manual Motor sequences (axis folders: Motor_U, Motor_V, Motor_W, Motor_ZLower, Motor_ZUpper)
         public const string Manual_Motor_U_AbsMove = "Manual_Motor_U_AbsMove";
         public const string Manual_Motor_U_IncMove = "Manual_Motor_U_IncMove";
