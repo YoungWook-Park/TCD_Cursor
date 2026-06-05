@@ -344,7 +344,7 @@ namespace Tcd.Simulator.Tests
     }
 
     // ════════════════════════════════════════════════════════════════════
-    // 5. IO 상태 검증 (Upper Stage Pick → Upper Chamber Place)
+    // 5. IO 상태 검증
     // ════════════════════════════════════════════════════════════════════
 
     [Fact]
@@ -393,6 +393,54 @@ namespace Tcd.Simulator.Tests
 
       Assert.False(chamberVac, "UpperChamberVacOn should be OFF after unload");
       Assert.True(stageVac,    "HighStageVacOn should be ON after unload");
+    }
+
+    [Fact]
+    public async Task LowerStagePick_LowerChamberPlace_IoState_AfterLoad()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.LoadStage();
+      await SetZReadyAsync(sim.Plc);
+
+      await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerStagePick_LowerChamberPlace,
+        sim, null, CancellationToken.None);
+
+      // 시퀀스 완료 후 ESC Enable ON, Vac ON, Grip Off 상태여야 함
+      var escOn = await sim.Plc.ReadBitAsync(
+        (DiBit)(int)DoBit.LowerEscEnable, CancellationToken.None);
+      var vacOn = await sim.Plc.ReadBitAsync(
+        (DiBit)(int)DoBit.LowerChamberVacOn, CancellationToken.None);
+      var gripOn = await sim.Plc.ReadBitAsync(
+        (DiBit)(int)DoBit.RobotGripVacOn, CancellationToken.None);
+
+      Assert.True(escOn,   "LowerEscEnable should be ON after load");
+      Assert.True(vacOn,   "LowerChamberVacOn should be ON after load");
+      Assert.False(gripOn, "RobotGripVacOn should be OFF after place");
+    }
+
+    [Fact]
+    public async Task LowerChamberPick_LowerStagePlace_IoState_AfterUnload()
+    {
+      var (mgr, sim) = CreateEnv();
+      sim.Materials.Place(
+        new Material(Guid.NewGuid(), MaterialKind.LowerFilm,
+          MaterialState.Loaded, MaterialLocation.LowerChamber),
+        MaterialLocation.LowerChamber);
+      await SetZReadyAsync(sim.Plc);
+
+      await mgr.RunAsync(
+        TcdSequenceKeys.SEMI_LowerChamberPick_LowerStagePlace,
+        sim, null, CancellationToken.None);
+
+      // 언로드 후 챔버 Vac OFF, StageVac ON
+      var chamberVac = await sim.Plc.ReadBitAsync(
+        (DiBit)(int)DoBit.LowerChamberVacOn, CancellationToken.None);
+      var stageVac   = await sim.Plc.ReadBitAsync(
+        (DiBit)(int)DoBit.LowStageVacOn, CancellationToken.None);
+
+      Assert.False(chamberVac, "LowerChamberVacOn should be OFF after unload");
+      Assert.True(stageVac,    "LowStageVacOn should be ON after unload");
     }
 
     // ════════════════════════════════════════════════════════════════════

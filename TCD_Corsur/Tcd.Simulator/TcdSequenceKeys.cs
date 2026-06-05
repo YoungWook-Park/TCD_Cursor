@@ -109,10 +109,8 @@ namespace Tcd.Simulator
         public const string Manual_Io_HighStageVacOff       = "Manual_Io_HighStageVacOff";
         public const string Manual_Io_RobotGripVacOn        = "Manual_Io_RobotGripVacOn";
         public const string Manual_Io_RobotGripVacOff       = "Manual_Io_RobotGripVacOff";
-        /// <summary>인터락: LowerChamberAtBond &amp;&amp; UpperChamberAtBond</summary>
         public const string Manual_Io_LowerChamberVacOn     = "Manual_Io_LowerChamberVacOn";
         public const string Manual_Io_LowerChamberVacOff    = "Manual_Io_LowerChamberVacOff";
-        /// <summary>인터락: LowerChamberAtBond &amp;&amp; UpperChamberAtBond</summary>
         public const string Manual_Io_UpperChamberVacOn     = "Manual_Io_UpperChamberVacOn";
         public const string Manual_Io_UpperChamberVacOff    = "Manual_Io_UpperChamberVacOff";
         /// <summary>인터락: UpperChamberVac On 확인</summary>
@@ -121,6 +119,13 @@ namespace Tcd.Simulator
         /// <summary>인터락: LowerChamberVac On 확인</summary>
         public const string Manual_Io_LowerEscEnable        = "Manual_Io_LowerEscEnable";
         public const string Manual_Io_LowerEscDisable       = "Manual_Io_LowerEscDisable";
+        /// <summary>인터락: LowerChamberAtBond &amp;&amp; UpperChamberAtBond (펌프 보호)</summary>
+        public const string Manual_Io_ChamberPumpVacOn      = "Manual_Io_ChamberPumpVacOn";
+        public const string Manual_Io_ChamberPumpVacOff     = "Manual_Io_ChamberPumpVacOff";
+        public const string Manual_Io_LowStageBlowOn        = "Manual_Io_LowStageBlowOn";
+        public const string Manual_Io_LowStageBlowOff       = "Manual_Io_LowStageBlowOff";
+        public const string Manual_Io_RobotGripBlowOn       = "Manual_Io_RobotGripBlowOn";
+        public const string Manual_Io_RobotGripBlowOff      = "Manual_Io_RobotGripBlowOff";
 
         public const string Material_Create_Bonded = "Material_Create_Bonded";
         public const string Delay_Bond_Dwell1s = "Delay_Bond_Dwell1s";
